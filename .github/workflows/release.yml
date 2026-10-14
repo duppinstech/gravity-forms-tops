@@ -25,6 +25,11 @@ jobs:
           rsync -a \
             --exclude='.git/' \
             --exclude='.github/' \
+            --exclude='.claude/' \
+            --exclude='AGENTS.md' \
+            --exclude='CLAUDE.md' \
+            --exclude='intent.md' \
+            --exclude='plan.md' \
             --exclude='build/' \
             ./ build/gravity-forms-tops/
           ( cd build && zip -r9 ../gravity-forms-tops.zip gravity-forms-tops )
