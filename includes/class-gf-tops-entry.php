@@ -70,16 +70,14 @@ class GF_Tops_Entry {
 		$zip     = (string) rgar( $entry, $field_id . '.5' );
 		$country = (string) rgar( $entry, $field_id . '.6' );
 
-		$location = $line1;
-		if ( $line2 !== '' ) {
-			$location .= ', ' . $line2;
-		}
-		$location .= ', ' . $city . ', ' . $state . ' ' . $zip;
-		if ( $country !== '' ) {
-			$location .= ', ' . $country;
-		}
+		// "Line 1, Line 2, City, State Zip, Country" — empty parts are skipped so a blank address is "" rather than ", ,  ".
+		$state_zip = trim( trim( $state ) . ' ' . trim( $zip ) );
+		$parts     = array_filter(
+			array_map( 'trim', array( $line1, $line2, $city, $state_zip, $country ) ),
+			'strlen'
+		);
 
-		return $location;
+		return implode( ', ', $parts );
 	}
 
 	/**

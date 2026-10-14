@@ -21,7 +21,7 @@ class GF_Tops_GitHub_Updater {
 	 */
 	public static function config() {
 		$defaults = array(
-			'owner' => 'oduppinsjr',
+			'owner' => 'duppinstech',
 			'repo'  => 'gravity-forms-tops',
 			'token' => '',
 		);
