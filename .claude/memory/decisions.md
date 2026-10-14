@@ -12,3 +12,4 @@
 - 2026-10-14: Visitors see TowX / transport error text in the error confirmation so they can report it (leaning decision; per-form custom error text can replace it).
 - 2026-10-14: The ⚡ marker on public Make / Model / Color labels stays.
 - 2026-10-14: Adopted the shared GitHub updater standard v1.0.0 (docs/github-updater-standard.md). This repo holds the reference implementation; other plugins copy the class verbatim with a renamed class. Private repositories are out of scope (LPM Pro delivery is an open decision).
+- 2026-10-14: Every change goes through the department review board (security, legal, finance, product, QA, docs/support agents) after development and before merge or release.

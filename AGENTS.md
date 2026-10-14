@@ -19,3 +19,4 @@ This file applies to all work in this repository.
 - Validation tooling is dev-only Composer: `composer lint`, `composer phpcs`, `composer test`. Run them before claiming a check passed; state which ones ran. Integration with WordPress, Gravity Forms and TowX is still a manual check.
 - Never pass credential-bearing XML or settings to logs, emails, transients or the request log; use `GF_Tops_Xml::redact_for_log()`.
 - Before completing a change, inspect the diff and report validation performed and any environment-dependent checks not run.
+- After development is done, run the department review board (`.claude/commands/review-board.md`: security, legal, finance, product, QA, docs/support reviewers in `.claude/agents/`) before merging or releasing. Agents without subagent support should work through each reviewer's checklist in turn.
