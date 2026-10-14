@@ -78,6 +78,9 @@ class GF_Tops_Request_Log {
 	public static function insert( array $row ) {
 		global $wpdb;
 
+		// A front-end submission can arrive after an upgrade before any admin page has created the table.
+		self::maybe_install();
+
 		$defaults = array(
 			'form_id'               => 0,
 			'entry_id'              => 0,
@@ -195,7 +198,7 @@ class GF_Tops_Request_Log {
 	}
 
 	/**
-	 * @param int $id Log ID.
+	 * Drop the log table and its version option (current site).
 	 */
 	public static function uninstall_drop() {
 		global $wpdb;

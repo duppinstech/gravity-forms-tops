@@ -1,0 +1,43 @@
+# Lint, coding-standard and unit-test checks. These do not need WordPress, Gravity Forms or TowX credentials.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.1', '8.2', '8.3']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dev tooling
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: PHP syntax lint
+        run: composer lint
+
+      - name: PHPCS (security, i18n, PHP 7.4+ compatibility)
+        if: matrix.php == '8.2'
+        run: composer phpcs
+
+      - name: Unit tests
+        run: composer test

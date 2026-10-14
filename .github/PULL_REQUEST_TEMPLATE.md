@@ -4,7 +4,8 @@
 
 ## Validation
 
-- [ ] Relevant checks or tests were run (list them below).
+- [ ] `composer check` passes (lint, PHPCS, PHPUnit).
+- [ ] Relevant manual checks were run (list them below).
 - [ ] Manual checks were performed where automated coverage is unavailable.
 - [ ] No credentials, customer data, or production API responses are included.
 

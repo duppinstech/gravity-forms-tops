@@ -1,0 +1,40 @@
+{
+	"name": "duppinstech/gravity-forms-tops",
+	"description": "Gravity Forms TOPS / TowX Integration (WordPress plugin). Composer is used for development tooling only; the plugin has no runtime Composer dependencies.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Odell Duppins",
+			"homepage": "https://duppinstech.com"
+		}
+	],
+	"require": {
+		"php": ">=7.4"
+	},
+	"require-dev": {
+		"phpcompatibility/phpcompatibility-wp": "^2.1",
+		"phpunit/phpunit": "^9.6",
+		"squizlabs/php_codesniffer": "^3.10",
+		"wp-coding-standards/wpcs": "^3.1"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		},
+		"platform": {
+			"php": "7.4.33"
+		},
+		"sort-packages": true
+	},
+	"scripts": {
+		"lint": "@php bin/lint.php",
+		"phpcs": "phpcs",
+		"test": "phpunit",
+		"check": [
+			"@lint",
+			"@phpcs",
+			"@test"
+		]
+	}
+}

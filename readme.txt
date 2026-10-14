@@ -4,7 +4,7 @@ Tags: gravity forms, tops, towx, towing, api
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.9
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,24 @@ In Gravity Forms form meta for that form. Current versions encrypt the password 
 Yes. Configure the field map separately on each site.
 
 == Changelog ==
+
+= 1.4.0 =
+* **Security:** TowX failure emails and the short-lived confirmation transient now contain the *redacted* Create Call XML. Earlier versions emailed the TowX password, Session ID and authentication key in plain text.
+* **Security:** Stored secrets are no longer decrypted into the form settings screen; they are decrypted only when calling TowX. "Test authentication" still uses the saved key when the field is left blank.
+* **Security:** Model lookups (AJAX and on submit) only accept make keys from TowX's GetMakes list, and submit-time lookups run only for a real submission of that form, so arbitrary requests cannot spend the site's TowX quota.
+* **Security:** On upgrade, any remaining plaintext TowX password / authentication key in form settings is encrypted automatically, including inactive and trashed forms (no need to re-save each form).
+* **Fix:** VehicleInfo now sends the model *name* (not its TowX key) by loading models for the submitted make on the server. Re-rendering after a validation error keeps the visitor's model choice.
+* **Fix:** Resend from the request log now uses make / model / color names in VehicleInfo (previously sent raw keys).
+* **Fix:** Blank or partial addresses no longer produce values like ", ,  " in Location / Destination.
+* **Fix:** Control characters pasted into form fields are stripped so they cannot make the Create Call XML invalid.
+* **Fix:** The request-log table is created on first write, so submissions right after an upgrade are logged even before an admin opens wp-admin.
+* **Performance:** GetMakes, GetColors and GetModelsForMake results are cached for one hour (filter `gf_tops_vehicle_list_cache_ttl`, 0 disables). Previously every render, validation and submission called TowX.
+* **Admin:** Resending a request-log row that already returned a Call ID asks for confirmation (a resend creates a second tow call).
+* **Privacy:** The `<!-- GF TOPS … -->` footer comment is shown only when browser console logging or WP_DEBUG is on (filter `gf_tops_show_footer_diagnostic_comment`).
+* **New filter:** `gf_tops_models_require_nonce` for sites that cannot exclude tow-form pages from long-lived page caches.
+* **Uninstall:** Cleans up every site on multisite and removes cached plugin transients.
+* **Updates:** GitHub updater, plugin URI and security contact now point to `duppinstech/gravity-forms-tops`.
+* **Development:** Composer dev tooling, PHPCS ruleset, PHPUnit tests, CI on PHP 7.4–8.3, and release checks that the tag matches the plugin version.
 
 = 1.3.9 =
 * **GitHub updates:** Removed the `upgrader_source_selection` hook that returned plugin paths without a trailing slash (WordPress core already picks the correct folder for single-root ZIPs). That mismatch caused “The package could not be installed” on many hosts.
@@ -108,6 +126,9 @@ Yes. Configure the field map separately on each site.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.4.0 =
+Security update: stops TowX credentials from being included in failure notification emails. If error emails were enabled on an earlier version, rotate the TowX password and authentication key.
 
 = 1.3.4 =
 Requires **WordPress 6.2 or newer** (database identifier placeholders). Stay on 1.3.3 if you must run WordPress 6.0–6.1.

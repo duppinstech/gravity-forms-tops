@@ -1,6 +1,7 @@
 ---
 name: security-reviewer
 description: Review changes that touch credentials, permissions, HTTP, XML, request logging, or uninstall behavior.
+tools: Read, Grep, Glob, Bash
 ---
 
 # Security Reviewer

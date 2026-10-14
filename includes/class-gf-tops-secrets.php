@@ -110,8 +110,58 @@ class GF_Tops_Secrets {
 		}
 
 		$payload = substr( $stored, strlen( self::PREFIX ) );
-		$plain     = GFCommon::openssl_decrypt( $payload );
+		$plain   = GFCommon::openssl_decrypt( $payload );
 
 		return false !== $plain && is_string( $plain ) ? $plain : '';
+	}
+
+	/**
+	 * Encrypt every non-empty secret field in a settings array (values already encrypted are kept).
+	 *
+	 * @param array $settings Add-on form settings.
+	 * @return array
+	 */
+	public static function encrypt_settings( array $settings ) {
+		foreach ( self::secret_field_names() as $key ) {
+			if ( ! isset( $settings[ $key ] ) || '' === $settings[ $key ] ) {
+				continue;
+			}
+			$settings[ $key ] = self::encrypt_at_rest( (string) $settings[ $key ] );
+		}
+		return $settings;
+	}
+
+	/**
+	 * Decrypt every secret field in a settings array for runtime use (API calls).
+	 *
+	 * @param array $settings Add-on form settings as stored.
+	 * @return array
+	 */
+	public static function decrypt_settings( array $settings ) {
+		foreach ( self::secret_field_names() as $key ) {
+			if ( ! isset( $settings[ $key ] ) || '' === $settings[ $key ] ) {
+				continue;
+			}
+			$settings[ $key ] = self::decrypt_at_rest( (string) $settings[ $key ] );
+		}
+		return $settings;
+	}
+
+	/**
+	 * Whether stored settings still hold a plaintext secret that encryption would change.
+	 *
+	 * @param array $settings Add-on form settings as stored.
+	 * @return bool
+	 */
+	public static function settings_need_migration( array $settings ) {
+		if ( ! self::encryption_enabled() ) {
+			return false;
+		}
+		foreach ( self::secret_field_names() as $key ) {
+			if ( isset( $settings[ $key ] ) && is_string( $settings[ $key ] ) && '' !== $settings[ $key ] && ! self::is_encrypted( $settings[ $key ] ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

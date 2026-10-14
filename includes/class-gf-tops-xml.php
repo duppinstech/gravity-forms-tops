@@ -23,7 +23,9 @@ class GF_Tops_Xml {
 	 * @return string
 	 */
 	public static function escape( $value ) {
-		return htmlspecialchars( (string) $value, ENT_XML1 | ENT_QUOTES, self::ENCODING );
+		// Control characters other than tab / LF / CR are not allowed in XML 1.0 and make TowX reject the document.
+		$value = (string) preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', (string) $value );
+		return htmlspecialchars( $value, ENT_XML1 | ENT_QUOTES, self::ENCODING );
 	}
 
 	/**
@@ -200,8 +202,10 @@ class GF_Tops_Xml {
 			'raw'            => $output,
 		);
 
-		libxml_use_internal_errors( true );
-		$xml = simplexml_load_string( $output );
+		$previous = libxml_use_internal_errors( true );
+		$xml      = simplexml_load_string( (string) $output );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous );
 		if ( false === $xml ) {
 			$result['error_message'] = __( 'Invalid XML response from TowX.', 'gravity-forms-tops' );
 			return $result;
