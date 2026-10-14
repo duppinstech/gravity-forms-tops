@@ -24,6 +24,8 @@ if ( ! function_exists( 'gf_tops_uninstall_site' ) ) {
 		delete_option( 'gravityformsaddon_gravityformstops_settings' );
 		delete_option( 'gravityformsaddon_gravityformstops_version' );
 		delete_option( 'gf_tops_request_log_db_version' );
+		delete_option( 'gf_tops_lookup_status' );
+		delete_option( 'gf_tops_auth_test_ok' );
 
 		// Cached TowX vehicle lists and per-entry confirmation results (gf_tops_list_*, gf_tops_result_*).
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall only; transient names are not enumerable through the API.

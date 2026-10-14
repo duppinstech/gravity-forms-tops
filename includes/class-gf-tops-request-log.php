@@ -198,6 +198,70 @@ class GF_Tops_Request_Log {
 	}
 
 	/**
+	 * WHERE clause and values matching one person's rows: their Gravity Forms entry IDs, or their email
+	 * address inside the stored request / response (covers entries already deleted).
+	 *
+	 * @param int[]  $entry_ids Entry IDs (at most 1000 are used).
+	 * @param string $email     Email address.
+	 * @return array{0: string, 1: array}
+	 */
+	protected static function person_where( array $entry_ids, $email ) {
+		global $wpdb;
+
+		$entry_ids = array_slice( array_values( array_unique( array_filter( array_map( 'absint', $entry_ids ) ) ) ), 0, 1000 );
+		$like      = '%' . $wpdb->esc_like( (string) $email ) . '%';
+		$where     = '(request_xml_redacted LIKE %s OR response_raw LIKE %s';
+		$values    = array( $like, $like );
+		if ( ! empty( $entry_ids ) ) {
+			$where .= ' OR entry_id IN (' . implode( ',', array_fill( 0, count( $entry_ids ), '%d' ) ) . ')';
+			$values = array_merge( $values, $entry_ids );
+		}
+		return array( $where . ')', $values );
+	}
+
+	/**
+	 * Log rows belonging to one person (privacy export).
+	 *
+	 * @param int[]  $entry_ids Entry IDs.
+	 * @param string $email     Email address.
+	 * @param int    $limit     Rows per page.
+	 * @param int    $offset    Offset.
+	 * @return array<int, object>
+	 */
+	public static function find_for_person( array $entry_ids, $email, $limit = 50, $offset = 0 ) {
+		global $wpdb;
+		if ( ! is_email( $email ) ) {
+			return array();
+		}
+		list( $where, $values ) = self::person_where( $entry_ids, $email );
+		$values                 = array_merge( array( self::table_name() ), $values, array( max( 1, (int) $limit ), max( 0, (int) $offset ) ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $where contains only %s/%d placeholders built in person_where(); every value is passed to prepare().
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i WHERE ' . $where . ' ORDER BY id ASC LIMIT %d OFFSET %d', $values ) );
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
+	 * Delete one person's log rows (privacy erasure).
+	 *
+	 * @param int[]  $entry_ids Entry IDs.
+	 * @param string $email     Email address.
+	 * @return int Rows deleted.
+	 */
+	public static function delete_for_person( array $entry_ids, $email ) {
+		global $wpdb;
+		if ( ! is_email( $email ) ) {
+			return 0;
+		}
+		list( $where, $values ) = self::person_where( $entry_ids, $email );
+		$values                 = array_merge( array( self::table_name() ), $values );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $where contains only %s/%d placeholders built in person_where(); every value is passed to prepare().
+		$deleted = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE ' . $where, $values ) );
+		return is_numeric( $deleted ) ? (int) $deleted : 0;
+	}
+
+	/**
 	 * Drop the log table and its version option (current site).
 	 */
 	public static function uninstall_drop() {

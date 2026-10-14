@@ -126,9 +126,11 @@
 			if ($lab.find('.gf-tops-source-marker').length) {
 				return;
 			}
-			$lab.append(
-				$('<span class="gf-tops-source-marker" aria-label="TowX / TOPS" title="TowX / TOPS">' + LIGHTNING + '</span>')
-			);
+			var label = i18n('markerLabel');
+			var $marker = $('<span class="gf-tops-source-marker"></span>').attr('title', label);
+			$marker.append($('<span aria-hidden="true"></span>').text(LIGHTNING));
+			$marker.append($('<span class="gf-tops-sr-only"></span>').text(' ' + label));
+			$lab.append($marker);
 		}
 		mark(st.makeFieldId);
 		mark(st.modelFieldId);
@@ -147,6 +149,26 @@
 
 	function updateModelsStatusLine(formId, phase, message) {
 		topsConsole(formId, 'Models (' + phase + ')', message);
+	}
+
+	/** Visible, screen-reader-announced status under the Model field (loading / failed / none). */
+	function showModelStatus(formId, fieldId, text, isError) {
+		var fid = String(fieldId).replace(/\./g, '_');
+		var $field = $('#field_' + formId + '_' + fid);
+		if (!$field.length) {
+			return;
+		}
+		var $status = $field.find('.gf-tops-model-status');
+		if (!$status.length) {
+			$status = $('<div class="gf-tops-model-status" role="status" aria-live="polite"></div>');
+			$field.append($status);
+		}
+		$status.text(text || '').toggleClass('gf-tops-model-status--error', !!isError);
+		$status.toggle(!!text);
+	}
+
+	function modelPlaceholder() {
+		return $('<option></option>').val('').text(i18n('selectModel'));
 	}
 
 	function logCascade(formId, ok, msg, detail) {
@@ -238,12 +260,11 @@
 
 		$make.off('change.gfTops').on('change.gfTops', function () {
 			var makeKey = $(this).val();
-			$model.empty();
+			$model.empty().append(modelPlaceholder());
 			if (!makeKey) {
 				updateModelsStatusLine(formId, 'pending', i18n('statusModelsPending'));
-				$model.append(
-					$('<option></option>').val('').text(i18n('selectModel') || 'Select a model')
-				);
+				showModelStatus(formId, cfg.modelFieldId, '', false);
+				$model.prop('disabled', false);
 				if (dbg) {
 					logCascade(formId, true, 'Make cleared; model dropdown reset.', null);
 				}
@@ -251,6 +272,8 @@
 			}
 
 			updateModelsStatusLine(formId, 'loading', i18n('statusModelsLoading'));
+			showModelStatus(formId, cfg.modelFieldId, i18n('modelsLoading'), false);
+			$model.prop('disabled', true);
 
 			var postData = {
 				action: 'gf_tops_models',
@@ -266,8 +289,10 @@
 
 			$.post(cfg.ajaxUrl, postData)
 				.done(function (resp) {
+					$model.prop('disabled', false);
 					if (!resp || !resp.success) {
 						updateModelsStatusLine(formId, 'error', i18n('statusModelsErr').replace('%s', 'AJAX'));
+						showModelStatus(formId, cfg.modelFieldId, i18n('modelsUnavailable'), true);
 						if (dbg) {
 							logCascade(formId, false, 'AJAX response not successful.', resp);
 						}
@@ -280,19 +305,20 @@
 					if (data.error) {
 						var errMsg = i18n('statusModelsErr').replace('%s', data.error);
 						updateModelsStatusLine(formId, 'error', errMsg);
+						showModelStatus(formId, cfg.modelFieldId, i18n('modelsUnavailable'), true);
 						if (dbg) {
 							logCascade(formId, false, data.error, data.debug);
 						}
 						console.warn('[GF TOPS] GetModelsForMake:', data.error, data.debug || '');
 					} else {
-						var okText = i18n('statusModelsOk').replace('%d', String(models.length));
+						var okText = models.length === 1
+							? i18n('statusModelsOkOne')
+							: i18n('statusModelsOkMany').replace('%d', String(models.length));
 						updateModelsStatusLine(formId, 'ok', okText);
+						showModelStatus(formId, cfg.modelFieldId, models.length ? '' : i18n('modelsNone'), false);
 					}
 
-					$model.empty();
-					$model.append(
-						$('<option></option>').val('').text(i18n('selectModel') || 'Select a model')
-					);
+					$model.empty().append(modelPlaceholder());
 					models.forEach(function (m) {
 						$model.append($('<option></option>').val(m.key).text(m.name));
 					});
@@ -306,7 +332,8 @@
 					setHiddenVal(formId, cfg.hiddenModelId, '');
 				})
 				.fail(function (xhr) {
-					$model.empty();
+					$model.empty().append(modelPlaceholder()).prop('disabled', false);
+					showModelStatus(formId, cfg.modelFieldId, i18n('modelsUnavailable'), true);
 					var shortErr =
 						'HTTP ' +
 						(xhr.status || '?') +

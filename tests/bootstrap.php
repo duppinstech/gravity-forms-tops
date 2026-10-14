@@ -29,6 +29,14 @@ function __( $text, $domain = 'default' ) {
 	return $text;
 }
 
+function esc_html__( $text, $domain = 'default' ) {
+	return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+}
+
+function _n( $single, $plural, $number, $domain = 'default' ) {
+	return 1 === (int) $number ? $single : $plural;
+}
+
 function absint( $value ) {
 	return abs( (int) $value );
 }
@@ -261,8 +269,172 @@ function wp_kses_post( $html ) {
 	return (string) preg_replace( '#<script\b[^>]*>.*?</script>#is', '', (string) $html );
 }
 
+// ---- Doubles used by the add-on and privacy tests. -----------------------------------------------
+
+$GLOBALS['gf_tops_test_options']    = array();
+$GLOBALS['gf_tops_test_transients'] = array();
+
+function get_option( $name, $default_value = false ) {
+	return array_key_exists( $name, $GLOBALS['gf_tops_test_options'] ) ? $GLOBALS['gf_tops_test_options'][ $name ] : $default_value;
+}
+
+function update_option( $name, $value, $autoload = null ) {
+	$GLOBALS['gf_tops_test_options'][ $name ] = $value;
+	return true;
+}
+
+function delete_option( $name ) {
+	unset( $GLOBALS['gf_tops_test_options'][ $name ] );
+	return true;
+}
+
+function get_transient( $name ) {
+	return array_key_exists( $name, $GLOBALS['gf_tops_test_transients'] ) ? $GLOBALS['gf_tops_test_transients'][ $name ] : false;
+}
+
+function set_transient( $name, $value, $expiration = 0 ) {
+	$GLOBALS['gf_tops_test_transients'][ $name ] = $value;
+	return true;
+}
+
+function wp_salt( $scheme = 'auth' ) {
+	return 'gf-tops-unit-test-salt';
+}
+
+function esc_url_raw( $url ) {
+	return (string) $url;
+}
+
+function set_url_scheme( $url, $scheme = null ) {
+	return (string) preg_replace( '#^\w+://#', $scheme . '://', (string) $url );
+}
+
+function wp_strip_all_tags( $text ) {
+	return trim( strip_tags( (string) $text ) ); // phpcs:ignore
+}
+
+function wp_json_encode( $data, $options = 0 ) {
+	return json_encode( $data, $options ); // phpcs:ignore
+}
+
+function is_email( $email ) {
+	return false !== filter_var( $email, FILTER_VALIDATE_EMAIL ) ? $email : false;
+}
+
+function has_blocks( $content ) {
+	return false !== strpos( (string) $content, '<!-- wp:' );
+}
+
+/**
+ * Minimal parse_blocks(): enough for "<!-- wp:name {json} /-->" self-closing blocks.
+ */
+function parse_blocks( $content ) {
+	$blocks = array();
+	if ( preg_match_all( '#<!-- wp:([a-z0-9/-]+) (\{.*?\}) /-->#', (string) $content, $m, PREG_SET_ORDER ) ) {
+		foreach ( $m as $match ) {
+			$blocks[] = array(
+				'blockName'   => $match[1],
+				'attrs'       => json_decode( $match[2], true ),
+				'innerBlocks' => array(),
+			);
+		}
+	}
+	return $blocks;
+}
+
+if ( ! defined( 'GF_TOPS_VERSION' ) ) {
+	define( 'GF_TOPS_VERSION', '0.0.0-test' );
+	define( 'GF_TOPS_FILE', dirname( __DIR__ ) . '/gravity-forms-tops.php' );
+	define( 'GF_TOPS_PATH', dirname( __DIR__ ) . '/' );
+	define( 'GF_TOPS_URL', 'https://example.test/wp-content/plugins/gravity-forms-tops/' );
+}
+
+/**
+ * Minimal Gravity Forms add-on base class.
+ */
+class GFAddOn {
+	protected $_slug;
+
+	public function __construct() {}
+
+	public function get_slug() {
+		return $this->_slug;
+	}
+
+	public function get_plugin_settings() {
+		return isset( $GLOBALS['gf_tops_test_plugin_settings'] ) ? $GLOBALS['gf_tops_test_plugin_settings'] : array();
+	}
+
+	public function get_form_settings( $form ) {
+		return is_array( $form ) && isset( $form[ $this->_slug ] ) && is_array( $form[ $this->_slug ] ) ? $form[ $this->_slug ] : array();
+	}
+}
+
+/**
+ * GFAPI double: entries come from $GLOBALS['gf_tops_test_entries']; the last search is recorded.
+ */
+class GFAPI {
+	public static function get_entries( $form_ids, $search = array(), $sorting = null, $paging = null ) {
+		$GLOBALS['gf_tops_test_entry_search'] = $search;
+		$offset                               = isset( $paging['offset'] ) ? (int) $paging['offset'] : 0;
+		$size                                 = isset( $paging['page_size'] ) ? (int) $paging['page_size'] : 20;
+		$all                                  = isset( $GLOBALS['gf_tops_test_entries'] ) ? $GLOBALS['gf_tops_test_entries'] : array();
+		return array_slice( $all, $offset, $size );
+	}
+}
+
+/**
+ * $wpdb double: records prepared SQL and returns queued results.
+ */
+class GF_Tops_Test_Wpdb {
+	public $prefix  = 'wp_';
+	public $queries = array();
+	public $results = array();
+	public $affected = 0;
+
+	public function esc_like( $text ) {
+		return addcslashes( (string) $text, '_%\\' );
+	}
+
+	public function prepare( $query, ...$args ) {
+		if ( 1 === count( $args ) && is_array( $args[0] ) ) {
+			$args = $args[0];
+		}
+		$i = 0;
+		return (string) preg_replace_callback(
+			'/%[ids]/',
+			static function ( $m ) use ( &$i, $args ) {
+				$value = $args[ $i++ ];
+				if ( '%d' === $m[0] ) {
+					return (string) (int) $value;
+				}
+				if ( '%i' === $m[0] ) {
+					return '`' . $value . '`';
+				}
+				return "'" . addslashes( (string) $value ) . "'";
+			},
+			$query
+		);
+	}
+
+	public function get_results( $sql ) {
+		$this->queries[] = $sql;
+		return $this->results;
+	}
+
+	public function query( $sql ) {
+		$this->queries[] = $sql;
+		return $this->affected;
+	}
+}
+
+$GLOBALS['wpdb'] = new GF_Tops_Test_Wpdb();
+
 require_once dirname( __DIR__ ) . '/includes/class-gf-tops-github-updater.php';
 require_once dirname( __DIR__ ) . '/includes/class-gf-tops-secrets.php';
 require_once dirname( __DIR__ ) . '/includes/class-gf-tops-xml.php';
 require_once dirname( __DIR__ ) . '/includes/class-gf-tops-entry.php';
 require_once dirname( __DIR__ ) . '/includes/class-gf-tops-http.php';
+require_once dirname( __DIR__ ) . '/includes/class-gf-tops-request-log.php';
+require_once dirname( __DIR__ ) . '/includes/class-gf-tops-privacy.php';
+require_once dirname( __DIR__ ) . '/includes/class-gf-tops-addon.php';
