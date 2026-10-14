@@ -24,7 +24,7 @@ These need WordPress, a licensed Gravity Forms install and authorized QA TowX cr
 - [ ] **Non-ASCII text:** submit with an accented name and a curly apostrophe (for example `José O’Brien`) and confirm how it appears in TowX. The plugin sends UTF-8 bytes but labels the request `charset=WINDOWS-1252`; if TowX shows garbled characters, open a fix to transcode to Windows-1252 (or change the declared charset) after confirming which one TowX expects.
 - [ ] **Page cache:** if the site uses a full-page cache, exclude tow-form pages or confirm their cache lifetime is under 12 hours (see README → Production notes).
 - [ ] **Release:** after the checks pass, tag `v1.4.0` on `main`, confirm the Release ZIP workflow succeeded, inspect `gravity-forms-tops.zip`, then update production sites via Plugins → Updates.
-- [ ] **Credential rotation:** if TowX error emails were enabled on any production site before 1.4.0, rotate that site's TowX password and authentication key (old emails contain them).
+- [x] **Credential rotation:** not needed (confirmed by the owner, 2026-10-14).
 
 ## Product decisions (2026-10-14)
 
