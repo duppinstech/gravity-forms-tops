@@ -2,6 +2,10 @@
 # (single top-level folder named gravity-forms-tops — no version suffix).
 #
 # Keep the exclusion list in bin/build-zip.sh in sync when adding development-only files or directories.
+# Third-party actions are pinned to commit SHAs (comment shows the release); update them deliberately.
+#
+# Build runs with read-only permissions. Publish only receives the built artifact, attests its provenance,
+# and runs in the "release" environment (add required reviewers in GitHub → Settings → Environments).
 
 name: Release ZIP
 
@@ -11,14 +15,28 @@ on:
       - 'v*'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  attach-zip:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify tag is on main
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag $GITHUB_REF_NAME points at a commit that is not on main."
+            exit 1
+          fi
 
       - name: Verify tag matches plugin version
         run: |
@@ -34,17 +52,20 @@ jobs:
           fi
 
       - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '7.4'
           coverage: none
-          tools: composer:v2
+          tools: composer:v2, wp-cli
 
       - name: Lint and test before packaging
         run: |
           composer install --no-interaction --no-progress --prefer-dist
           composer lint
           composer test
+
+      - name: Regenerate translation template
+        run: wp i18n make-pot . languages/gravity-forms-tops.pot --slug=gravity-forms-tops --domain=gravity-forms-tops --exclude=vendor,tests,bin,build,docs,node_modules
 
       - name: Create gravity-forms-tops.zip
         run: bash bin/build-zip.sh
@@ -60,8 +81,37 @@ jobs:
             "$requires" "$requires_php" "$tested" > release-requirements.md
           cat release-requirements.md
 
+      - name: Upload build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: |
+            gravity-forms-tops.zip
+            release-requirements.md
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Download build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: gravity-forms-tops.zip
+
       - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           files: gravity-forms-tops.zip
           body_path: release-requirements.md
