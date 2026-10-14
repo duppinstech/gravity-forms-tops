@@ -133,6 +133,56 @@ class AddonTest extends TestCase {
 		$this->assertNull( $this->call( 'get_last_lookup_failure', $settings ) );
 	}
 
+	public function test_towx_error_on_one_make_does_not_pause_everyone() {
+		$settings = $this->settings();
+
+		$this->call( 'note_model_failure', $settings, '10', 200, 'Bad make' );
+		$this->assertFalse( $this->call( 'is_lookup_paused', $settings ), 'A per-make TowX error does not pause all lookups.' );
+		$this->assertNotFalse( get_transient( $this->call( 'get_model_cooldown_key', $settings, '10' ) ), 'That make cools down.' );
+		$this->assertFalse( get_transient( $this->call( 'get_model_cooldown_key', $settings, '11' ) ), 'Other makes are unaffected.' );
+		$this->assertSame( 'Bad make', $this->call( 'get_last_lookup_failure', $settings )['message'], 'Admins still see it.' );
+
+		$this->call( 'note_model_failure', $settings, '10', 404, 'Not found' );
+		$this->assertFalse( $this->call( 'is_lookup_paused', $settings ) );
+
+		foreach ( array( 0, 429, 503 ) as $code ) {
+			$GLOBALS['gf_tops_test_transients'] = array();
+			$this->call( 'note_model_failure', $settings, '10', $code, 'Outage' );
+			$this->assertTrue( $this->call( 'is_lookup_paused', $settings ), "HTTP $code is an outage." );
+		}
+	}
+
+	public function test_cooled_down_make_makes_no_request() {
+		$this->addon->makes = array( array( 'text' => 'Toyota', 'value' => '10' ) );
+		$GLOBALS['gf_tops_test_get_requests'] = array();
+		$this->call( 'note_model_failure', $this->settings(), '10', 200, 'Bad make' );
+
+		$this->assertNull( $this->call( 'fetch_models_for_make', $this->settings(), '10' ) );
+		$this->assertSame( array(), $GLOBALS['gf_tops_test_get_requests'] );
+	}
+
+	public function test_connection_test_record_is_cleared_when_credentials_change() {
+		$form = array(
+			'id'               => 5,
+			'gravityformstops' => array(
+				'tops_user_id'    => 'u',
+				'tops_password'   => GF_Tops_Secrets::encrypt_at_rest( 'p' ),
+				'tops_session_id' => 's',
+				'tops_auth_key'   => GF_Tops_Secrets::encrypt_at_rest( 'k' ),
+			),
+		);
+		update_option( 'gf_tops_auth_test_ok', array( 5 => 123 ) );
+
+		$this->addon->save_form_settings( $form, $form['gravityformstops'] );
+		$this->assertSame( array( 5 => 123 ), get_option( 'gf_tops_auth_test_ok' ), 'Same credentials (re-encrypted on save) keep the record.' );
+
+		$changed                  = $form['gravityformstops'];
+		$changed['tops_auth_key'] = 'new-key';
+		$this->addon->save_form_settings( $form, $changed );
+		$this->assertSame( array(), get_option( 'gf_tops_auth_test_ok' ) );
+		$this->assertTrue( GF_Tops_Secrets::is_encrypted( $GLOBALS['gf_tops_test_saved_settings']['tops_auth_key'] ), 'Still encrypted on save.' );
+	}
+
 	public function test_lookup_backoff_can_be_disabled() {
 		$GLOBALS['gf_tops_test_filters']['gf_tops_lookup_failure_backoff'] = static function () {
 			return 0;

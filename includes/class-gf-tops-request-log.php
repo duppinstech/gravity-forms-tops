@@ -197,26 +197,64 @@ class GF_Tops_Request_Log {
 		return $row ? $row : null;
 	}
 
+	const MAX_PERSON_CANDIDATES = 5000;
+
 	/**
-	 * WHERE clause and values matching one person's rows: their Gravity Forms entry IDs, or their email
-	 * address inside the stored request / response (covers entries already deleted).
+	 * Whether stored text contains this exact email address, not just as part of a longer one
+	 * (bob@x.com must not match jimbob@x.com or bob@x.com.au).
+	 *
+	 * @param string $text  Stored request or response.
+	 * @param string $email Email address.
+	 * @return bool
+	 */
+	public static function text_contains_email( $text, $email ) {
+		if ( '' === (string) $email ) {
+			return false;
+		}
+		$pattern = '/(?<![A-Za-z0-9._%+\-])' . preg_quote( (string) $email, '/' ) . '(?![A-Za-z0-9\-]|\.[A-Za-z0-9])/i';
+		return (bool) preg_match( $pattern, (string) $text );
+	}
+
+	/**
+	 * One person's rows: those for their Gravity Forms entry IDs, or whose stored request / response contains
+	 * their exact email address (covers entries already deleted). The database query is only a pre-filter;
+	 * every row is confirmed in PHP.
 	 *
 	 * @param int[]  $entry_ids Entry IDs (at most 1000 are used).
 	 * @param string $email     Email address.
-	 * @return array{0: string, 1: array}
+	 * @return array<int, object>
 	 */
-	protected static function person_where( array $entry_ids, $email ) {
+	protected static function rows_for_person( array $entry_ids, $email ) {
 		global $wpdb;
+		if ( ! is_email( $email ) ) {
+			return array();
+		}
 
 		$entry_ids = array_slice( array_values( array_unique( array_filter( array_map( 'absint', $entry_ids ) ) ) ), 0, 1000 );
 		$like      = '%' . $wpdb->esc_like( (string) $email ) . '%';
 		$where     = '(request_xml_redacted LIKE %s OR response_raw LIKE %s';
-		$values    = array( $like, $like );
+		$values    = array( self::table_name(), $like, $like );
 		if ( ! empty( $entry_ids ) ) {
 			$where .= ' OR entry_id IN (' . implode( ',', array_fill( 0, count( $entry_ids ), '%d' ) ) . ')';
 			$values = array_merge( $values, $entry_ids );
 		}
-		return array( $where . ')', $values );
+		$values[] = self::MAX_PERSON_CANDIDATES;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $where contains only %s/%d placeholders built above; every value is passed to prepare().
+		$candidates = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i WHERE ' . $where . ') ORDER BY id ASC LIMIT %d', $values ) );
+		if ( ! is_array( $candidates ) ) {
+			return array();
+		}
+
+		$rows = array();
+		foreach ( $candidates as $row ) {
+			if ( in_array( (int) $row->entry_id, $entry_ids, true )
+				|| self::text_contains_email( $row->request_xml_redacted, $email )
+				|| self::text_contains_email( $row->response_raw, $email ) ) {
+				$rows[] = $row;
+			}
+		}
+		return $rows;
 	}
 
 	/**
@@ -229,16 +267,7 @@ class GF_Tops_Request_Log {
 	 * @return array<int, object>
 	 */
 	public static function find_for_person( array $entry_ids, $email, $limit = 50, $offset = 0 ) {
-		global $wpdb;
-		if ( ! is_email( $email ) ) {
-			return array();
-		}
-		list( $where, $values ) = self::person_where( $entry_ids, $email );
-		$values                 = array_merge( array( self::table_name() ), $values, array( max( 1, (int) $limit ), max( 0, (int) $offset ) ) );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $where contains only %s/%d placeholders built in person_where(); every value is passed to prepare().
-		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i WHERE ' . $where . ' ORDER BY id ASC LIMIT %d OFFSET %d', $values ) );
-		return is_array( $rows ) ? $rows : array();
+		return array_slice( self::rows_for_person( $entry_ids, $email ), max( 0, (int) $offset ), max( 1, (int) $limit ) );
 	}
 
 	/**
@@ -250,15 +279,20 @@ class GF_Tops_Request_Log {
 	 */
 	public static function delete_for_person( array $entry_ids, $email ) {
 		global $wpdb;
-		if ( ! is_email( $email ) ) {
-			return 0;
-		}
-		list( $where, $values ) = self::person_where( $entry_ids, $email );
-		$values                 = array_merge( array( self::table_name() ), $values );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $where contains only %s/%d placeholders built in person_where(); every value is passed to prepare().
-		$deleted = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE ' . $where, $values ) );
-		return is_numeric( $deleted ) ? (int) $deleted : 0;
+		$ids = array();
+		foreach ( self::rows_for_person( $entry_ids, $email ) as $row ) {
+			$ids[] = (int) $row->id;
+		}
+
+		$deleted = 0;
+		foreach ( array_chunk( $ids, 500 ) as $chunk ) {
+			$values = array_merge( array( self::table_name() ), $chunk );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Only %d placeholders, one per row ID; every value is passed to prepare().
+			$result = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE id IN (' . implode( ',', array_fill( 0, count( $chunk ), '%d' ) ) . ')', $values ) );
+			$deleted += is_numeric( $result ) ? (int) $result : 0;
+		}
+		return $deleted;
 	}
 
 	/**

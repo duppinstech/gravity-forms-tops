@@ -80,6 +80,8 @@ class XmlTest extends TestCase {
 		$this->assertStringNotContainsString( 'fake-password', $redacted );
 		$this->assertStringNotContainsString( 'fake-auth-key', $redacted );
 		$this->assertStringNotContainsString( 'fake-session', $redacted );
+		$this->assertStringNotContainsString( 'fake-user', $redacted );
+		$this->assertSame( 2, substr_count( $redacted, '<UserID>***</UserID>' ) );
 		$this->assertSame( 2, substr_count( $redacted, '<Password>***</Password>' ) );
 		$this->assertStringContainsString( 'Test Caller', $redacted );
 		$this->assertSame( $redacted, GF_Tops_Xml::redact_for_log( $redacted ), 'Redaction is idempotent.' );

@@ -258,8 +258,11 @@
 			});
 		}
 
+		var requestSeq = 0;
+
 		$make.off('change.gfTops').on('change.gfTops', function () {
 			var makeKey = $(this).val();
+			var seq = ++requestSeq;
 			$model.empty().append(modelPlaceholder());
 			if (!makeKey) {
 				updateModelsStatusLine(formId, 'pending', i18n('statusModelsPending'));
@@ -289,6 +292,9 @@
 
 			$.post(cfg.ajaxUrl, postData)
 				.done(function (resp) {
+					if (seq !== requestSeq) {
+						return;
+					}
 					$model.prop('disabled', false);
 					if (!resp || !resp.success) {
 						updateModelsStatusLine(formId, 'error', i18n('statusModelsErr').replace('%s', 'AJAX'));
@@ -305,7 +311,7 @@
 					if (data.error) {
 						var errMsg = i18n('statusModelsErr').replace('%s', data.error);
 						updateModelsStatusLine(formId, 'error', errMsg);
-						showModelStatus(formId, cfg.modelFieldId, i18n('modelsUnavailable'), true);
+						showModelStatus(formId, cfg.modelFieldId, i18n(data.code === 'unknown_make' ? 'modelsReload' : 'modelsUnavailable'), true);
 						if (dbg) {
 							logCascade(formId, false, data.error, data.debug);
 						}
@@ -332,8 +338,11 @@
 					setHiddenVal(formId, cfg.hiddenModelId, '');
 				})
 				.fail(function (xhr) {
+					if (seq !== requestSeq) {
+						return;
+					}
 					$model.empty().append(modelPlaceholder()).prop('disabled', false);
-					showModelStatus(formId, cfg.modelFieldId, i18n('modelsUnavailable'), true);
+					showModelStatus(formId, cfg.modelFieldId, i18n(xhr.status === 403 ? 'modelsReload' : 'modelsUnavailable'), true);
 					var shortErr =
 						'HTTP ' +
 						(xhr.status || '?') +

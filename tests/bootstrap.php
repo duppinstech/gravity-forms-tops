@@ -368,6 +368,11 @@ class GFAddOn {
 	public function get_form_settings( $form ) {
 		return is_array( $form ) && isset( $form[ $this->_slug ] ) && is_array( $form[ $this->_slug ] ) ? $form[ $this->_slug ] : array();
 	}
+
+	public function save_form_settings( $form, $settings ) {
+		$GLOBALS['gf_tops_test_saved_settings'] = $settings;
+		return true;
+	}
 }
 
 /**

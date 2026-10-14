@@ -42,8 +42,8 @@ class GF_Tops_Privacy {
 	public static function policy_text() {
 		$paragraphs = array(
 			'<strong>' . __( 'Suggested text:', 'gravity-forms-tops' ) . '</strong> ' . __( 'When you submit a tow or roadside request on this site, the details you enter (such as your name, phone number, pickup location, destination, vehicle year, make, model and color, license plate, and notes) are sent to our dispatch system provider, TowXchange (TowX / TOPS), to create the service call.', 'gravity-forms-tops' ),
-			__( 'A copy of each request sent to the dispatch system, and its response, is kept in this site\'s database so that we can confirm, troubleshoot, and resend requests. These records are kept until they are erased on request or the integration is removed. Dispatch login credentials are never included in these records.', 'gravity-forms-tops' ),
-			__( 'If a request cannot be delivered to the dispatch system, the request details may be emailed to our staff so that we can follow up with you.', 'gravity-forms-tops' ),
+			__( 'A copy of each request sent to the dispatch system, and its response, is kept in this site\'s database so that we can confirm, troubleshoot, and resend requests. These records are kept until they are erased on request or the plugin is deleted. Dispatch login credentials are removed from these records.', 'gravity-forms-tops' ),
+			__( 'If a request cannot be delivered to the dispatch system, the request details may be emailed to our staff so that we can follow up with you. Those emails are kept in our mailboxes and are not removed by an erasure request to this site.', 'gravity-forms-tops' ),
 			__( 'You can ask us for a copy of this information, or ask us to erase it, using the contact details on this site.', 'gravity-forms-tops' ),
 			'<em>' . __( 'For site owners: this plugin also checks GitHub (github.com) for plugin updates. That check does not include visitor data.', 'gravity-forms-tops' ) . '</em>',
 		);
@@ -84,32 +84,34 @@ class GF_Tops_Privacy {
 		if ( ! class_exists( 'GFAPI' ) || ! is_email( $email ) ) {
 			return array();
 		}
-		$ids  = array();
-		$page = 0;
-		do {
-			$entries = GFAPI::get_entries(
-				0,
-				array(
-					'status'        => 'active',
-					'field_filters' => array(
-						array( 'value' => $email ),
+		$ids = array();
+		foreach ( array( 'active', 'spam', 'trash' ) as $status ) {
+			$page = 0;
+			do {
+				$entries = GFAPI::get_entries(
+					0,
+					array(
+						'status'        => $status,
+						'field_filters' => array(
+							array( 'value' => $email ),
+						),
 					),
-				),
-				null,
-				array(
-					'offset'    => $page * 200,
-					'page_size' => 200,
-				)
-			);
-			if ( is_wp_error( $entries ) || ! is_array( $entries ) ) {
-				break;
-			}
-			foreach ( $entries as $entry ) {
-				$ids[] = (int) rgar( $entry, 'id' );
-			}
-			$batch = count( $entries );
-			++$page;
-		} while ( 200 === $batch && $page < 50 );
+					null,
+					array(
+						'offset'    => $page * 200,
+						'page_size' => 200,
+					)
+				);
+				if ( is_wp_error( $entries ) || ! is_array( $entries ) ) {
+					break;
+				}
+				foreach ( $entries as $entry ) {
+					$ids[] = (int) rgar( $entry, 'id' );
+				}
+				$batch = count( $entries );
+				++$page;
+			} while ( 200 === $batch && $page < 50 );
+		}
 
 		return array_values( array_unique( array_filter( $ids ) ) );
 	}
@@ -179,7 +181,9 @@ class GF_Tops_Privacy {
 		return array(
 			'items_removed'  => $removed > 0,
 			'items_retained' => false,
-			'messages'       => array(),
+			'messages'       => array(
+				__( 'TOPS / TowX request log: rows are found by this email address in Gravity Forms entries or in the stored request. Requests submitted without this email address cannot be matched automatically; search Forms → TOPS log by name or phone and remove them if needed. Failure notification emails already sent are not affected.', 'gravity-forms-tops' ),
+			),
 			'done'           => true,
 		);
 	}

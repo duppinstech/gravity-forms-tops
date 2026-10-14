@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-14T23:41:55+02:00\n"
+"POT-Creation-Date: 2026-10-14T23:49:49+02:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gravity-forms-tops\n"
@@ -68,560 +68,582 @@ msgstr ""
 msgid "No response body (HTTP 0). Often a network drop, timeout, or admin-ajax blocked. Check the browser Network tab for admin-ajax.php."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:469
-#: includes/class-gf-tops-addon.php:1126
+#: includes/class-gf-tops-addon.php:493
+#: includes/class-gf-tops-addon.php:1151
 msgid "QA (apiqa.towxchange.net)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:473
-#: includes/class-gf-tops-addon.php:1130
-#: includes/class-gf-tops-addon.php:1137
+#: includes/class-gf-tops-addon.php:497
+#: includes/class-gf-tops-addon.php:1155
+#: includes/class-gf-tops-addon.php:1162
 msgid "Custom base URL"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:476
-#: includes/class-gf-tops-addon.php:1122
+#: includes/class-gf-tops-addon.php:500
+#: includes/class-gf-tops-addon.php:1147
 msgid "Production (api.towxchange.net)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:535
+#: includes/class-gf-tops-addon.php:559
 msgid "When this integration is enabled, the plugin talks to the TowX (TOPSLink) API using your credentials below. TowX is the system of record for vehicle make, model, and color lists."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:540
+#: includes/class-gf-tops-addon.php:564
 msgid "Makes and colors are loaded into your mapped dropdown selects from TowX (live lists — choices update when TowX data changes)."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:545
+#: includes/class-gf-tops-addon.php:569
 msgid "When both Make and Model are mapped to select fields, choosing a make triggers GetModelsForMake so the model dropdown stays in sync."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:550
+#: includes/class-gf-tops-addon.php:574
 msgid "Map Make, Model, and Color in the field map to visible TowX dropdowns; option values must be TowX keys (the plugin populates them for you)."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:555
+#: includes/class-gf-tops-addon.php:579
 msgid "Nothing in this section appears on the public form — it is only for editors configuring the integration."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:599
+#: includes/class-gf-tops-addon.php:623
 msgid "TowX credentials are saved."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:600
+#: includes/class-gf-tops-addon.php:624
 msgid "Enter and save all four TowX credentials (User ID, Password, Session ID, Authentication key)."
 msgstr ""
 
 #. translators: %s: date and time of the last successful connection test
-#: includes/class-gf-tops-addon.php:611
+#: includes/class-gf-tops-addon.php:635
 #, php-format
 msgid "Connection test passed (%s)."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:614
+#: includes/class-gf-tops-addon.php:638
 msgid "Run \"Test authentication\" below after saving credentials."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:628
+#: includes/class-gf-tops-addon.php:652
 msgid "All required TowX fields are mapped (Make, Model and Color dropdowns are filled from TowX)."
 msgstr ""
 
 #. translators: %d: number of required field-map rows still empty
-#: includes/class-gf-tops-addon.php:631
+#: includes/class-gf-tops-addon.php:655
 #, php-format
 msgid "%d required field-map row is empty. Map it under \"Field map\" below."
 msgid_plural "%d required field-map rows are empty. Map them under \"Field map\" below."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-gf-tops-addon.php:641
+#: includes/class-gf-tops-addon.php:665
 msgid "A contact line is set for visitors when TowX cannot take the request."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:642
+#: includes/class-gf-tops-addon.php:666
 msgid "No contact line is set. If TowX fails, visitors see the error but no phone number or next step. Add one under \"TowX confirmation text\" below or in Forms → Settings → TOPS."
 msgstr ""
 
 #. translators: %s: API environment label, e.g. "Production (api.towxchange.net)"
-#: includes/class-gf-tops-addon.php:652
+#: includes/class-gf-tops-addon.php:676
 #, php-format
 msgid "API environment: %s. In Production, every test submission creates a real tow call."
 msgstr ""
 
 #. translators: 1: TowX request name, 2: date and time, 3: error detail
-#: includes/class-gf-tops-addon.php:664
+#: includes/class-gf-tops-addon.php:688
 #, php-format
 msgid "Last TowX lookup failed: %1$s at %2$s — %3$s. Dropdowns fall back to the choices saved in the form until TowX answers again."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:688
+#: includes/class-gf-tops-addon.php:708
+msgid "Tick \"Enable integration\" and save to see the setup checklist for this form."
+msgstr ""
+
+#: includes/class-gf-tops-addon.php:712
 msgid "Setup checklist"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:692
+#: includes/class-gf-tops-addon.php:716
 msgid "Attention:"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:696
+#: includes/class-gf-tops-addon.php:720
 msgid "Done:"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:700
+#: includes/class-gf-tops-addon.php:724
 msgid "To do:"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1043
+#: includes/class-gf-tops-addon.php:1067
 msgid "Select a model"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1044
+#: includes/class-gf-tops-addon.php:1068
 msgid "TOPS / TowX API"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1045
+#: includes/class-gf-tops-addon.php:1069
 msgid "Integration active on this form."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1046
+#: includes/class-gf-tops-addon.php:1070
 msgid "JSON / XML endpoint"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1047
+#: includes/class-gf-tops-addon.php:1071
 msgid "Makes loaded into dropdown"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1048
+#: includes/class-gf-tops-addon.php:1072
 msgid "Colors loaded into dropdown"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1049
+#: includes/class-gf-tops-addon.php:1073
 msgid "Models (GetModelsForMake)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1050
+#: includes/class-gf-tops-addon.php:1074
 msgid "Choose a make — models load after you select."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1051
-#: includes/class-gf-tops-addon.php:1058
+#: includes/class-gf-tops-addon.php:1075
+#: includes/class-gf-tops-addon.php:1082
 msgid "Loading models…"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1052
+#: includes/class-gf-tops-addon.php:1076
 msgid "1 model loaded for the selected make."
 msgstr ""
 
 #. translators: %d: number of vehicle models loaded from TowX for the selected make (more than one).
-#: includes/class-gf-tops-addon.php:1054
+#: includes/class-gf-tops-addon.php:1078
 #, php-format
 msgid "%d models loaded for the selected make."
 msgstr ""
 
 #. translators: %s: error message text from TowX or transport layer.
-#: includes/class-gf-tops-addon.php:1056
+#: includes/class-gf-tops-addon.php:1080
 #, php-format
 msgid "Could not load models: %s"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1057
+#: includes/class-gf-tops-addon.php:1081
 msgid "Field not found — check field map IDs."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1059
-msgid "Vehicle models could not be loaded. Please try again in a minute, or describe the vehicle in the notes."
+#: includes/class-gf-tops-addon.php:1083
+msgid "Vehicle models could not be loaded. Choose the make again to retry."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1060
-msgid "No models are listed for this make. Describe the vehicle in the notes."
+#: includes/class-gf-tops-addon.php:1084
+msgid "No models are listed for this make."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1061
+#: includes/class-gf-tops-addon.php:1085
+msgid "This page is out of date. Reload the page, then choose the make again."
+msgstr ""
+
+#: includes/class-gf-tops-addon.php:1086
 msgid "Choices provided by the dispatch system"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1113
+#: includes/class-gf-tops-addon.php:1138
 msgid "TowX API"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1114
+#: includes/class-gf-tops-addon.php:1139
 msgid "Choose Production or QA. This controls both JSON requests (GetMakes, GetColors, models) and the Create Call XML POST—they always use the same TowX host for that environment."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1118
+#: includes/class-gf-tops-addon.php:1143
 msgid "API environment"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1140
+#: includes/class-gf-tops-addon.php:1165
 msgid "Example: https://apiqa.towxchange.net/v1/ — include trailing slash if your API expects it. Always called over HTTPS."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1149
+#: includes/class-gf-tops-addon.php:1174
 msgid "Error notification email"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1152
+#: includes/class-gf-tops-addon.php:1177
 msgid "Optional. Must be a valid email address. Receives diagnostic emails when TowX Create Call fails (transport error, API error, or unexpected response). Leave blank to skip email."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1156
+#: includes/class-gf-tops-addon.php:1181
 msgid "Confirmation: contact line when TowX fails"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1159
+#: includes/class-gf-tops-addon.php:1184
 msgid "Optional HTML shown after an API error when this form does not override it under Form Settings → TOPS → TowX confirmation text. Message confirmations only, not redirects."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1163
+#: includes/class-gf-tops-addon.php:1188
 msgid "Logging"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1167
+#: includes/class-gf-tops-addon.php:1192
 msgid "Write TowX events to the PHP error log"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1174
+#: includes/class-gf-tops-addon.php:1199
 msgid "Browser console"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1178
+#: includes/class-gf-tops-addon.php:1203
 msgid "Write TowX diagnostics to the browser console on forms with TOPS enabled"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1182
+#: includes/class-gf-tops-addon.php:1207
 msgid "Logs integration snapshots, mapped field changes, and model-cascade activity to the visitor’s developer console (F12). Use for staging or production verification."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1203
+#: includes/class-gf-tops-addon.php:1228
 msgid "This address does not start with https://. The plugin calls it over HTTPS anyway."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1206
+#: includes/class-gf-tops-addon.php:1231
 msgid "This is not a towxchange.net host. TowX credentials and every Create Call (with customer details) are sent to it. Use it only for a TowX-provided or trusted endpoint."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1228
+#: includes/class-gf-tops-addon.php:1253
 msgid "TOPS / TowX"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1233
+#: includes/class-gf-tops-addon.php:1258
 msgid "Enable integration"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1237
+#: includes/class-gf-tops-addon.php:1262
 msgid "Submit this form to TowX when an entry is saved"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1254
+#: includes/class-gf-tops-addon.php:1279
 msgid "Per-form browser console"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1258
+#: includes/class-gf-tops-addon.php:1283
 msgid "Enable TowX browser console diagnostics for this form only (optional if already enabled under Forms → Settings → TOPS)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1262
+#: includes/class-gf-tops-addon.php:1287
 msgid "Same console output as the global “Browser console” checkbox; use here to debug one form while leaving global logging off."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1267
+#: includes/class-gf-tops-addon.php:1292
 msgid "Request log"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1268
+#: includes/class-gf-tops-addon.php:1293
 msgid "Review Create Call requests and responses, and resubmit after fixing credentials or outages."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1273
+#: includes/class-gf-tops-addon.php:1299
 msgid "Open request log for this form"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1278
+#: includes/class-gf-tops-addon.php:1300
+msgid "Opening the request log requires permission to view Gravity Forms entries."
+msgstr ""
+
+#: includes/class-gf-tops-addon.php:1305
 msgid "Authentication"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1282
+#: includes/class-gf-tops-addon.php:1309
 msgid "User ID"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1288
+#: includes/class-gf-tops-addon.php:1315
 msgid "Password"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1293
+#: includes/class-gf-tops-addon.php:1320
 msgid "Masked like a password. After saving, it is not shown again; leave blank to keep the saved value. Restrict who can edit forms."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1297
+#: includes/class-gf-tops-addon.php:1324
 msgid "Session ID"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1303
+#: includes/class-gf-tops-addon.php:1330
 msgid "Authentication key"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1308
+#: includes/class-gf-tops-addon.php:1335
 msgid "Masked like a password. After saving, it is not shown again; leave blank to keep the saved value."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1314
-#: includes/class-gf-tops-addon.php:1370
+#: includes/class-gf-tops-addon.php:1341
+#: includes/class-gf-tops-addon.php:1397
 msgid "Save settings"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1315
+#: includes/class-gf-tops-addon.php:1342
 msgid "Test authentication"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1317
+#: includes/class-gf-tops-addon.php:1344
 msgid "Save after changing credentials. Test uses what you typed when those fields have text; otherwise it uses the last saved Session ID and Authentication key (GetMakes)."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1322
+#: includes/class-gf-tops-addon.php:1349
 msgid "Field map"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1323
+#: includes/class-gf-tops-addon.php:1350
 msgid "Point each row at the correct form field. TowX uses Year, Make, Model, and Color for VehicleInfo; Make/Model/Color must be select fields that this add-on can fill from the API. Optional hidden fields at the bottom only mirror keys for other workflows."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1327
+#: includes/class-gf-tops-addon.php:1354
 msgid "TowX fields"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1334
+#: includes/class-gf-tops-addon.php:1361
 msgid "Optional: Hidden field sync"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1334
+#: includes/class-gf-tops-addon.php:1361
 msgid "Choose Hidden fields if you need the raw TowX keys copied from the visible Make, Model, or Color dropdowns (for notifications, feeds, or custom workflows). Leave blank to skip."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1338
+#: includes/class-gf-tops-addon.php:1365
 msgid "Hidden field — selected make (TowX key)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1343
-#: includes/class-gf-tops-addon.php:1353
-#: includes/class-gf-tops-addon.php:1363
+#: includes/class-gf-tops-addon.php:1370
+#: includes/class-gf-tops-addon.php:1380
+#: includes/class-gf-tops-addon.php:1390
 msgid "Add at least one Hidden field to this form to use this option."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1344
+#: includes/class-gf-tops-addon.php:1371
 msgid "When set, the visible Make dropdown value is copied into this Hidden field whenever it changes."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1348
+#: includes/class-gf-tops-addon.php:1375
 msgid "Hidden field — selected model (TowX key)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1354
+#: includes/class-gf-tops-addon.php:1381
 msgid "When set, the visible Model dropdown value is copied into this Hidden field whenever it changes."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1358
+#: includes/class-gf-tops-addon.php:1385
 msgid "Hidden field — selected color (TowX key)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1364
+#: includes/class-gf-tops-addon.php:1391
 msgid "When set, the visible Color dropdown value is copied into this Hidden field whenever it changes."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1371
+#: includes/class-gf-tops-addon.php:1398
 msgid "Saves all TOPS settings on this tab (integration, authentication, field map, and confirmation text)."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1376
+#: includes/class-gf-tops-addon.php:1403
 msgid "TowX confirmation text"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1377
+#: includes/class-gf-tops-addon.php:1404
 msgid "Shown after submit when TowX returns a result (message confirmations only). The site name in confirmations comes from Settings → General → Site Title unless you override it per form below."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1381
+#: includes/class-gf-tops-addon.php:1408
 msgid "Override organization name (optional)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1384
+#: includes/class-gf-tops-addon.php:1411
 msgid "Leave blank to use the WordPress Site Title (Settings → General). Set only if this form should show a different name in default confirmation text and in the {organization} placeholder."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1388
+#: includes/class-gf-tops-addon.php:1415
 msgid "Contact HTML when TowX fails (optional)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1391
+#: includes/class-gf-tops-addon.php:1418
 msgid "Overrides the global Forms → Settings → TOPS contact line for this form only (e.g. phone link). Allowed HTML is sanitized."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1395
+#: includes/class-gf-tops-addon.php:1422
 msgid "Custom message — TowX success (optional)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1398
+#: includes/class-gf-tops-addon.php:1425
 msgid "If set, replaces the default success block. Placeholders: {call_id}, {organization}, {site_name}, {contact_html}"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1402
+#: includes/class-gf-tops-addon.php:1429
 msgid "Custom message — TowX error (optional)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1405
+#: includes/class-gf-tops-addon.php:1432
 msgid "If set, replaces the default error block. Placeholders: {error}, {organization}, {site_name}, {contact_html}"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1409
+#: includes/class-gf-tops-addon.php:1436
 msgid "Custom message — unclear result (optional)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1412
+#: includes/class-gf-tops-addon.php:1439
 msgid "If set, replaces the default message when the response had no Call ID and no clear error. Placeholders: {organization}, {site_name}, {contact_html}"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1428
+#: includes/class-gf-tops-addon.php:1455
 msgid "Location (pickup)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1434
+#: includes/class-gf-tops-addon.php:1461
 msgid "Caller name"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1440
+#: includes/class-gf-tops-addon.php:1467
 msgid "Caller phone"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1446
+#: includes/class-gf-tops-addon.php:1473
 msgid "Destination"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1452
+#: includes/class-gf-tops-addon.php:1479
 msgid "Tag number"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1458
+#: includes/class-gf-tops-addon.php:1485
 msgid "Tag state"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1464
+#: includes/class-gf-tops-addon.php:1491
 msgid "Dispatch notes"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1470
+#: includes/class-gf-tops-addon.php:1497
 msgid "Year"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1476
+#: includes/class-gf-tops-addon.php:1503
 msgid "Make (drop-down filled from TowX)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1482
+#: includes/class-gf-tops-addon.php:1509
 msgid "Model (drop-down filled from TowX)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1488
+#: includes/class-gf-tops-addon.php:1515
 msgid "Color (drop-down filled from TowX)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1494
+#: includes/class-gf-tops-addon.php:1521
 msgid "Optional: Bill-to account (prefixed in notes)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1500
+#: includes/class-gf-tops-addon.php:1527
 msgid "Optional: Customer email (prefixed in notes)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1506
+#: includes/class-gf-tops-addon.php:1533
 msgid "Optional: Owner name (prefixed in notes)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1512
+#: includes/class-gf-tops-addon.php:1539
 msgid "Optional: Key location (prefixed in notes)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1518
+#: includes/class-gf-tops-addon.php:1545
 msgid "Optional: Call reason (prefixed in notes)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1628
+#: includes/class-gf-tops-addon.php:1656
 msgid "Select a make"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:1632
+#: includes/class-gf-tops-addon.php:1660
 msgid "Select a color"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2041
-msgid "Invalid request. Reload the page and try again."
-msgstr ""
-
-#: includes/class-gf-tops-addon.php:2045
-msgid "TOPS is not enabled for this form."
-msgstr ""
-
-#: includes/class-gf-tops-addon.php:2050
-#: includes/class-gf-tops-addon.php:2360
-#: includes/class-gf-tops-addon.php:2849
-msgid "Form not found."
-msgstr ""
-
-#: includes/class-gf-tops-addon.php:2077
-msgid "Vehicle models are temporarily unavailable. Please try again in a minute."
-msgstr ""
-
-#: includes/class-gf-tops-addon.php:2083
-msgid "Unknown vehicle make. Reload the page and try again."
-msgstr ""
-
 #. translators: %d: HTTP status code
-#: includes/class-gf-tops-addon.php:2126
+#: includes/class-gf-tops-addon.php:1814
+#: includes/class-gf-tops-addon.php:2054
+#: includes/class-gf-tops-addon.php:2185
+#: includes/class-gf-tops-addon.php:2190
 #, php-format
 msgid "TowX HTTP %d"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2141
+#. translators: %s: TowX list name, "Makes" or "Colors"
+#: includes/class-gf-tops-addon.php:2062
+#, php-format
+msgid "TowX returned no %s list."
+msgstr ""
+
+#: includes/class-gf-tops-addon.php:2102
+msgid "Invalid request. Reload the page and try again."
+msgstr ""
+
+#: includes/class-gf-tops-addon.php:2106
+msgid "TOPS is not enabled for this form."
+msgstr ""
+
+#: includes/class-gf-tops-addon.php:2111
+#: includes/class-gf-tops-addon.php:2424
+#: includes/class-gf-tops-addon.php:2916
+msgid "Form not found."
+msgstr ""
+
+#: includes/class-gf-tops-addon.php:2138
+msgid "Vehicle models are temporarily unavailable. Please try again in a minute."
+msgstr ""
+
+#: includes/class-gf-tops-addon.php:2146
+msgid "Unknown vehicle make. Reload the page and try again."
+msgstr ""
+
+#: includes/class-gf-tops-addon.php:2202
+#: includes/class-gf-tops-addon.php:2205
 msgid "TowX did not return valid JSON."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2182
+#: includes/class-gf-tops-addon.php:2246
 msgid "TowX response had no Models list for this make."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2235
+#: includes/class-gf-tops-addon.php:2299
 msgid "TowX returned an error."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2322
+#: includes/class-gf-tops-addon.php:2386
 msgid "The connection test hit a PHP error on the server (see details below)."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2337
+#: includes/class-gf-tops-addon.php:2401
 msgid "Invalid session. Reload the page and try again."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2343
+#: includes/class-gf-tops-addon.php:2407
 msgid "You do not have permission to run this test."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2354
+#: includes/class-gf-tops-addon.php:2418
 msgid "Gravity Forms API is not available."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2378
+#: includes/class-gf-tops-addon.php:2444
 msgid "Session ID and Authentication key are required. Save the form first if those fields are blank (saved keys are used when the inputs are empty)."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2403
+#: includes/class-gf-tops-addon.php:2469
 msgid "Unknown transport error."
 msgstr ""
 
 #. translators: %s: transport error
-#: includes/class-gf-tops-addon.php:2408
+#: includes/class-gf-tops-addon.php:2474
 #, php-format
 msgid "Request failed: %s"
 msgstr ""
 
 #. translators: 1: API base URL, 2: WordPress error code, 3: all error lines
-#: includes/class-gf-tops-addon.php:2413
+#: includes/class-gf-tops-addon.php:2479
 #, php-format
 msgid ""
 "Target base: %1$s\n"
@@ -632,13 +654,13 @@ msgid ""
 msgstr ""
 
 #. translators: %d: HTTP status
-#: includes/class-gf-tops-addon.php:2434
+#: includes/class-gf-tops-addon.php:2500
 #, php-format
 msgid "HTTP %d from TowX."
 msgstr ""
 
 #. translators: 1: URL base, 2: response body excerpt
-#: includes/class-gf-tops-addon.php:2439
+#: includes/class-gf-tops-addon.php:2505
 #, php-format
 msgid ""
 "Request: GET GetMakes\n"
@@ -648,22 +670,22 @@ msgid ""
 "%2$s"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2449
+#: includes/class-gf-tops-addon.php:2515
 msgid "Invalid JSON"
 msgstr ""
 
 #. translators: %s: json_last_error message
-#: includes/class-gf-tops-addon.php:2454
+#: includes/class-gf-tops-addon.php:2520
 #, php-format
 msgid "TowX did not return valid JSON (%s)."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2480
+#: includes/class-gf-tops-addon.php:2546
 msgid "Unexpected TowX response: no Makes array in Data."
 msgstr ""
 
 #. translators: %d: number of makes
-#: includes/class-gf-tops-addon.php:2498
+#: includes/class-gf-tops-addon.php:2565
 #, php-format
 msgid "Connected. Retrieved %d vehicle make."
 msgid_plural "Connected. Retrieved %d vehicle makes."
@@ -671,7 +693,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: API base, 2: HTTP status code, 3: count of makes
-#: includes/class-gf-tops-addon.php:2503
+#: includes/class-gf-tops-addon.php:2570
 #, php-format
 msgid ""
 "GET GetMakes\n"
@@ -680,239 +702,239 @@ msgid ""
 "Parsed: towXResponse → Data → Makes (%3$d items)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2582
+#: includes/class-gf-tops-addon.php:2649
 msgid "Bill To Account"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2583
+#: includes/class-gf-tops-addon.php:2650
 msgid "Customer Email"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2584
+#: includes/class-gf-tops-addon.php:2651
 msgid "Owner Name"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2585
+#: includes/class-gf-tops-addon.php:2652
 msgid "Key Location"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2586
+#: includes/class-gf-tops-addon.php:2653
 msgid "Call Reason"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2642
+#: includes/class-gf-tops-addon.php:2709
 msgid "TOPS API transport error"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2678
+#: includes/class-gf-tops-addon.php:2745
 msgid "TOPS API returned an error"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2711
+#: includes/class-gf-tops-addon.php:2778
 msgid "No CallKey in response"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2733
+#: includes/class-gf-tops-addon.php:2800
 msgid "TOPS API unexpected response"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2734
+#: includes/class-gf-tops-addon.php:2801
 msgid "CallKey missing."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2794
+#: includes/class-gf-tops-addon.php:2861
 msgid "TOPS request log"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2795
+#: includes/class-gf-tops-addon.php:2862
 msgid "TOPS log"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2807
+#: includes/class-gf-tops-addon.php:2874
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2819
+#: includes/class-gf-tops-addon.php:2886
 #: includes/class-gf-tops-privacy.php:59
 #: includes/class-gf-tops-privacy.php:71
 msgid "TOPS / TowX request log"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2823
+#: includes/class-gf-tops-addon.php:2890
 msgid "Create Call was sent again. Check the new row below."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2825
+#: includes/class-gf-tops-addon.php:2892
 msgid "Resend could not be completed."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2827
+#: includes/class-gf-tops-addon.php:2894
 msgid "Nothing was sent: this form has no TOPS field map. Map the fields under Form Settings → TOPS, then resend."
 msgstr ""
 
 #. translators: %s: request log status label, e.g. "API error"
-#: includes/class-gf-tops-addon.php:2831
+#: includes/class-gf-tops-addon.php:2898
 #, php-format
 msgid "Create Call was sent again, but TowX did not return a Call ID (%s). See the new row below."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2837
+#: includes/class-gf-tops-addon.php:2904
 msgid "Open this screen from Forms → select a form → Settings → TOPS → Open request log for this form, or add ?id=FORM_ID to the URL."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2843
+#: includes/class-gf-tops-addon.php:2910
 msgid "Gravity Forms is not available."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2856
+#: includes/class-gf-tops-addon.php:2923
 msgid "Form"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2857
+#: includes/class-gf-tops-addon.php:2924
 msgid "View entries"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2858
+#: includes/class-gf-tops-addon.php:2925
 msgid "TOPS settings"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2863
+#: includes/class-gf-tops-addon.php:2930
 msgid "Log row not found."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2867
+#: includes/class-gf-tops-addon.php:2934
 msgid "Back to list"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2878
+#: includes/class-gf-tops-addon.php:2945
 msgid "Success is recorded when TowX returns a CallKey in the XML response. Each row is one HTTP attempt; resend rebuilds the Create Call from the current entry data and saved TOPS credentials."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2882
-#: includes/class-gf-tops-privacy.php:136
+#: includes/class-gf-tops-addon.php:2949
+#: includes/class-gf-tops-privacy.php:138
 msgid "Date (UTC)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2883
+#: includes/class-gf-tops-addon.php:2950
 msgid "Entry"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2884
-#: includes/class-gf-tops-addon.php:2950
-#: includes/class-gf-tops-privacy.php:144
+#: includes/class-gf-tops-addon.php:2951
+#: includes/class-gf-tops-addon.php:3017
+#: includes/class-gf-tops-privacy.php:146
 msgid "Status"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2885
+#: includes/class-gf-tops-addon.php:2952
 msgid "HTTP"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2886
-#: includes/class-gf-tops-addon.php:2956
-#: includes/class-gf-tops-privacy.php:148
+#: includes/class-gf-tops-addon.php:2953
+#: includes/class-gf-tops-addon.php:3023
+#: includes/class-gf-tops-privacy.php:150
 msgid "Call ID"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2887
+#: includes/class-gf-tops-addon.php:2954
 msgid "Source"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2888
+#: includes/class-gf-tops-addon.php:2955
 msgid "Actions"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2892
+#: includes/class-gf-tops-addon.php:2959
 msgid "No requests logged yet for this form."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2914
+#: includes/class-gf-tops-addon.php:2981
 msgid "View"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2958
+#: includes/class-gf-tops-addon.php:3025
 msgid "Endpoint"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2960
+#: includes/class-gf-tops-addon.php:3027
 msgid "Request (redacted)"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2965
-#: includes/class-gf-tops-addon.php:3411
+#: includes/class-gf-tops-addon.php:3032
+#: includes/class-gf-tops-addon.php:3478
 msgid "Response"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2988
+#: includes/class-gf-tops-addon.php:3055
 msgid "TowX already returned a Call ID for this attempt. Resending creates a second tow call. Continue?"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:2996
+#: includes/class-gf-tops-addon.php:3063
 msgid "Resend Create Call"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3006
+#: includes/class-gf-tops-addon.php:3073
 msgid "Form submission"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3007
+#: includes/class-gf-tops-addon.php:3074
 msgid "Resend"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3018
+#: includes/class-gf-tops-addon.php:3085
 msgid "Success"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3019
+#: includes/class-gf-tops-addon.php:3086
 msgid "API error"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3020
+#: includes/class-gf-tops-addon.php:3087
 msgid "HTTP error"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3021
+#: includes/class-gf-tops-addon.php:3088
 msgid "Transport error"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3022
+#: includes/class-gf-tops-addon.php:3089
 msgid "No Call ID"
 msgstr ""
 
 #. translators: %s: site / organization name (WordPress Site Title unless overridden per form)
-#: includes/class-gf-tops-addon.php:3336
+#: includes/class-gf-tops-addon.php:3403
 #, php-format
 msgid "Thank you for contacting %s."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3340
+#: includes/class-gf-tops-addon.php:3407
 msgid "Thank you for your submission."
 msgstr ""
 
 #. translators: %s: TowX Call ID / reference
-#: includes/class-gf-tops-addon.php:3344
+#: includes/class-gf-tops-addon.php:3411
 #, php-format
 msgid "Your Call ID: %s — keep this number for any follow-up about this request."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3347
+#: includes/class-gf-tops-addon.php:3414
 msgid "You should receive follow-up about next steps."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3360
+#: includes/class-gf-tops-addon.php:3427
 msgid "We could not send your request to dispatch automatically."
 msgstr ""
 
 #. translators: %s: technical or API error detail
-#: includes/class-gf-tops-addon.php:3363
+#: includes/class-gf-tops-addon.php:3430
 #, php-format
 msgid "Details: %s"
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3380
+#: includes/class-gf-tops-addon.php:3447
 msgid "Your submission was received, but the dispatch reference could not be confirmed. Use the contact options below if you need help."
 msgstr ""
 
-#: includes/class-gf-tops-addon.php:3409
+#: includes/class-gf-tops-addon.php:3476
 msgid "Request XML (credentials redacted)"
 msgstr ""
 
@@ -925,11 +947,11 @@ msgid "When you submit a tow or roadside request on this site, the details you e
 msgstr ""
 
 #: includes/class-gf-tops-privacy.php:45
-msgid "A copy of each request sent to the dispatch system, and its response, is kept in this site's database so that we can confirm, troubleshoot, and resend requests. These records are kept until they are erased on request or the integration is removed. Dispatch login credentials are never included in these records."
+msgid "A copy of each request sent to the dispatch system, and its response, is kept in this site's database so that we can confirm, troubleshoot, and resend requests. These records are kept until they are erased on request or the plugin is deleted. Dispatch login credentials are removed from these records."
 msgstr ""
 
 #: includes/class-gf-tops-privacy.php:46
-msgid "If a request cannot be delivered to the dispatch system, the request details may be emailed to our staff so that we can follow up with you."
+msgid "If a request cannot be delivered to the dispatch system, the request details may be emailed to our staff so that we can follow up with you. Those emails are kept in our mailboxes and are not removed by an erasure request to this site."
 msgstr ""
 
 #: includes/class-gf-tops-privacy.php:47
@@ -940,28 +962,32 @@ msgstr ""
 msgid "For site owners: this plugin also checks GitHub (github.com) for plugin updates. That check does not include visitor data."
 msgstr ""
 
-#: includes/class-gf-tops-privacy.php:132
+#: includes/class-gf-tops-privacy.php:134
 msgid "Tow request log"
 msgstr ""
 
-#: includes/class-gf-tops-privacy.php:140
+#: includes/class-gf-tops-privacy.php:142
 msgid "Form entry"
 msgstr ""
 
-#: includes/class-gf-tops-privacy.php:152
+#: includes/class-gf-tops-privacy.php:154
 msgid "Request sent to dispatch (credentials removed)"
 msgstr ""
 
-#: includes/class-gf-tops-privacy.php:156
+#: includes/class-gf-tops-privacy.php:158
 msgid "Dispatch response"
 msgstr ""
 
+#: includes/class-gf-tops-privacy.php:185
+msgid "TOPS / TowX request log: rows are found by this email address in Gravity Forms entries or in the stored request. Requests submitted without this email address cannot be matched automatically; search Forms → TOPS log by name or phone and remove them if needed. Failure notification emails already sent are not affected."
+msgstr ""
+
 #. translators: %d: HTTP status code
-#: includes/class-gf-tops-xml.php:175
+#: includes/class-gf-tops-xml.php:177
 #, php-format
 msgid "TowX HTTP error (%d)."
 msgstr ""
 
-#: includes/class-gf-tops-xml.php:210
+#: includes/class-gf-tops-xml.php:212
 msgid "Invalid XML response from TowX."
 msgstr ""

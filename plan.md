@@ -43,6 +43,13 @@ These need WordPress, a licensed Gravity Forms install and authorized QA TowX cr
 - [ ] Screen reader (or browser accessibility tree): the ⚡ marker reads "Choices provided by the dispatch system", not "high voltage".
 - [ ] **Tools → Export Personal Data** for a test email used in a QA submission includes a "Tow request log" group; **Erase Personal Data** removes those log rows. **Settings → Privacy → Policy Guide** shows the suggested text.
 - [ ] Resend a row on a form with an empty field map: the notice says nothing was sent.
+- [ ] Upgrade 1.4.1 → 1.5.0: no notices in `debug.log`; existing log rows are kept.
+- [ ] Erasure with similar emails: submit as `bob@example.test` and as `jimbob@example.test` (in a mapped Customer Email field); erasing `bob@example.test` removes only bob's rows, and the eraser message explains rows without that email cannot be matched.
+- [ ] Custom base URL `http://…`: both warnings show and the log row's endpoint starts with `https://`. View source on the form page: no API address while console logging is off.
+- [ ] Unreachable custom URL: the second page load is fast (lookups paused) and the checklist shows the failure. Choosing a make TowX rejects only affects that make.
+- [ ] Changing a saved credential clears the "Connection test passed" tick until the next successful test.
+- [ ] Plugins screen shows a **Settings** link. Multisite: uninstall removes `gf_tops_lookup_status` and `gf_tops_auth_test_ok` on every site.
+- [ ] On QA, confirm the TowX endpoints answer without redirects; if so, consider turning redirects off for TowX calls (`'redirection' => 0`) so a redirect can never downgrade to HTTP.
 - [ ] Before the first tag after merging: add required reviewers to the `release` environment and protect `v*` tags in GitHub settings (see owner decisions).
 
 ## Review board, 2026-10-14 (full-product review)
@@ -60,14 +67,17 @@ All six departments reviewed the whole product. Everything that did not need the
 9. **Default environment.** Default fresh installs to QA, so the first test does not create a real tow call?
 10. **Site-wide credentials.** Offer one set of TowX credentials per site instead of per form?
 11. **Custom API host.** Restrict the custom base URL to `*.towxchange.net` (currently HTTPS is enforced and other hosts get a warning)?
-12. **GitHub settings.** Protect `v*` tags and add required reviewers to the `release` environment.
+12. **GitHub settings.** Protect `v*` tags (ruleset) and add required reviewers to the `release` environment; until then the environment protects nothing. Do both before tagging 1.5.0.
+16. **Release verification.** Build provenance is attested, but the in-plugin updater does not verify it. Document offline verification (`gh attestation verify gravity-forms-tops.zip -R duppinstech/gravity-forms-tops`) for now, or add checksum verification to the updater standard later?
+17. **Support channel.** The readme tells customers what to send but not where. Options: name a contact, say "support per your agreement", or point to a paid support page (finance recommends "per your agreement" until pricing is decided).
+18. **Visitor message when models cannot load.** Currently generic ("Choose the make again to retry"). Product suggests adding the form's contact line, or owner-set text, so visitors with a required Model field are never stuck.
 13. **TowX.** Ask whether credentials can be sent in headers instead of the query string, and whether a commercial third-party integration is allowed.
 14. **Contributions.** Add a CLA or DCO if the licensing model may change later.
 15. **Sample form.** Ship an importable sample Gravity Forms form (needs a Gravity Forms install to build and verify the export).
 
 ## Product decisions (2026-10-14)
 
-- **Request-log retention:** rows are kept indefinitely (until the plugin is uninstalled). No scheduled cleanup.
+- **Request-log retention:** rows are kept indefinitely (until the plugin is uninstalled, or erased for one person through WordPress's privacy tools). No scheduled cleanup.
 - **Public error detail:** visitors keep seeing TowX / transport error text in the error confirmation so they can quote it when reporting a problem. Leaning decision; revisit if the text exposes anything sensitive. Sites can already replace it per form with the custom error message setting.
 - **Front-end ⚡ marker:** kept on the public form's Make, Model and Color labels.
 

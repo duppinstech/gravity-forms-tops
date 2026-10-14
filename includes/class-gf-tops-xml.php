@@ -118,11 +118,13 @@ class GF_Tops_Xml {
 	public static function redact_for_log( $xml ) {
 		$xml = (string) $xml;
 		$patterns = array(
+			'/<UserID>.*?<\/UserID>/is',
 			'/<Password>.*?<\/Password>/is',
 			'/<AuthenticationKey>.*?<\/AuthenticationKey>/is',
 			'/<SessionID>.*?<\/SessionID>/is',
 		);
 		$repl     = array(
+			'<UserID>***</UserID>',
 			'<Password>***</Password>',
 			'<AuthenticationKey>***</AuthenticationKey>',
 			'<SessionID>***</SessionID>',

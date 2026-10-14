@@ -32,7 +32,7 @@ jobs:
       - name: Verify tag is on main
         run: |
           set -euo pipefail
-          git fetch --no-tags origin main
+          # fetch-depth: 0 above already fetched origin/main.
           if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
             echo "::error::Tag $GITHUB_REF_NAME points at a commit that is not on main."
             exit 1
@@ -56,7 +56,7 @@ jobs:
         with:
           php-version: '7.4'
           coverage: none
-          tools: composer:v2, wp-cli
+          tools: composer:v2, wp-cli:2.12.0
 
       - name: Lint and test before packaging
         run: |

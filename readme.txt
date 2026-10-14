@@ -20,7 +20,7 @@ This plugin connects a Gravity Forms request form on your WordPress site to your
 * **Request log.** Every attempt is recorded under **Forms → TOPS log** with the response from TowX, and failed requests can be resent after you fix the cause.
 * **Safe credentials.** The TowX password and authentication key are encrypted in the database and never shown again after saving.
 * **Setup checklist and connection test** on each form's TOPS settings.
-* **Privacy tools.** Suggested privacy-policy text, and request-log data is included in WordPress's personal-data export and erase tools.
+* **Privacy tools.** Suggested privacy-policy text, and request-log rows that can be matched to a person's email address are included in WordPress's personal-data export and erase tools.
 
 **Requirements:** WordPress 6.2+, PHP 7.4+, Gravity Forms 2.5+ (licensed), and TowX / TOPS API credentials from TowXchange.
 
@@ -38,7 +38,7 @@ This plugin is not affiliated with or endorsed by Rocketgenius (Gravity Forms) o
 2. **Choose the environment.** Go to **Forms → Settings → TOPS** and set **API environment** to **QA** while you test. Optionally enter an **Error notification email** and a **contact line** shown to visitors if TowX cannot take a request (for example your dispatch phone number).
 3. **Build the form.** Your request form needs fields for: pickup location and destination (Address, Single Line Text or Paragraph), caller name (Name or Text), caller phone (Phone or Text), tag number and tag state, vehicle year, and **Make, Model and Color as Drop Down fields** (the plugin fills their choices from TowX). Optional: dispatch notes, bill-to account, customer email, owner name, key location and call reason are added to the dispatch notes.
 4. **Enable and connect.** Open the form → **Settings → TOPS**. Tick **Enable integration**, enter the four credentials, click **Save settings**, then **Test authentication**. It should report the number of vehicle makes found.
-5. **Map the fields.** Under **Field map**, choose the form field for each TowX field and save. The **Setup checklist** at the top of the tab shows what is still missing.
+5. **Map the fields.** Under **Field map**, choose the form field for each TowX field and save. Once the integration is enabled and saved, the **Setup checklist** at the top of the tab shows what is still missing.
 6. **Use a message confirmation.** The TowX result (Call ID, or the error and your contact line) is added to Gravity Forms **Text** confirmations. Redirect confirmations do not show it.
 7. **Test on QA.** Submit the form. You should see a Call ID in the confirmation and a **Success** row under **Forms → TOPS log**.
 8. **Go live.** Switch **API environment** to **Production**. From then on, every submission creates a real tow call.
@@ -55,7 +55,7 @@ Run **Test authentication** on the form's TOPS settings. Check that Make and Col
 
 = Models never load, or visitors see "Vehicle models could not be loaded" =
 
-Usually a page cache is serving an expired token (see **Page caching**) or TowX was briefly unreachable; after a failure the plugin waits about 90 seconds before asking TowX again. Turn on **Browser console** under **Forms → Settings → TOPS** to see details in the browser's developer console (F12).
+Usually a page cache is serving an expired token (see **Page caching**; visitors are told to reload) or TowX was briefly unreachable. After TowX does not answer, the plugin waits about 90 seconds before asking again; if TowX rejects one make, that make is retried after 5 minutes. Turn on **Browser console** under **Forms → Settings → TOPS** to see details in the browser's developer console (F12).
 
 = What do the request log statuses mean? =
 
@@ -79,7 +79,7 @@ In Gravity Forms form meta for that form, encrypted with Gravity Forms' built-in
 
 = Who can see the request log? =
 
-Users who can view Gravity Forms entries. Resending requires permission to edit entries. Log rows contain customer details from the request, with the TowX password, Session ID and authentication key removed.
+Users who can view Gravity Forms entries. Resending requires permission to edit entries. Log rows contain customer details from the request, with the TowX User ID, password, Session ID and authentication key removed.
 
 = What should I send when asking for support? =
 
@@ -94,7 +94,7 @@ This plugin connects to:
 
 == Privacy ==
 
-Request-log rows (including customer details from each request) are stored in your site's database until they are erased with **Tools → Erase Personal Data** or the plugin is deleted. Failure notification emails include the request details. Suggested privacy-policy text is added under **Settings → Privacy → Policy Guide**.
+Request-log rows (including customer details from each request) are stored in your site's database until they are erased with **Tools → Erase Personal Data** or the plugin is deleted. Rows are matched to a person by their email address (in the Gravity Forms entry or the stored request); requests submitted without that email address must be found in **Forms → TOPS log** by name or phone. Failure notification emails include the request details and stay in the recipient's mailbox. Suggested privacy-policy text is added under **Settings → Privacy → Policy Guide**.
 
 == Changelog ==
 
@@ -197,7 +197,7 @@ Request-log rows (including customer details from each request) are stored in yo
 == Upgrade Notice ==
 
 = 1.5.0 =
-The request log now requires the Gravity Forms "view entries" permission (and "edit entries" to resend). Users who could only edit forms lose access to the log.
+The request log now requires the Gravity Forms "view entries" permission (and "edit entries" to resend). Users who could only edit forms lose access, and roles that can view entries but not edit forms (for example support staff) gain access to the customer details in the log. Check custom roles after updating.
 
 = 1.4.0 =
 Security update: stops TowX credentials from being included in failure notification emails. If error emails were enabled on an earlier version, rotate the TowX password and authentication key.

@@ -300,10 +300,34 @@ class GF_Tops_Addon extends GFAddOn {
 	 */
 	public function save_form_settings( $form, $settings ) {
 		if ( is_array( $settings ) ) {
+			$this->maybe_forget_connection_test( $form, $settings );
 			$settings = GF_Tops_Secrets::encrypt_settings( $settings );
 		}
 
 		return parent::save_form_settings( $form, $settings );
+	}
+
+	/**
+	 * Clear the "connection test passed" record for a form when its TowX credentials change.
+	 *
+	 * @param array $form     Form array.
+	 * @param array $settings Settings about to be saved (secrets may be plaintext or stored ciphertext).
+	 */
+	protected function maybe_forget_connection_test( $form, array $settings ) {
+		$form_id = (int) rgar( $form, 'id' );
+		$tests   = get_option( 'gf_tops_auth_test_ok', array() );
+		if ( $form_id <= 0 || ! is_array( $tests ) || ! isset( $tests[ $form_id ] ) ) {
+			return;
+		}
+		$old = GF_Tops_Secrets::decrypt_settings( (array) parent::get_form_settings( $form ) );
+		$new = GF_Tops_Secrets::decrypt_settings( $settings );
+		foreach ( array( 'tops_user_id', 'tops_password', 'tops_session_id', 'tops_auth_key' ) as $key ) {
+			if ( (string) rgar( $old, $key ) !== (string) rgar( $new, $key ) ) {
+				unset( $tests[ $form_id ] );
+				update_option( 'gf_tops_auth_test_ok', $tests, false );
+				return;
+			}
+		}
 	}
 
 	/**
@@ -646,7 +670,7 @@ class GF_Tops_Addon extends GFAddOn {
 		$env    = rgar( $plugin, 'api_environment', 'production' );
 		$items[] = array(
 			'ok'   => true,
-			'warn' => 'production' === $env || '' === $env,
+			'warn' => false,
 			'text' => sprintf(
 				/* translators: %s: API environment label, e.g. "Production (api.towxchange.net)" */
 				__( 'API environment: %s. In Production, every test submission creates a real tow call.', 'gravity-forms-tops' ),
@@ -681,7 +705,7 @@ class GF_Tops_Addon extends GFAddOn {
 	protected function get_tops_mmc_mapping_notice_html( $form ) {
 		$settings = $this->get_form_settings( $form );
 		if ( empty( $settings['enabled'] ) ) {
-			return '';
+			return '<p class="description" style="max-width:720px;">' . esc_html__( 'Tick "Enable integration" and save to see the setup checklist for this form.', 'gravity-forms-tops' ) . '</p>';
 		}
 
 		$html = '<div class="gf-tops-setup-checklist" style="max-width:720px;margin:0.75em 0 0;"><p style="margin:0 0 0.25em;"><strong>'
@@ -1056,8 +1080,9 @@ class GF_Tops_Addon extends GFAddOn {
 				'statusModelsErr'       => esc_html__( 'Could not load models: %s', 'gravity-forms-tops' ),
 				'statusUnknownField'    => esc_html__( 'Field not found — check field map IDs.', 'gravity-forms-tops' ),
 				'modelsLoading'         => esc_html__( 'Loading models…', 'gravity-forms-tops' ),
-				'modelsUnavailable'     => esc_html__( 'Vehicle models could not be loaded. Please try again in a minute, or describe the vehicle in the notes.', 'gravity-forms-tops' ),
-				'modelsNone'            => esc_html__( 'No models are listed for this make. Describe the vehicle in the notes.', 'gravity-forms-tops' ),
+				'modelsUnavailable'     => esc_html__( 'Vehicle models could not be loaded. Choose the make again to retry.', 'gravity-forms-tops' ),
+				'modelsNone'            => esc_html__( 'No models are listed for this make.', 'gravity-forms-tops' ),
+				'modelsReload'          => esc_html__( 'This page is out of date. Reload the page, then choose the make again.', 'gravity-forms-tops' ),
 				'markerLabel'           => esc_html__( 'Choices provided by the dispatch system', 'gravity-forms-tops' ),
 			)
 		);
@@ -1270,7 +1295,9 @@ class GF_Tops_Addon extends GFAddOn {
 					array(
 						'name' => 'tops_request_log_link_html',
 						'type' => 'html',
-						'html' => '<p><a href="' . esc_url( $log_url ) . '" class="button button-secondary">' . esc_html__( 'Open request log for this form', 'gravity-forms-tops' ) . '</a></p>',
+						'html' => $this->user_can_view_tops_request_log()
+							? '<p><a href="' . esc_url( $log_url ) . '" class="button button-secondary">' . esc_html__( 'Open request log for this form', 'gravity-forms-tops' ) . '</a></p>'
+							: '<p class="description">' . esc_html__( 'Opening the request log requires permission to view Gravity Forms entries.', 'gravity-forms-tops' ) . '</p>',
 					),
 				),
 			),
@@ -1545,7 +1572,8 @@ class GF_Tops_Addon extends GFAddOn {
 		if ( 'custom' === $env ) {
 			$custom = (string) rgar( $plugin, 'custom_api_base' );
 			if ( $custom !== '' ) {
-				// Credentials travel in the query string and XML body, so never send them over plain HTTP.
+				// Credentials travel in the query string and XML body, so always start over HTTPS. (Redirects are still
+				// followed, as for the built-in hosts; see plan.md before disabling them.)
 				return trailingslashit( set_url_scheme( esc_url_raw( $custom ), 'https' ) );
 			}
 		}
@@ -1767,7 +1795,8 @@ class GF_Tops_Addon extends GFAddOn {
 		if ( null !== $cached ) {
 			return $cached;
 		}
-		if ( $this->is_lookup_paused( $settings ) || true !== $this->is_known_make_key( $settings, $make_key ) ) {
+		if ( $this->is_lookup_paused( $settings ) || false !== get_transient( $this->get_model_cooldown_key( $settings, $make_key ) )
+			|| true !== $this->is_known_make_key( $settings, $make_key ) ) {
 			return null;
 		}
 
@@ -1781,7 +1810,8 @@ class GF_Tops_Addon extends GFAddOn {
 		$data = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( $code < 200 || $code >= 300 || ! is_array( $data ) || isset( $data['towXResponse']['Errors'] ) ) {
 			$this->log( 'GetModelsForMake failed (HTTP ' . $code . ').' );
-			$this->note_lookup_failure( $settings, 'GetModelsForMake', sprintf( 'HTTP %d', $code ) );
+			/* translators: %d: HTTP status code */
+			$this->note_model_failure( $settings, $make_key, $code, sprintf( __( 'TowX HTTP %d', 'gravity-forms-tops' ), $code ) );
 			return null;
 		}
 
@@ -1854,15 +1884,16 @@ class GF_Tops_Addon extends GFAddOn {
 	 * @param array  $settings Runtime add-on form settings.
 	 * @param string $verb     TowX verb.
 	 * @param string $message  Error detail (shown to admins only).
+	 * @param bool   $pause    Pause all lookups for these credentials (outages only).
 	 */
-	protected function note_lookup_failure( array $settings, $verb, $message ) {
+	protected function note_lookup_failure( array $settings, $verb, $message, $pause = true ) {
 		/**
-		 * Seconds to pause TowX vehicle lookups after a failure. Return 0 to disable.
+		 * Seconds to pause TowX vehicle lookups after an outage (transport error, timeout, 5xx, 429). Return 0 to disable.
 		 *
 		 * @param int    $seconds Default 90.
 		 * @param string $verb    TowX verb that failed.
 		 */
-		$seconds = max( 0, (int) apply_filters( 'gf_tops_lookup_failure_backoff', 90, $verb ) );
+		$seconds = $pause ? max( 0, (int) apply_filters( 'gf_tops_lookup_failure_backoff', 90, $verb ) ) : 0;
 		if ( $seconds > 0 ) {
 			set_transient( $this->get_lookup_backoff_key( $settings ), 1, $seconds );
 		}
@@ -1882,6 +1913,34 @@ class GF_Tops_Addon extends GFAddOn {
 			$status = array_slice( $status, -20, null, true );
 		}
 		update_option( 'gf_tops_lookup_status', $status, false );
+	}
+
+	/**
+	 * GetModelsForMake failure. Outages (no response, 429, 5xx) pause all lookups; any other TowX error only
+	 * puts this make on a short cooldown, so a visitor choosing one problem make cannot pause lookups for
+	 * everyone.
+	 *
+	 * @param array  $settings Runtime add-on form settings.
+	 * @param string $make_key TowX make key.
+	 * @param int    $code     HTTP status (0 when there was no response).
+	 * @param string $message  Error detail (shown to admins only).
+	 */
+	protected function note_model_failure( array $settings, $make_key, $code, $message ) {
+		$code   = (int) $code;
+		$outage = 0 === $code || 429 === $code || $code >= 500;
+		$this->note_lookup_failure( $settings, 'GetModelsForMake', $message, $outage );
+		if ( ! $outage ) {
+			set_transient( $this->get_model_cooldown_key( $settings, $make_key ), 1, 5 * MINUTE_IN_SECONDS );
+		}
+	}
+
+	/**
+	 * @param array  $settings Runtime add-on form settings.
+	 * @param string $make_key TowX make key.
+	 * @return string
+	 */
+	protected function get_model_cooldown_key( array $settings, $make_key ) {
+		return $this->get_vehicle_list_cache_key( $settings, 'GetModelsForMake-failed', (string) $make_key );
 	}
 
 	/**
@@ -1991,14 +2050,16 @@ class GF_Tops_Addon extends GFAddOn {
 			$this->log( 'TowX ' . $verb . ' unexpected JSON.' );
 			$detail = is_array( $data ) && isset( $data['towXResponse']['Errors'] )
 				? $this->parse_towx_test_errors_for_display( $data )['summary']
-				: sprintf( 'HTTP %d', (int) wp_remote_retrieve_response_code( $response ) );
+				/* translators: %d: HTTP status code */
+				: sprintf( __( 'TowX HTTP %d', 'gravity-forms-tops' ), (int) wp_remote_retrieve_response_code( $response ) );
 			$this->note_lookup_failure( $form_settings, $verb, $detail );
 			return null;
 		}
 
 		$key_name = ( 'GetMakes' === $verb ) ? 'Makes' : 'Colors';
 		if ( ! isset( $data['towXResponse']['Data'][ $key_name ] ) || ! is_array( $data['towXResponse']['Data'][ $key_name ] ) ) {
-			$this->note_lookup_failure( $form_settings, $verb, sprintf( 'No %s list in the TowX response.', $key_name ) );
+			/* translators: %s: TowX list name, "Makes" or "Colors" */
+			$this->note_lookup_failure( $form_settings, $verb, sprintf( __( 'TowX returned no %s list.', 'gravity-forms-tops' ), $key_name ) );
 			return null;
 		}
 
@@ -2075,11 +2136,13 @@ class GF_Tops_Addon extends GFAddOn {
 		}
 
 		$unavailable = __( 'Vehicle models are temporarily unavailable. Please try again in a minute.', 'gravity-forms-tops' );
-		$known       = $this->is_lookup_paused( $settings ) ? null : $this->is_known_make_key( $settings, $make_key );
+		$cooling     = false !== get_transient( $this->get_model_cooldown_key( $settings, $make_key ) );
+		$known       = ( $cooling || $this->is_lookup_paused( $settings ) ) ? null : $this->is_known_make_key( $settings, $make_key );
 		if ( true !== $known ) {
 			wp_send_json_success(
 				array(
 					'models' => array(),
+					'code'   => null === $known ? 'unavailable' : 'unknown_make',
 					'error'  => null === $known ? $unavailable : __( 'Unknown vehicle make. Reload the page and try again.', 'gravity-forms-tops' ),
 				)
 			);
@@ -2118,7 +2181,8 @@ class GF_Tops_Addon extends GFAddOn {
 
 		if ( $http_code < 200 || $http_code >= 300 ) {
 			$this->log( 'GetModelsForMake HTTP ' . $http_code );
-			$this->note_lookup_failure( $settings, 'GetModelsForMake', sprintf( 'HTTP %d', $http_code ) );
+			/* translators: %d: HTTP status code */
+			$this->note_model_failure( $settings, $make_key, $http_code, sprintf( __( 'TowX HTTP %d', 'gravity-forms-tops' ), $http_code ) );
 			$payload = array(
 				'models' => array(),
 				'error'  => sprintf(
@@ -2135,7 +2199,7 @@ class GF_Tops_Addon extends GFAddOn {
 
 		if ( ! is_array( $data ) ) {
 			$this->log( 'GetModelsForMake invalid JSON.' );
-			$this->note_lookup_failure( $settings, 'GetModelsForMake', 'Invalid JSON.' );
+			$this->note_model_failure( $settings, $make_key, $http_code, __( 'TowX did not return valid JSON.', 'gravity-forms-tops' ) );
 			$payload = array(
 				'models' => array(),
 				'error'  => __( 'TowX did not return valid JSON.', 'gravity-forms-tops' ),
@@ -2150,7 +2214,7 @@ class GF_Tops_Addon extends GFAddOn {
 			$parsed  = $this->parse_towx_test_errors_for_display( $data );
 			$summary = $parsed['summary'];
 			$this->log( 'GetModelsForMake TowX error: ' . $summary );
-			$this->note_lookup_failure( $settings, 'GetModelsForMake', $summary );
+			$this->note_model_failure( $settings, $make_key, $http_code, $summary );
 			$payload = array(
 				'models' => array(),
 				'error'  => $summary,
@@ -2360,6 +2424,8 @@ class GF_Tops_Addon extends GFAddOn {
 				wp_send_json_error( array( 'message' => __( 'Form not found.', 'gravity-forms-tops' ) ), 200 );
 			}
 			$stored = $this->get_runtime_form_settings( $form );
+			$saved_session = (string) rgar( $stored, 'tops_session_id' );
+			$saved_authkey = (string) rgar( $stored, 'tops_auth_key' );
 			// If the settings screen echoed the stored ciphertext into the masked input, treat it as "use saved".
 			if ( GF_Tops_Secrets::is_encrypted( $authkey ) ) {
 				$authkey = '';
@@ -2485,7 +2551,8 @@ class GF_Tops_Addon extends GFAddOn {
 		}
 
 		$count = count( $data['towXResponse']['Data']['Makes'] );
-		if ( $form_id > 0 ) {
+		// The checklist tick means "the saved credentials work", so only record tests of the saved values.
+		if ( $form_id > 0 && isset( $saved_session, $saved_authkey ) && $session === $saved_session && $authkey === $saved_authkey ) {
 			$tests = get_option( 'gf_tops_auth_test_ok', array() );
 			$tests = is_array( $tests ) ? $tests : array();
 			$tests[ $form_id ] = time();

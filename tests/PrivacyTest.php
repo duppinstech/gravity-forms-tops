@@ -18,58 +18,94 @@ class PrivacyTest extends TestCase {
 		$GLOBALS['gf_tops_test_entry_search'] = null;
 	}
 
-	private function row( $id ) {
+	private function row( $id, $entry_id = 41, $xml = '<Password>***</Password>' ) {
 		return (object) array(
 			'id'                   => $id,
 			'created_at'           => '2026-10-01 12:00:00',
-			'entry_id'             => 41,
+			'entry_id'             => $entry_id,
 			'status'               => 'success',
 			'call_key'             => 'CALL-1',
-			'request_xml_redacted' => '<Password>***</Password>',
+			'request_xml_redacted' => $xml,
 			'response_raw'         => '<towXResponse/>',
 		);
 	}
 
-	public function test_entries_are_found_by_email_across_all_fields() {
-		$this->assertSame( array( 41, 42 ), GF_Tops_Privacy::find_entry_ids( 'person@example.com' ) );
+	public function test_entries_are_found_by_email_in_every_entry_status() {
+		$ids = GF_Tops_Privacy::find_entry_ids( 'person@example.com' );
+
+		$this->assertSame( array( 41, 42 ), $ids );
 		$this->assertSame( array( array( 'value' => 'person@example.com' ) ), $GLOBALS['gf_tops_test_entry_search']['field_filters'] );
+		$this->assertSame( 'trash', $GLOBALS['gf_tops_test_entry_search']['status'], 'Spam and trash entries are searched too.' );
 		$this->assertSame( array(), GF_Tops_Privacy::find_entry_ids( 'not-an-email' ) );
 	}
 
-	public function test_export_returns_rows_for_entries_or_email_with_prepared_values() {
-		$GLOBALS['wpdb']->results = array( $this->row( 7 ) );
+	public function test_exact_email_matching() {
+		$this->assertTrue( GF_Tops_Request_Log::text_contains_email( '<DispatchNotes>Customer Email: bob@x.com Owner</DispatchNotes>', 'bob@x.com' ) );
+		$this->assertTrue( GF_Tops_Request_Log::text_contains_email( 'Email: BOB@X.COM.', 'bob@x.com' ), 'Case-insensitive; trailing sentence dot is fine.' );
+		$this->assertFalse( GF_Tops_Request_Log::text_contains_email( 'Customer Email: jimbob@x.com', 'bob@x.com' ) );
+		$this->assertFalse( GF_Tops_Request_Log::text_contains_email( 'Customer Email: bob@x.com.au', 'bob@x.com' ) );
+		$this->assertFalse( GF_Tops_Request_Log::text_contains_email( 'Customer Email: bob@x.co', 'bob@x.com' ) );
+		$this->assertFalse( GF_Tops_Request_Log::text_contains_email( 'Customer Email: bob+tow@x.com', 'b+tow@x.com' ) );
+	}
 
-		$out = GF_Tops_Privacy::export_personal_data( 'per_son%@example.com', 1 );
+	public function test_export_returns_only_confirmed_rows() {
+		$GLOBALS['wpdb']->results = array(
+			$this->row( 7 ),
+			$this->row( 8, 99, '<DispatchNotes>Customer Email: jimbob@example.com</DispatchNotes>' ),
+			$this->row( 9, 99, '<DispatchNotes>Customer Email: bob@example.com</DispatchNotes>' ),
+		);
+		$GLOBALS['gf_tops_test_entries'] = array( array( 'id' => 41 ) );
+
+		$out = GF_Tops_Privacy::export_personal_data( 'bob@example.com', 1 );
 
 		$this->assertTrue( $out['done'] );
-		$this->assertSame( 'gf-tops-log-7', $out['data'][0]['item_id'] );
-		$this->assertSame( 'CALL-1', $out['data'][0]['data'][3]['value'] );
+		$this->assertSame( array( 'gf-tops-log-7', 'gf-tops-log-9' ), array_column( $out['data'], 'item_id' ), 'jimbob@ row is not exported.' );
 
 		$sql = $GLOBALS['wpdb']->queries[0];
-		$this->assertStringContainsString( 'entry_id IN (41,42)', $sql );
-		$this->assertStringContainsString( "LIKE '%per\\\\_son\\\\%@example.com%'", $sql, 'LIKE wildcards in the email are escaped.' );
-		$this->assertStringContainsString( 'LIMIT 50 OFFSET 0', $sql );
+		$this->assertStringContainsString( 'entry_id IN (41)', $sql );
+		$this->assertStringContainsString( 'LIMIT 5000', $sql );
+	}
+
+	public function test_like_wildcards_in_the_email_are_escaped() {
+		GF_Tops_Privacy::export_personal_data( 'per_son%@example.com', 1 );
+		$this->assertStringContainsString( "LIKE '%per\\\\_son\\\\%@example.com%'", $GLOBALS['wpdb']->queries[0] );
 	}
 
 	public function test_export_paginates() {
-		$GLOBALS['wpdb']->results = array_fill( 0, GF_Tops_Privacy::ROWS_PER_PAGE, $this->row( 1 ) );
-		$out                      = GF_Tops_Privacy::export_personal_data( 'person@example.com', 2 );
+		$GLOBALS['wpdb']->results = array_fill( 0, 120, $this->row( 1 ) );
 
-		$this->assertFalse( $out['done'] );
-		$this->assertStringContainsString( 'OFFSET 50', $GLOBALS['wpdb']->queries[0] );
+		$page2 = GF_Tops_Privacy::export_personal_data( 'person@example.com', 2 );
+		$this->assertCount( 50, $page2['data'] );
+		$this->assertFalse( $page2['done'] );
+
+		$page3 = GF_Tops_Privacy::export_personal_data( 'person@example.com', 3 );
+		$this->assertCount( 20, $page3['data'] );
+		$this->assertTrue( $page3['done'] );
 	}
 
-	public function test_erase_deletes_matching_rows() {
-		$GLOBALS['wpdb']->affected = 3;
-		$out                       = GF_Tops_Privacy::erase_personal_data( 'person@example.com', 1 );
+	public function test_erase_deletes_only_confirmed_row_ids() {
+		$GLOBALS['wpdb']->results  = array(
+			$this->row( 7 ),
+			$this->row( 8, 99, 'Customer Email: jimbob@example.com' ),
+		);
+		$GLOBALS['wpdb']->affected = 1;
+
+		$out = GF_Tops_Privacy::erase_personal_data( 'bob@example.com', 1 );
 
 		$this->assertTrue( $out['items_removed'] );
 		$this->assertTrue( $out['done'] );
-		$this->assertStringStartsWith( 'DELETE FROM `wp_gf_tops_request_log` WHERE', $GLOBALS['wpdb']->queries[0] );
+		$this->assertNotEmpty( $out['messages'], 'Explains rows without the email cannot be matched.' );
+		$this->assertSame( 'DELETE FROM `wp_gf_tops_request_log` WHERE id IN (7)', end( $GLOBALS['wpdb']->queries ) );
+	}
 
-		$GLOBALS['wpdb']->affected = 0;
-		$none                      = GF_Tops_Privacy::erase_personal_data( 'nobody@example.com', 1 );
-		$this->assertFalse( $none['items_removed'] );
+	public function test_erase_with_no_matches_runs_no_delete() {
+		$GLOBALS['wpdb']->results        = array( $this->row( 8, 99, 'Customer Email: jimbob@example.com' ) );
+		$GLOBALS['gf_tops_test_entries'] = array();
+
+		$out = GF_Tops_Privacy::erase_personal_data( 'bob@example.com', 1 );
+
+		$this->assertFalse( $out['items_removed'] );
+		$this->assertCount( 1, $GLOBALS['wpdb']->queries, 'Only the candidate SELECT ran.' );
 	}
 
 	public function test_invalid_email_touches_nothing() {
@@ -90,6 +126,7 @@ class PrivacyTest extends TestCase {
 		$this->assertArrayHasKey( 'gravity-forms-tops', GF_Tops_Privacy::register_eraser( array() ) );
 		$text = GF_Tops_Privacy::policy_text();
 		$this->assertStringContainsString( 'TowXchange', $text );
-		$this->assertStringContainsString( 'erase', $text );
+		$this->assertStringContainsString( 'plugin is deleted', $text );
+		$this->assertStringNotContainsString( 'never included', $text );
 	}
 }
