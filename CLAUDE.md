@@ -19,6 +19,7 @@ Gravity Forms TOPS / TowX Integration is a WordPress plugin maintained by Duppin
 - Secret handling: `includes/class-gf-tops-secrets.php` (`get_form_settings()` returns stored ciphertext; use `get_runtime_form_settings()` only to call TowX)
 - Entry mapping: `includes/class-gf-tops-entry.php`
 - Release ZIP: `.github/workflows/release.yml`, triggered by `v*` tags; package contents come from `bin/build-zip.sh`.
+- Updater: `includes/class-gf-tops-github-updater.php` is the **reference implementation** of `docs/github-updater-standard.md`, copied into other Duppins Technology plugins. Behavior changes go through the standard: update the doc and tests, bump `STANDARD_VERSION`.
 - CI: `.github/workflows/ci.yml` (lint, PHPCS, PHPUnit on PHP 7.4–8.3).
 - Step-by-step playbooks: `.claude/playbooks/` (bug fix, feature change, release).
 - Requirements: WordPress 6.2+, PHP 7.4+, and active Gravity Forms.

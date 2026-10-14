@@ -3,7 +3,7 @@
  * Plugin Name:       Gravity Forms TOPS / TowX Integration
  * Plugin URI:        https://github.com/duppinstech/gravity-forms-tops
  * Description:       Connect Gravity Forms to the TowX / TOPS (TOPSLink) API with configurable field mapping and dynamic vehicle options.
- * Version:           1.4.0
+ * Version:           1.4.1
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            Duppins Technology
@@ -11,6 +11,7 @@
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       gravity-forms-tops
+ * Update URI:        https://github.com/duppinstech/gravity-forms-tops
  *
  * @package GF_Tops
  */
@@ -19,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GF_TOPS_VERSION', '1.4.0' );
+define( 'GF_TOPS_VERSION', '1.4.1' );
 define( 'GF_TOPS_FILE', __FILE__ );
 define( 'GF_TOPS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'GF_TOPS_URL', plugin_dir_url( __FILE__ ) );
@@ -27,7 +28,17 @@ define( 'GF_TOPS_URL', plugin_dir_url( __FILE__ ) );
 require_once GF_TOPS_PATH . 'includes/class-gf-tops-constants.php';
 require_once GF_TOPS_PATH . 'includes/class-gf-tops-github-updater.php';
 
-add_action( 'admin_init', array( 'GF_Tops_GitHub_Updater', 'init' ), 5 );
+// Updates from GitHub Releases. Booted at load (not admin_init) so WP-Cron and background auto-updates see releases.
+// Disable with define( 'GF_TOPS_DISABLE_GITHUB_UPDATER', true ).
+GF_Tops_GitHub_Updater::boot(
+	array(
+		'file'    => GF_TOPS_FILE,
+		'version' => GF_TOPS_VERSION,
+		'owner'   => 'duppinstech',
+		'repo'    => 'gravity-forms-tops',
+		'prefix'  => 'gf_tops',
+	)
+);
 
 /**
  * TLS/SNI workarounds for TowX (OpenSSL 3 + cURL). Runs before Gravity Forms loads.

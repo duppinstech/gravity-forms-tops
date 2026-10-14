@@ -26,6 +26,13 @@ These need WordPress, a licensed Gravity Forms install and authorized QA TowX cr
 - [ ] **Release:** after the checks pass, tag `v1.4.0` on `main`, confirm the Release ZIP workflow succeeded, inspect `gravity-forms-tops.zip`, then update production sites via Plugins → Updates.
 - [x] **Credential rotation:** not needed (confirmed by the owner, 2026-10-14).
 
+## Deployment checks for 1.4.1 (updater standard)
+
+- [ ] On a site running 1.4.0, update to 1.4.1 from Plugins → Updates. 1.4.0's old updater delivers it; every later update uses the new one.
+- [ ] After updating: the plugin row shows **Enable auto-updates**, and **View details** shows the release notes with the Requirements block.
+- [ ] Dashboard → Updates → **Check again** finds no update (current) without errors; `wp option get gf_tops_github_release --format=json` (or the `wp_options` / `wp_sitemeta` row) shows a stored ETag.
+- [ ] Port the standard to Landing Page Manager, Landing Page Manager Pro and Radius SEO with the porting prompt (Pro blocked until its release delivery is decided; its repository is private).
+
 ## Product decisions (2026-10-14)
 
 - **Request-log retention:** rows are kept indefinitely (until the plugin is uninstalled). No scheduled cleanup.
