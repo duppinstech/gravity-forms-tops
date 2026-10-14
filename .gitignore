@@ -9,3 +9,6 @@ vendor/
 *.tar.gz
 CLAUDE.local.md
 .claude/settings.local.json
+build/
+.phpunit.result.cache
+.phpcs-cache
