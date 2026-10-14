@@ -4,58 +4,117 @@ Tags: gravity forms, tops, towx, towing, api
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Connect Gravity Forms to the TowX / TOPS (TOPSLink) API with per-form field mapping, dynamic vehicle lists, and optional connection testing.
+Send Gravity Forms tow and roadside requests straight into TowX / TOPS dispatch, with live vehicle make, model and color lists.
 
 == Description ==
 
-This plugin registers a Gravity Forms add-on that:
+This plugin connects a Gravity Forms request form on your WordPress site to your TowX / TOPS (TOPSLink) dispatch system:
 
-* Submits tow requests using TowX **Create Call** XML.
-* Maps form fields to TowX data via the Gravity Forms **field map** UI (no hard-coded field IDs).
-* Optionally loads **makes**, **colors**, and **models** from TowX JSON endpoints.
-* Masks **password** and **authentication key** in the form settings screen; saved values are preserved when those fields are left blank.
-* Provides a **Test authentication** action (GetMakes) with expanded failure details (HTTP status, response body excerpt, TowX error JSON).
-* **Request log** per form (Forms → TOPS log) with redacted XML, responses, and **Resend Create Call** after fixing issues.
-* Sends **Create Call** XML to the same TowX host as JSON (Production vs QA) from **Forms → Settings → TOPS**—no per-form URL override.
+* **Creates the call in dispatch.** Each submitted request is sent to TowX as a **Create Call**, and the visitor's confirmation shows the TowX Call ID.
+* **Live vehicle lists.** Make and Color drop-downs are filled from TowX, and choosing a make loads that make's models.
+* **Your form, your fields.** You map your own form fields to TowX fields; nothing is hard-coded.
+* **Request log.** Every attempt is recorded under **Forms → TOPS log** with the response from TowX, and failed requests can be resent after you fix the cause.
+* **Safe credentials.** The TowX password and authentication key are encrypted in the database and never shown again after saving.
+* **Setup checklist and connection test** on each form's TOPS settings.
+* **Privacy tools.** Suggested privacy-policy text, and request-log data is included in WordPress's personal-data export and erase tools.
 
-**Requirements:** Gravity Forms (licensed copy per your site). TowX / TOPS credentials from your provider.
+**Requirements:** WordPress 6.2+, PHP 7.4+, Gravity Forms 2.5+ (licensed), and TowX / TOPS API credentials from TowXchange.
+
+This plugin is not affiliated with or endorsed by Rocketgenius (Gravity Forms) or TowXchange (TowX / TOPS). Product names are used only to describe compatibility.
 
 == Installation ==
 
-1. Upload the `gravity-forms-tops` folder to `/wp-content/plugins/`.
-2. Activate the plugin through the **Plugins** screen.
-3. Open **Forms → Settings → TOPS** for global options (API environment, notifications).
-4. Edit each tow form → **Settings → TOPS** to enable the integration, enter credentials, map fields, and save.
+1. Install `gravity-forms-tops.zip` from **Plugins → Add New → Upload Plugin**, or upload the `gravity-forms-tops` folder to `/wp-content/plugins/`.
+2. Activate **Gravity Forms TOPS / TowX Integration**.
+3. Follow the setup guide below.
+
+= Setup guide =
+
+1. **Get TowX API credentials.** Ask TowXchange (or your TOPS administrator) for API access. You need four values: **User ID**, **Password**, **Session ID** and **Authentication key**. Ask for **QA (test) access** as well, so you can test without creating real tow calls.
+2. **Choose the environment.** Go to **Forms → Settings → TOPS** and set **API environment** to **QA** while you test. Optionally enter an **Error notification email** and a **contact line** shown to visitors if TowX cannot take a request (for example your dispatch phone number).
+3. **Build the form.** Your request form needs fields for: pickup location and destination (Address, Single Line Text or Paragraph), caller name (Name or Text), caller phone (Phone or Text), tag number and tag state, vehicle year, and **Make, Model and Color as Drop Down fields** (the plugin fills their choices from TowX). Optional: dispatch notes, bill-to account, customer email, owner name, key location and call reason are added to the dispatch notes.
+4. **Enable and connect.** Open the form → **Settings → TOPS**. Tick **Enable integration**, enter the four credentials, click **Save settings**, then **Test authentication**. It should report the number of vehicle makes found.
+5. **Map the fields.** Under **Field map**, choose the form field for each TowX field and save. The **Setup checklist** at the top of the tab shows what is still missing.
+6. **Use a message confirmation.** The TowX result (Call ID, or the error and your contact line) is added to Gravity Forms **Text** confirmations. Redirect confirmations do not show it.
+7. **Test on QA.** Submit the form. You should see a Call ID in the confirmation and a **Success** row under **Forms → TOPS log**.
+8. **Go live.** Switch **API environment** to **Production**. From then on, every submission creates a real tow call.
+
+= Page caching =
+
+The model drop-down uses a security token that expires after 12–24 hours. Exclude tow-request pages from full-page caching, or cache them for less than 12 hours. Developers who cannot do either can use the `gf_tops_models_require_nonce` filter.
 
 == Frequently Asked Questions ==
 
-= WordPress.org rejected my plugin name or slug — why? =
+= The Make and Color drop-downs are empty or show my own placeholder choices =
 
-The Plugin Directory restricts starting certain trademark-related terms (including variations of “Gravity Forms”). This repo name is fine for **GitHub**; if you submit to WordPress.org later, rename the display name / slug per their guidelines (for example a neutral prefix plus “for Gravity Forms”) while keeping this codebase folder name if you prefer.
+Run **Test authentication** on the form's TOPS settings. Check that Make and Color are **Drop Down** fields mapped in the **Field map**, and that the **API environment** matches your credentials (QA credentials do not work in Production). If TowX is unreachable, the **Setup checklist** shows the last failed lookup, and the form keeps its saved choices until TowX answers again.
+
+= Models never load, or visitors see "Vehicle models could not be loaded" =
+
+Usually a page cache is serving an expired token (see **Page caching**) or TowX was briefly unreachable; after a failure the plugin waits about 90 seconds before asking TowX again. Turn on **Browser console** under **Forms → Settings → TOPS** to see details in the browser's developer console (F12).
+
+= What do the request log statuses mean? =
+
+* **Success** – TowX returned a Call ID.
+* **API error** – TowX rejected the request. Check the credentials, the environment, and the error shown on the row.
+* **HTTP error** – TowX answered with an error status (for example 500).
+* **Transport error** – the site could not reach TowX (DNS, TLS or timeout). Contact your host if it continues.
+* **No Call ID** – TowX answered without a Call ID. Check in TOPS whether the call was created **before** resending, because a resend creates a new call.
+
+= The confirmation does not show the Call ID =
+
+The result is only added to **Text** (message) confirmations, not redirects, and only when the integration is enabled for that form.
+
+= I do not receive error emails =
+
+Check **Error notification email** under **Forms → Settings → TOPS** and that your site can send email. With **Logging** turned on, the PHP error log records lines starting with `[GF TOPS]`, including when an email was skipped.
 
 = Where are my TowX password and key stored? =
 
-In Gravity Forms form meta for that form. Current versions encrypt the password and authentication key at rest (Gravity Forms AES-256-CTR + HMAC). Anyone with both database access and `wp-config.php` could still decrypt them. Restrict who can edit forms and use HTTPS for wp-admin.
+In Gravity Forms form meta for that form, encrypted with Gravity Forms' built-in encryption (AES-256-CTR + HMAC). User ID and Session ID are stored as entered. Anyone with both database access and `wp-config.php` could still decrypt the encrypted values, so restrict who can edit forms and use HTTPS for wp-admin.
 
-= Can I use different field IDs on different sites? =
+= Who can see the request log? =
 
-Yes. Configure the field map separately on each site.
+Users who can view Gravity Forms entries. Resending requires permission to edit entries. Log rows contain customer details from the request, with the TowX password, Session ID and authentication key removed.
+
+= What should I send when asking for support? =
+
+Plugin, WordPress, PHP and Gravity Forms versions; the API environment; the form ID, entry ID and request-log row; the status and error text; and the **Test authentication** result. **Never send** your TowX password, Session ID or authentication key.
+
+== External services ==
+
+This plugin connects to:
+
+* **TowXchange (TowX / TOPS)** – `api.towxchange.net` (Production) or `apiqa.towxchange.net` (QA), or the custom address you enter. Each submitted request (name, phone, locations, vehicle, tag, notes) and your TowX credentials are sent to create the call, and vehicle lists are requested to fill the drop-downs. See TowXchange's terms and privacy policy.
+* **GitHub** – `api.github.com` and `github.com` are checked for plugin updates and to download them. No visitor data is sent.
+
+== Privacy ==
+
+Request-log rows (including customer details from each request) are stored in your site's database until they are erased with **Tools → Erase Personal Data** or the plugin is deleted. Failure notification emails include the request details. Suggested privacy-policy text is added under **Settings → Privacy → Policy Guide**.
 
 == Changelog ==
 
+= 1.5.0 =
+* **Visitors:** The Model drop-down shows "Loading models…" and a clear message if models cannot be loaded or none exist, instead of going blank. The message is announced to screen readers.
+* **Admins:** New **Setup checklist** on each form's TOPS settings (credentials, connection test, field mapping, contact line, environment, and the last failed TowX lookup).
+* **Admins:** **Settings** link on the Plugins screen; clearer field-map labels; the request log shows what actually happened when you resend.
+* **Privacy:** Suggested privacy-policy text, and request-log rows are included in **Tools → Export / Erase Personal Data**.
+* **Security:** The request log now requires permission to view Gravity Forms entries (resending requires permission to edit entries). A custom API address is always called over HTTPS, with a warning if it is not a TowX address. The API address is no longer printed in public page source.
+* **Reliability:** When TowX is unreachable, vehicle lookups pause for about 90 seconds instead of slowing every page view.
+* **Accessibility:** The ⚡ marker on TowX-filled fields has proper screen-reader text.
+* **Translations:** Translation template (`languages/gravity-forms-tops.pot`) included.
+* **Releases:** Signed build provenance and stricter release checks.
+
 = 1.4.1 =
-* **Updates:** New shared Duppins Technology GitHub updater (standard v1.0.0, see `docs/github-updater-standard.md` in the repository).
-* **Fix:** Update checks run from WP-Cron and background auto-updates too; previously new releases were only noticed on wp-admin page loads.
-* **Fix:** The plugin is listed as up to date when current, so the core auto-update toggle works.
-* Adds the `Update URI` header so WordPress.org never offers a same-slug plugin over this one; same-slug entries from other sources are replaced.
-* GitHub checks are cached for 6 hours, use conditional requests (unchanged releases do not count against GitHub's rate limit), back off for 1 hour on errors, and wait for GitHub's rate-limit reset.
-* Only installs the `gravity-forms-tops.zip` asset from this repository's own GitHub releases. "View details" and the auto-update checks use the release's own WordPress / PHP requirements (written into the release notes by the release workflow).
-* Keeps the installed folder name when updating, so a site that installed the plugin under another folder name stays active.
-* Dashboard → Updates → **Check again** re-checks GitHub (at most once a minute, never during a rate-limit wait).
+* **Updates:** Update checks now also run in the background, so new versions appear (and auto-updates work) without someone visiting wp-admin.
+* **Updates:** The **Enable auto-updates** toggle works for this plugin.
+* **Updates:** Only official release packages of this plugin are installed, and the update details show each release's own WordPress / PHP requirements.
+* **Updates:** Sites that installed the plugin under a different folder name stay active after updating.
+* Fewer requests to GitHub, and **Dashboard → Updates → Check again** re-checks right away.
 
 = 1.4.0 =
 * **Security:** TowX failure emails and the short-lived confirmation transient now contain the *redacted* Create Call XML. Earlier versions emailed the TowX password, Session ID and authentication key in plain text.
@@ -136,6 +195,9 @@ Yes. Configure the field map separately on each site.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.5.0 =
+The request log now requires the Gravity Forms "view entries" permission (and "edit entries" to resend). Users who could only edit forms lose access to the log.
 
 = 1.4.0 =
 Security update: stops TowX credentials from being included in failure notification emails. If error emails were enabled on an earlier version, rotate the TowX password and authentication key.

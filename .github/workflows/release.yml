@@ -65,7 +65,7 @@ jobs:
           composer test
 
       - name: Regenerate translation template
-        run: wp i18n make-pot . languages/gravity-forms-tops.pot --slug=gravity-forms-tops --domain=gravity-forms-tops --exclude=vendor,tests,bin,build,docs,node_modules
+        run: wp i18n make-pot . languages/gravity-forms-tops.pot --slug=gravity-forms-tops --domain=gravity-forms-tops --exclude=vendor,tests,bin,build,docs,node_modules --headers='{"Report-Msgid-Bugs-To":"https://github.com/duppinstech/gravity-forms-tops/issues"}'
 
       - name: Create gravity-forms-tops.zip
         run: bash bin/build-zip.sh
