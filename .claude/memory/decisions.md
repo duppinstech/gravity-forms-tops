@@ -11,3 +11,4 @@
 - 2026-10-14: Request-log rows are retained indefinitely (until uninstall); do not add scheduled cleanup without a new decision.
 - 2026-10-14: Visitors see TowX / transport error text in the error confirmation so they can report it (leaning decision; per-form custom error text can replace it).
 - 2026-10-14: The ⚡ marker on public Make / Model / Color labels stays.
+- 2026-10-14: Every change goes through the department review board (security, legal, finance, product, QA, docs/support agents) after development and before merge or release.

@@ -32,6 +32,21 @@ Gravity Forms TOPS / TowX Integration is a WordPress plugin maintained by Duppin
 - For a release, bump the version in the plugin header, `GF_TOPS_VERSION` and `readme.txt` Stable tag (the release workflow fails on a mismatch), add a changelog entry, and inspect package contents; tagging `v*` causes GitHub Actions to create the plugin ZIP.
 - Keep author and ownership metadata aligned with Duppins Technology. Client names describe intended use only, not ownership.
 
+## Review board
+
+After development on any change is finished, and before merging, tagging or releasing, run `/review-board` (`.claude/commands/review-board.md`). It runs the department reviewers in `.claude/agents/` in parallel and consolidates one report:
+
+| Agent | Department | Reviews |
+|---|---|---|
+| `security-reviewer` | Security | Auth, nonces, escaping, credentials, HTTP/TLS, update integrity, uninstall |
+| `legal-reviewer` | Legal and compliance | License and copyright consistency, dependency licenses, trademarks, privacy and personal data, legal text |
+| `finance-reviewer` | Finance | Pricing and licensing-model impact, operating cost (API calls, storage), support burden, revenue risk |
+| `product-reviewer` | Product and UX | Fit with `intent.md` and recorded decisions, admin and visitor experience, accessibility, i18n, upgrade impact |
+| `qa-reviewer` | QA and release | Runs `composer check`, test coverage, compatibility, release readiness, manual test plan |
+| `docs-support-reviewer` | Docs and support | Docs match behavior, stale references, troubleshooting notes |
+
+Reviewers are read-only. Fix "must fix" items, take owner decisions to the owner, and record decisions in `.claude/memory/decisions.md`.
+
 ## Local-only settings
 
 Use `CLAUDE.local.md` or `.claude/settings.local.json` for personal machine-specific guidance. Both are ignored by Git. Never put credentials in them if the workspace may be shared or backed up.
