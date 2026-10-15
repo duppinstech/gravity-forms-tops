@@ -19,6 +19,16 @@ class GF_Tops_Request_Log {
 	const MAX_RESPONSE_BYTES = 262144;
 
 	/**
+	 * Default days to keep log rows (Forms → Settings → TOPS → Keep request log for).
+	 */
+	const DEFAULT_RETENTION_DAYS = 90;
+
+	/**
+	 * WP-Cron hook for the daily cleanup.
+	 */
+	const PURGE_HOOK = 'gf_tops_purge_request_log';
+
+	/**
 	 * @return string
 	 */
 	public static function table_name() {
@@ -291,6 +301,34 @@ class GF_Tops_Request_Log {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Only %d placeholders, one per row ID; every value is passed to prepare().
 			$result = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE id IN (' . implode( ',', array_fill( 0, count( $chunk ), '%d' ) ) . ')', $values ) );
 			$deleted += is_numeric( $result ) ? (int) $result : 0;
+		}
+		return $deleted;
+	}
+
+	/**
+	 * Delete rows older than a number of days, in batches.
+	 *
+	 * @param int $days        Rows created more than this many days ago are deleted (must be at least 1).
+	 * @param int $batch       Rows per DELETE.
+	 * @param int $max_batches Safety limit per run (the next daily run continues).
+	 * @return int Rows deleted.
+	 */
+	public static function purge_older_than( $days, $batch = 1000, $max_batches = 50 ) {
+		global $wpdb;
+		$days = (int) $days;
+		if ( $days < 1 ) {
+			return 0;
+		}
+		$cutoff  = gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS );
+		$deleted = 0;
+		for ( $i = 0; $i < (int) $max_batches; $i++ ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom log table retention cleanup.
+			$result = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE created_at < %s LIMIT %d', self::table_name(), $cutoff, max( 1, (int) $batch ) ) );
+			$count  = is_numeric( $result ) ? (int) $result : 0;
+			$deleted += $count;
+			if ( $count < (int) $batch ) {
+				break;
+			}
 		}
 		return $deleted;
 	}

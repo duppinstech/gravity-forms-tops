@@ -43,7 +43,7 @@ Later releases are offered through the normal WordPress **Plugins → Updates** 
 - **Live vehicle lists:** Make and Color selects are filled from TowX GetMakes / GetColors; Model is loaded with GetModelsForMake when a make is chosen. Lists are cached for one hour (filter `gf_tops_vehicle_list_cache_ttl`).
 - **Credentials:** password and authentication key are encrypted at rest and never re-displayed; leave blank to keep the stored value.
 - **Test authentication** runs GetMakes and shows a summary plus detailed response on failure.
-- **Request log** (Forms → TOPS log) with redacted request XML, TowX responses, and **Resend Create Call** (view requires Gravity Forms' view-entries permission; resend requires edit-entries).
+- **Request log** (Forms → TOPS log, kept 90 days by default) with redacted request XML, TowX responses, and **Resend Create Call** (view requires Gravity Forms' view-entries permission; resend requires edit-entries).
 - **Setup checklist** on each form's TOPS tab, including the last failed TowX lookup.
 - **Privacy:** suggested privacy-policy text and personal-data export / erase for request-log rows.
 - **TLS helpers** for `towxchange.net` hosts (filters `gf_tops_http_*`).
@@ -52,7 +52,7 @@ Later releases are offered through the normal WordPress **Plugins → Updates** 
 
 - **Page caching:** the model dropdown uses an AJAX nonce. If a full-page cache serves tow-form pages for longer than 12 hours, exclude those pages from the cache (preferred), or return `false` from `gf_tops_models_require_nonce`.
 - **Diagnostics:** the `<!-- GF TOPS … -->` footer comment appears only when browser console logging or `WP_DEBUG` is on (filter `gf_tops_show_footer_diagnostic_comment`).
-- **Request log retention:** log rows include customer details from the submission and are kept indefinitely (until erased through WordPress's privacy tools or the plugin is uninstalled) by design.
+- **Request log retention:** log rows include customer details from the submission and are deleted after **90 days** by a daily WP-Cron task (**Forms → Settings → TOPS → Keep request log for**, 0 keeps them forever; filter `gf_tops_request_log_retention_days`). Gravity Forms entries are not affected. Rows can also be erased per person through WordPress's privacy tools.
 - **Outages:** after a failed TowX lookup, lookups pause for 90 seconds per credential set (`gf_tops_lookup_failure_backoff`).
 - **Logging:** with **Logging** on, messages go to the PHP error log with the prefix `[GF TOPS]` (the host must have PHP error logging enabled).
 - **Hooks:** see [docs/hooks.md](docs/hooks.md).
@@ -72,13 +72,17 @@ bash bin/build-zip.sh  # build gravity-forms-tops.zip locally (needs zip)
 
 CI (`.github/workflows/ci.yml`) runs these on PHP 7.4–8.4. Pushing a `v*` tag on a commit that is on `main` runs `.github/workflows/release.yml`: a read-only build job checks the tag against the plugin version, re-runs lint and tests, regenerates the translation template and builds the ZIP; a separate publish job (environment `release`) attests build provenance and attaches the ZIP to the GitHub release. Actions are pinned to commit SHAs.
 
+## Support
+
+Email **support@duppinstech.com**. Include the details listed under "What should I send when asking for support?" in [readme.txt](readme.txt), and never send TowX credentials.
+
 ## Security
 
 See [SECURITY.md](SECURITY.md). TowX password and authentication key are encrypted at rest in form meta; User ID and Session ID are not. Limit form-admin access and use HTTPS.
 
 ## License
 
-GPL-2.0-or-later. See [LICENSE](LICENSE). Copyright Odell Duppins / Duppins Technology.
+GPL-2.0-or-later. See [LICENSE](LICENSE). Copyright Duppins Technology.
 
 ## Legal
 

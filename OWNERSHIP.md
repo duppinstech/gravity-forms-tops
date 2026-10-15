@@ -6,10 +6,13 @@ Portable notice. The same file goes in every repo Odell Duppins works on.
 
 - **Product:** Gravity Forms TOPS / TowX Integration (WordPress plugin, slug `gravity-forms-tops`)
 - **Author:** Odell Duppins
-- **Owner:** Duppins Technology (https://duppinstech.com)
+- **Owner and copyright holder:** Duppins Technology (https://duppinstech.com)
+- **Support:** support@duppinstech.com
 - **Repository:** https://github.com/duppinstech/gravity-forms-tops
 
-Gravity Forms TOPS / TowX Integration is a Duppins Technology product. Odell Duppins is the author. Copyright, the plugin `Author` header, license notices, and package metadata name **Duppins Technology**. They do not name the client.
+Gravity Forms TOPS / TowX Integration is a Duppins Technology product. Odell Duppins is the author; **Duppins Technology is the copyright holder**. Copyright lines, the plugin `Author` header, license notices, and package metadata name **Duppins Technology**. They do not name the client.
+
+This file stays in the repository and is not included in the release ZIP.
 
 ## Beta client
 

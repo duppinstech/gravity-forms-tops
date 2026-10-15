@@ -126,7 +126,7 @@ class PrivacyTest extends TestCase {
 		$this->assertArrayHasKey( 'gravity-forms-tops', GF_Tops_Privacy::register_eraser( array() ) );
 		$text = GF_Tops_Privacy::policy_text();
 		$this->assertStringContainsString( 'TowXchange', $text );
-		$this->assertStringContainsString( 'plugin is deleted', $text );
+		$this->assertStringContainsString( 'after 90 days', $text );
 		$this->assertStringNotContainsString( 'never included', $text );
 	}
 }

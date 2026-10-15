@@ -17,7 +17,7 @@ This plugin connects a Gravity Forms request form on your WordPress site to your
 * **Creates the call in dispatch.** Each submitted request is sent to TowX as a **Create Call**, and the visitor's confirmation shows the TowX Call ID.
 * **Live vehicle lists.** Make and Color drop-downs are filled from TowX, and choosing a make loads that make's models.
 * **Your form, your fields.** You map your own form fields to TowX fields; nothing is hard-coded.
-* **Request log.** Every attempt is recorded under **Forms → TOPS log** with the response from TowX, and failed requests can be resent after you fix the cause.
+* **Request log.** Every attempt is recorded under **Forms → TOPS log** with the response from TowX (kept 90 days by default), and failed requests can be resent after you fix the cause.
 * **Safe credentials.** The TowX password and authentication key are encrypted in the database and never shown again after saving.
 * **Setup checklist and connection test** on each form's TOPS settings.
 * **Privacy tools.** Suggested privacy-policy text, and request-log rows that can be matched to a person's email address are included in WordPress's personal-data export and erase tools.
@@ -65,6 +65,10 @@ Usually a page cache is serving an expired token (see **Page caching**; visitors
 * **Transport error** – the site could not reach TowX (DNS, TLS or timeout). Contact your host if it continues.
 * **No Call ID** – TowX answered without a Call ID. Check in TOPS whether the call was created **before** resending, because a resend creates a new call.
 
+= What do visitors see when TowX fails? =
+
+A generic message ("Your request was received, but we could not send it to our dispatch system automatically") and your contact line. The actual TowX error is shown only to signed-in staff who can open the request log, with a link to it, and is included in the error notification email. A custom error message with the `{error}` placeholder shows the raw error to visitors.
+
 = The confirmation does not show the Call ID =
 
 The result is only added to **Text** (message) confirmations, not redirects, and only when the integration is enabled for that form.
@@ -81,9 +85,9 @@ In Gravity Forms form meta for that form, encrypted with Gravity Forms' built-in
 
 Users who can view Gravity Forms entries. Resending requires permission to edit entries. Log rows contain customer details from the request, with the TowX User ID, password, Session ID and authentication key removed.
 
-= What should I send when asking for support? =
+= How do I get support? =
 
-Plugin, WordPress, PHP and Gravity Forms versions; the API environment; the form ID, entry ID and request-log row; the status and error text; and the **Test authentication** result. **Never send** your TowX password, Session ID or authentication key.
+Email **support@duppinstech.com**. Please include: plugin, WordPress, PHP and Gravity Forms versions; the API environment; the form ID, entry ID and request-log row; the status and error text; and the **Test authentication** result. **Never send** your TowX password, Session ID or authentication key.
 
 == External services ==
 
@@ -94,7 +98,7 @@ This plugin connects to:
 
 == Privacy ==
 
-Request-log rows (including customer details from each request) are stored in your site's database until they are erased with **Tools → Erase Personal Data** or the plugin is deleted. Rows are matched to a person by their email address (in the Gravity Forms entry or the stored request); requests submitted without that email address must be found in **Forms → TOPS log** by name or phone. Failure notification emails include the request details and stay in the recipient's mailbox. Suggested privacy-policy text is added under **Settings → Privacy → Policy Guide**.
+Request-log rows (including customer details from each request) are stored in your site's database and deleted automatically after **90 days** (change it under **Forms → Settings → TOPS → Keep request log for**; 0 keeps them forever). Gravity Forms entries are kept as Gravity Forms keeps them. Rows can be erased sooner with **Tools → Erase Personal Data**, and all rows are removed when the plugin is deleted. Rows are matched to a person by their email address (in the Gravity Forms entry or the stored request); requests submitted without that email address must be found in **Forms → TOPS log** by name or phone. Failure notification emails include the request details and stay in the recipient's mailbox. Suggested privacy-policy text is added under **Settings → Privacy → Policy Guide**.
 
 == Changelog ==
 
@@ -103,6 +107,9 @@ Request-log rows (including customer details from each request) are stored in yo
 * **Admins:** New **Setup checklist** on each form's TOPS settings (credentials, connection test, field mapping, contact line, environment, and the last failed TowX lookup).
 * **Admins:** **Settings** link on the Plugins screen; clearer field-map labels; the request log shows what actually happened when you resend.
 * **Privacy:** Suggested privacy-policy text, and request-log rows are included in **Tools → Export / Erase Personal Data**.
+* **Visitors:** When TowX fails, visitors see a generic message and your contact line instead of the technical error. Signed-in staff who can open the request log see the error and a link to the log; error emails link to the log too.
+* **Request log retention:** Rows are deleted after 90 days by default (**Forms → Settings → TOPS → Keep request log for**; 0 keeps them forever). Gravity Forms entries are not affected.
+* **Support:** support@duppinstech.com (also linked on the Plugins screen).
 * **Security:** The request log now requires permission to view Gravity Forms entries (resending requires permission to edit entries). A custom API address is always called over HTTPS, with a warning if it is not a TowX address. The API address is no longer printed in public page source.
 * **Reliability:** When TowX is unreachable, vehicle lookups pause for about 90 seconds instead of slowing every page view.
 * **Accessibility:** The ⚡ marker on TowX-filled fields has proper screen-reader text.
@@ -197,7 +204,7 @@ Request-log rows (including customer details from each request) are stored in yo
 == Upgrade Notice ==
 
 = 1.5.0 =
-The request log now requires the Gravity Forms "view entries" permission (and "edit entries" to resend). Users who could only edit forms lose access, and roles that can view entries but not edit forms (for example support staff) gain access to the customer details in the log. Check custom roles after updating.
+Request-log rows older than 90 days are deleted daily from this version on. The first cleanup runs a day after updating; to keep older rows, set **Keep request log for** (Forms → Settings → TOPS) to 0 before then. The request log now requires the Gravity Forms "view entries" permission (and "edit entries" to resend). Users who could only edit forms lose access, and roles that can view entries but not edit forms (for example support staff) gain access to the customer details in the log. Check custom roles after updating.
 
 = 1.4.0 =
 Security update: stops TowX credentials from being included in failure notification emails. If error emails were enabled on an earlier version, rotate the TowX password and authentication key.

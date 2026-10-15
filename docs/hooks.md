@@ -10,12 +10,18 @@ Filters provided by Gravity Forms TOPS / TowX Integration. The plugin defines no
 | `gf_tops_replace_confirmation_with_status` | `$replace, $form, $entry, $data` | `false` | Return `true` to replace the whole confirmation message with the TowX block instead of appending it. |
 | `gf_tops_confirmation_full_html` | `$html, $form, $entry, $data, $confirmation` | The TowX block | Full HTML used when replacing (see above). |
 
+## Request log
+
+| Filter | Arguments | Default | Use |
+|---|---|---|---|
+| `gf_tops_request_log_retention_days` | `$days` | **Keep request log for** setting (90) | Days to keep log rows before the daily WP-Cron cleanup (`gf_tops_purge_request_log`) deletes them. `0` keeps them forever. |
+
 ## Vehicle lists and model lookups
 
 | Filter | Arguments | Default | Use |
 |---|---|---|---|
 | `gf_tops_vehicle_list_cache_ttl` | `$ttl, $verb` | `HOUR_IN_SECONDS` | Seconds to cache GetMakes / GetColors / GetModelsForMake results. `0` disables caching. |
-| `gf_tops_lookup_failure_backoff` | `$seconds, $verb` | `90` | Seconds to pause lookups for a set of credentials after a failed lookup. `0` disables the pause (failures are still shown on the settings checklist). |
+| `gf_tops_lookup_failure_backoff` | `$seconds, $verb` | `90` | Seconds to pause lookups for a set of credentials after an outage (no response, 429 or 5xx). Other TowX errors only cool down that make for 5 minutes. `0` disables the pause (failures are still shown on the settings checklist). |
 | `gf_tops_models_require_nonce` | `$require, $form_id` | `true` | Return `false` only if tow-form pages cannot be excluded from long-lived page caches. Make keys are still checked against TowX's make list. |
 
 ## Front-end discovery and diagnostics

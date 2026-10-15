@@ -8,8 +8,15 @@
 - 2026-10-14: Adopted dev-only Composer tooling (PHPUnit 9.6, PHPCS with WordPress-Extra minus formatting sniffs, PHPCompatibilityWP 7.4+). Formatting sniffs (Yoda, alignment) stay off to avoid a whole-codebase reformat; enable them only as a dedicated formatting change.
 - 2026-10-14: `get_form_settings()` returns secrets as stored (encrypted); `get_runtime_form_settings()` decrypts for TowX calls only. Consequence: never render runtime settings.
 - 2026-10-14: TowX vehicle lists are cached in transients (1 hour default) keyed by a salted hash of API base + credentials.
-- 2026-10-14: Request-log rows are retained indefinitely (until uninstall, or erased for one person through WordPress's privacy tools); do not add scheduled cleanup without a new decision.
-- 2026-10-14: Visitors see TowX / transport error text in the error confirmation so they can report it (leaning decision; per-form custom error text can replace it).
+- 2026-10-14 (superseded same day): Request-log rows were retained indefinitely.
+- 2026-10-14: Request-log rows are deleted after 90 days by default (owner: "whatever you suggest"; 90 covers a monthly billing cycle with margin). Configurable, 0 keeps forever. Gravity Forms entries are never deleted by this plugin.
+- 2026-10-14 (superseded same day): Visitors saw TowX error text.
+- 2026-10-14: Visitors see a generic error plus the contact line; signed-in staff who can open the log see the real error and a link; error emails link to the log. A custom template with {error} can still show it.
 - 2026-10-14: The ⚡ marker on public Make / Model / Color labels stays.
 - 2026-10-14: Adopted the shared GitHub updater standard v1.0.0 (docs/github-updater-standard.md). This repo holds the reference implementation; other plugins copy the class verbatim with a renamed class. Private repositories are out of scope (LPM Pro delivery is an open decision).
 - 2026-10-14: Every change goes through the department review board (security, legal, finance, product, QA, docs/support agents) after development and before merge or release.
+- 2026-10-14: Sales model: payment is taken before the plugin is delivered or installed. No license keys or activation in the plugin. Releases are public on GitHub, so the code itself is not access-controlled (GPL).
+- 2026-10-14: Copyright holder of record is Duppins Technology; Odell Duppins is the author.
+- 2026-10-14: Support channel is support@duppinstech.com (also the security contact and the .pot bug-report address). No response-time promise.
+- 2026-10-14: OWNERSHIP.md (names the beta client) stays in the repo but is excluded from the release ZIP.
+- 2026-10-14: Tags matching v* are protected by a repository ruleset (only admins create; no update or delete).

@@ -40,6 +40,13 @@ GF_Tops_GitHub_Updater::boot(
 	)
 );
 
+register_deactivation_hook(
+	__FILE__,
+	static function () {
+		wp_clear_scheduled_hook( 'gf_tops_purge_request_log' );
+	}
+);
+
 /**
  * TLS/SNI workarounds for TowX (OpenSSL 3 + cURL). Runs before Gravity Forms loads.
  */

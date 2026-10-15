@@ -48,37 +48,46 @@ These need WordPress, a licensed Gravity Forms install and authorized QA TowX cr
 - [ ] Custom base URL `http://…`: both warnings show and the log row's endpoint starts with `https://`. View source on the form page: no API address while console logging is off.
 - [ ] Unreachable custom URL: the second page load is fast (lookups paused) and the checklist shows the failure. Choosing a make TowX rejects only affects that make.
 - [ ] Changing a saved credential clears the "Connection test passed" tick until the next successful test.
-- [ ] Plugins screen shows a **Settings** link. Multisite: uninstall removes `gf_tops_lookup_status` and `gf_tops_auth_test_ok` on every site.
+- [ ] Retention: with **Keep request log for** = 1, a log row backdated more than a day in the database is gone after the daily `gf_tops_purge_request_log` cron run (`wp cron event run gf_tops_purge_request_log`); with 0, nothing is deleted. Deactivating the plugin removes the cron event.
+- [ ] TowX failure seen by a logged-out visitor: generic message and contact line, no technical detail. Same form submitted while logged in as an admin: the staff-only note shows the error and links to the log. The error email links to the log.
+- [ ] Plugins screen shows a **Settings** link and a **Support** link (support@duppinstech.com). Multisite: uninstall removes `gf_tops_lookup_status` and `gf_tops_auth_test_ok` on every site.
 - [ ] On QA, confirm the TowX endpoints answer without redirects; if so, consider turning redirects off for TowX calls (`'redirection' => 0`) so a redirect can never downgrade to HTTP.
 - [ ] Before the first tag after merging: add required reviewers to the `release` environment and protect `v*` tags in GitHub settings (see owner decisions).
 
 ## Review board, 2026-10-14 (full-product review)
 
-All six departments reviewed the whole product. Everything that did not need the owner was built in the `feature/review-board-fixes` branch (1.5.0). Owner decisions:
+All six departments reviewed the whole product. Everything that did not need the owner was built in the `feature/review-board-fixes` branch (1.5.0).
 
-1. **Pricing model.** Finance recommends a free plugin plus paid setup and support. Selling the download or updates gives little protection under GPL with public releases, and needs a license server and private delivery. Validate demand first: ask TowXchange about a partner listing and its API terms; pilot pricing with WhiteRail; put up a "request setup" page and count inquiries.
-2. **Product name.** Legal rates a name that starts with "Gravity Forms" as the biggest trademark risk for a commercial product. Recommend a neutral name plus "for Gravity Forms" (the folder slug can stay). Counsel review.
-3. **Ownership and IP.** Confirm with counsel that the work account / OneDrive (WorldVia Travel Group) location creates no employer IP claim. Choose the copyright holder of record (Odell Duppins or Duppins Technology as an entity).
-4. **Visitor error text.** Security recommends a generic message for visitors. This conflicts with the recorded decision to show TowX error text. Keep, or switch to generic text plus the contact line?
-5. **Retention.** Legal, security and finance all recommend a configurable retention period (for example 30–90 days) instead of keeping log rows indefinitely, especially if the product is sold to more sites.
-6. **Failure emails.** Send a link to the log row instead of the full request details (customer data)?
-7. **Confidential names in public files.** `OWNERSHIP.md` (shipped in the ZIP) names WhiteRail; `docs/github-updater-standard.md` and this plan name other products, including that LPM Pro's repository is private. Keep public?
-8. **Contacts and promises.** Security / support email address and response times for `SECURITY.md` and readme.txt.
-9. **Default environment.** Default fresh installs to QA, so the first test does not create a real tow call?
-10. **Site-wide credentials.** Offer one set of TowX credentials per site instead of per form?
-11. **Custom API host.** Restrict the custom base URL to `*.towxchange.net` (currently HTTPS is enforced and other hosts get a warning)?
-12. **GitHub settings.** Protect `v*` tags (ruleset) and add required reviewers to the `release` environment; until then the environment protects nothing. Do both before tagging 1.5.0.
-16. **Release verification.** Build provenance is attested, but the in-plugin updater does not verify it. Document offline verification (`gh attestation verify gravity-forms-tops.zip -R duppinstech/gravity-forms-tops`) for now, or add checksum verification to the updater standard later?
-17. **Support channel.** The readme tells customers what to send but not where. Options: name a contact, say "support per your agreement", or point to a paid support page (finance recommends "per your agreement" until pricing is decided).
-18. **Visitor message when models cannot load.** Currently generic ("Choose the make again to retry"). Product suggests adding the form's contact line, or owner-set text, so visitors with a required Model field are never stuck.
-13. **TowX.** Ask whether credentials can be sent in headers instead of the query string, and whether a commercial third-party integration is allowed.
-14. **Contributions.** Add a CLA or DCO if the licensing model may change later.
-15. **Sample form.** Ship an importable sample Gravity Forms form (needs a Gravity Forms install to build and verify the export).
+**Resolved by the owner (2026-10-14), built in 1.5.0:**
+
+- **Sales model:** payment is taken before the plugin is delivered or installed; no license keys in the plugin. Note: releases stay public on GitHub, so anyone can still download the code (GPL); payment buys delivery, setup and support.
+- **Copyright holder:** Duppins Technology (Odell Duppins is the author). LICENSE, README and OWNERSHIP.md updated.
+- **Visitor error text:** generic message plus the contact line; signed-in staff who can open the log see the real error and a link to the log; error emails link to the log.
+- **Retention:** request-log rows deleted after 90 days by default (configurable; 0 keeps forever). Gravity Forms entries are never deleted by this plugin.
+- **Beta client name:** `OWNERSHIP.md` stays in the repository but is no longer shipped in the release ZIP.
+- **Support / security contact:** support@duppinstech.com (readme, SECURITY.md, Plugins-screen Support link, translation bug reports). No response-time promise.
+- **Tag protection:** repository ruleset "Protect release tags" on `refs/tags/v*` (admins only create; no update or delete) — set via the API.
+
+**Still open:**
+
+1. **Product name.** Legal rates a name that starts with "Gravity Forms" as the biggest trademark risk for a commercial product. Recommend a neutral name plus "for Gravity Forms" (the folder slug can stay). Counsel review.
+2. **Ownership and IP.** Confirm with counsel that the work account / OneDrive (WorldVia Travel Group) location creates no employer IP claim.
+3. **Release approvals.** Add required reviewers to the `release` environment (GitHub creates it on the first release run). Optional for a solo maintainer now that tags are protected.
+4. **Failure emails.** Keep the full request details in the email, or send only the log link?
+5. **Other products named in public docs.** `docs/github-updater-standard.md` and this plan mention other products, including that LPM Pro's repository is private.
+6. **Default environment.** Default fresh installs to QA, so the first test does not create a real tow call?
+7. **Site-wide credentials.** Offer one set of TowX credentials per site instead of per form?
+8. **Custom API host.** Restrict the custom base URL to `*.towxchange.net` (currently HTTPS is enforced and other hosts get a warning)?
+9. **Release verification.** Build provenance is attested, but the in-plugin updater does not verify it. Document offline verification (`gh attestation verify gravity-forms-tops.zip -R duppinstech/gravity-forms-tops`) for now, or add checksum verification to the updater standard later?
+10. **Visitor message when models cannot load.** Currently generic ("Choose the make again to retry"). Product suggests adding the form's contact line, or owner-set text, so visitors with a required Model field are never stuck.
+11. **TowX.** Ask whether credentials can be sent in headers instead of the query string, and whether a commercial third-party integration is allowed.
+12. **Contributions.** Add a CLA or DCO if the licensing model may change later.
+13. **Sample form.** Ship an importable sample Gravity Forms form (needs a Gravity Forms install to build and verify the export).
 
 ## Product decisions (2026-10-14)
 
-- **Request-log retention:** rows are kept indefinitely (until the plugin is uninstalled, or erased for one person through WordPress's privacy tools). No scheduled cleanup.
-- **Public error detail:** visitors keep seeing TowX / transport error text in the error confirmation so they can quote it when reporting a problem. Leaning decision; revisit if the text exposes anything sensitive. Sites can already replace it per form with the custom error message setting.
+- **Request-log retention:** 90 days by default (configurable; 0 keeps forever). Supersedes the earlier "keep indefinitely".
+- **Public error detail:** generic text for visitors; details for staff and in the log and email. Supersedes the earlier "show TowX error text".
 - **Front-end ⚡ marker:** kept on the public form's Make, Model and Color labels.
 
 ## Open items

@@ -297,6 +297,48 @@ function set_transient( $name, $value, $expiration = 0 ) {
 	return true;
 }
 
+$GLOBALS['gf_tops_test_cron']      = array();
+$GLOBALS['gf_tops_test_logged_in'] = false;
+$GLOBALS['gf_tops_test_mail']      = array();
+
+function wp_next_scheduled( $hook ) {
+	return isset( $GLOBALS['gf_tops_test_cron'][ $hook ] ) ? $GLOBALS['gf_tops_test_cron'][ $hook ] : false;
+}
+
+function wp_schedule_event( $timestamp, $recurrence, $hook ) {
+	$GLOBALS['gf_tops_test_cron'][ $hook ] = $timestamp;
+	return true;
+}
+
+function is_admin() {
+	return false;
+}
+
+function is_user_logged_in() {
+	return (bool) $GLOBALS['gf_tops_test_logged_in'];
+}
+
+function admin_url( $path = '' ) {
+	return 'https://example.test/wp-admin/' . ltrim( (string) $path, '/' );
+}
+
+function sanitize_email( $email ) {
+	return (string) $email;
+}
+
+function wp_specialchars_decode( $text, $quote_style = ENT_NOQUOTES ) {
+	return htmlspecialchars_decode( (string) $text, $quote_style );
+}
+
+function get_bloginfo( $show = '', $filter = 'raw' ) {
+	return 'Test Site';
+}
+
+function wp_mail( $to, $subject, $message, $headers = '' ) {
+	$GLOBALS['gf_tops_test_mail'][] = compact( 'to', 'subject', 'message' );
+	return true;
+}
+
 function wp_salt( $scheme = 'auth' ) {
 	return 'gf-tops-unit-test-salt';
 }
@@ -356,6 +398,8 @@ class GFAddOn {
 	protected $_slug;
 
 	public function __construct() {}
+
+	public function init() {}
 
 	public function get_slug() {
 		return $this->_slug;

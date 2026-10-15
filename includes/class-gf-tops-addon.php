@@ -60,6 +60,11 @@ class GF_Tops_Addon extends GFAddOn {
 	protected $_short_title = 'TOPS';
 
 	/**
+	 * Support contact shown on the Plugins screen and in documentation.
+	 */
+	const SUPPORT_EMAIL = 'support@duppinstech.com';
+
+	/**
 	 * Singleton.
 	 *
 	 * @var GF_Tops_Addon|null
@@ -139,10 +144,17 @@ class GF_Tops_Addon extends GFAddOn {
 
 		add_action( 'wp_ajax_gf_tops_test_auth', array( $this, 'ajax_test_auth' ) );
 
+		add_action( GF_Tops_Request_Log::PURGE_HOOK, array( $this, 'purge_request_log' ) );
+		if ( function_exists( 'wp_next_scheduled' ) && ! wp_next_scheduled( GF_Tops_Request_Log::PURGE_HOOK ) ) {
+			// First run a day after activation or upgrade, so admins can change the retention period before anything is deleted.
+			wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', GF_Tops_Request_Log::PURGE_HOOK );
+		}
+
 		GF_Tops_Privacy::register_hooks();
 
 		if ( is_admin() ) {
 			add_filter( 'plugin_action_links_' . plugin_basename( GF_TOPS_FILE ), array( $this, 'add_plugin_action_links' ) );
+			add_filter( 'plugin_row_meta', array( $this, 'add_plugin_row_meta' ), 10, 2 );
 			add_action( 'admin_menu', array( $this, 'register_request_log_menu' ), 60 );
 			add_action( 'admin_post_gf_tops_resend_create_call', array( $this, 'handle_resend_create_call_post' ) );
 		}
@@ -158,6 +170,55 @@ class GF_Tops_Addon extends GFAddOn {
 		$url = admin_url( 'admin.php?page=gf_settings&subview=' . $this->get_slug() );
 		array_unshift( $links, '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'gravity-forms-tops' ) . '</a>' );
 		return $links;
+	}
+
+	/**
+	 * "Support" link under the plugin description on the Plugins screen.
+	 *
+	 * @param array  $links Row meta links.
+	 * @param string $file  Plugin basename.
+	 * @return array
+	 */
+	public function add_plugin_row_meta( $links, $file ) {
+		if ( plugin_basename( GF_TOPS_FILE ) === $file ) {
+			$links[] = '<a href="' . esc_url( 'mailto:' . self::SUPPORT_EMAIL ) . '">' . esc_html__( 'Support', 'gravity-forms-tops' ) . '</a>';
+		}
+		return $links;
+	}
+
+	/**
+	 * Days to keep request-log rows. 0 keeps them forever.
+	 *
+	 * @return int
+	 */
+	public function get_request_log_retention_days() {
+		$plugin = $this->get_plugin_settings();
+		$value  = is_array( $plugin ) && isset( $plugin['request_log_retention_days'] ) ? trim( (string) $plugin['request_log_retention_days'] ) : '';
+		$days   = '' === $value ? GF_Tops_Request_Log::DEFAULT_RETENTION_DAYS : absint( $value );
+
+		/**
+		 * Days to keep TOPS request-log rows before the daily cleanup deletes them. 0 keeps them forever.
+		 *
+		 * @param int $days Default from Forms → Settings → TOPS (90 when not set).
+		 */
+		return max( 0, (int) apply_filters( 'gf_tops_request_log_retention_days', $days ) );
+	}
+
+	/**
+	 * Daily WP-Cron task: delete request-log rows older than the retention period.
+	 *
+	 * @return int Rows deleted.
+	 */
+	public function purge_request_log() {
+		$days = $this->get_request_log_retention_days();
+		if ( $days <= 0 ) {
+			return 0;
+		}
+		$deleted = GF_Tops_Request_Log::purge_older_than( $days );
+		if ( $deleted > 0 ) {
+			$this->log( sprintf( 'Request log cleanup removed %d row(s) older than %d day(s).', $deleted, $days ) );
+		}
+		return $deleted;
 	}
 
 	/**
@@ -663,7 +724,7 @@ class GF_Tops_Addon extends GFAddOn {
 			'warn' => ! $has_contact,
 			'text' => $has_contact
 				? __( 'A contact line is set for visitors when TowX cannot take the request.', 'gravity-forms-tops' )
-				: __( 'No contact line is set. If TowX fails, visitors see the error but no phone number or next step. Add one under "TowX confirmation text" below or in Forms → Settings → TOPS.', 'gravity-forms-tops' ),
+				: __( 'No contact line is set. If TowX fails, visitors are asked to contact you but are not shown a phone number or link. Add one under "TowX confirmation text" below or in Forms → Settings → TOPS.', 'gravity-forms-tops' ),
 		);
 
 		$plugin = $this->get_plugin_settings();
@@ -1184,6 +1245,15 @@ class GF_Tops_Addon extends GFAddOn {
 						'tooltip' => esc_html__( 'Optional HTML shown after an API error when this form does not override it under Form Settings → TOPS → TowX confirmation text. Message confirmations only, not redirects.', 'gravity-forms-tops' ),
 					),
 					array(
+						'name'          => 'request_log_retention_days',
+						'label'         => esc_html__( 'Keep request log for (days)', 'gravity-forms-tops' ),
+						'type'          => 'text',
+						'input_type'    => 'number',
+						'class'         => 'small',
+						'default_value' => (string) GF_Tops_Request_Log::DEFAULT_RETENTION_DAYS,
+						'tooltip'       => esc_html__( 'Request-log rows (with customer details) older than this are deleted daily. Gravity Forms entries are not affected. Default 90. Enter 0 to keep rows forever.', 'gravity-forms-tops' ),
+					),
+					array(
 						'name'    => 'enable_logging',
 						'label'   => esc_html__( 'Logging', 'gravity-forms-tops' ),
 						'type'    => 'checkbox',
@@ -1429,7 +1499,7 @@ class GF_Tops_Addon extends GFAddOn {
 						'label'   => esc_html__( 'Custom message — TowX error (optional)', 'gravity-forms-tops' ),
 						'type'    => 'textarea',
 						'class'   => 'large',
-						'tooltip' => esc_html__( 'If set, replaces the default error block. Placeholders: {error}, {organization}, {site_name}, {contact_html}', 'gravity-forms-tops' ),
+						'tooltip' => esc_html__( 'If set, replaces the default error block. Placeholders: {error} (the raw TowX / transport error, shown to visitors), {organization}, {site_name}, {contact_html}. The default block shows visitors a generic message instead.', 'gravity-forms-tops' ),
 					),
 					array(
 						'name'    => 'tops_confirmation_unknown_custom',
@@ -2709,7 +2779,8 @@ class GF_Tops_Addon extends GFAddOn {
 					__( 'TOPS API transport error', 'gravity-forms-tops' ),
 					$err_msg,
 					$redacted,
-					$raw
+					$raw,
+					$form_id
 				);
 			}
 			return $status;
@@ -2745,7 +2816,8 @@ class GF_Tops_Addon extends GFAddOn {
 					__( 'TOPS API returned an error', 'gravity-forms-tops' ),
 					$detail,
 					$redacted,
-					$out
+					$out,
+					$form_id
 				);
 			}
 			return 'api_error';
@@ -2800,7 +2872,8 @@ class GF_Tops_Addon extends GFAddOn {
 				__( 'TOPS API unexpected response', 'gravity-forms-tops' ),
 				__( 'CallKey missing.', 'gravity-forms-tops' ),
 				$redacted,
-				$out
+				$out,
+				$form_id
 			);
 		}
 		return 'no_call_key';
@@ -3319,7 +3392,7 @@ class GF_Tops_Addon extends GFAddOn {
 				$html .= wp_kses_post( strtr( $custom, $pairs ) );
 				$html .= '</div>';
 			} else {
-				$html = $this->build_default_tops_confirmation_error( $error, $contact_html );
+				$html = $this->build_default_tops_confirmation_error( $error, $contact_html, (int) rgar( $form, 'id' ) );
 			}
 		} else {
 			$custom = isset( $settings['tops_confirmation_unknown_custom'] ) ? trim( (string) $settings['tops_confirmation_unknown_custom'] ) : '';
@@ -3328,7 +3401,7 @@ class GF_Tops_Addon extends GFAddOn {
 				$html .= wp_kses_post( strtr( $custom, $pairs ) );
 				$html .= '</div>';
 			} else {
-				$html = $this->build_default_tops_confirmation_unknown( $contact_html );
+				$html = $this->build_default_tops_confirmation_unknown( $contact_html, (int) rgar( $form, 'id' ) );
 			}
 		}
 
@@ -3418,21 +3491,23 @@ class GF_Tops_Addon extends GFAddOn {
 	}
 
 	/**
+	 * Default error block. Visitors get a generic message and the contact line; the TowX / transport detail is
+	 * shown only to signed-in staff who can open the request log (for example while testing the form).
+	 *
 	 * @param string $error        Error text.
 	 * @param string $contact_html Sanitized contact HTML.
+	 * @param int    $form_id      Form ID (for the request-log link).
 	 * @return string HTML fragment (wrapped).
 	 */
-	protected function build_default_tops_confirmation_error( $error, $contact_html ) {
+	protected function build_default_tops_confirmation_error( $error, $contact_html, $form_id = 0 ) {
 		$html = '<div class="gf-tops-confirmation gf-tops-confirmation--error">';
-		$html .= '<p>' . esc_html__( 'We could not send your request to dispatch automatically.', 'gravity-forms-tops' ) . '</p>';
-		$html .= '<p>' . sprintf(
-			/* translators: %s: technical or API error detail */
-			esc_html__( 'Details: %s', 'gravity-forms-tops' ),
-			esc_html( $error )
-		) . '</p>';
+		$html .= '<p>' . esc_html__( 'Your request was received, but we could not send it to our dispatch system automatically.', 'gravity-forms-tops' ) . '</p>';
 		if ( $contact_html !== '' ) {
 			$html .= '<div class="gf-tops-confirmation__contact">' . $contact_html . '</div>';
+		} else {
+			$html .= '<p>' . esc_html__( 'Please contact us directly so we can make sure your request is handled.', 'gravity-forms-tops' ) . '</p>';
 		}
+		$html .= $this->get_staff_confirmation_note( $error, $form_id );
 		$html .= '</div>';
 
 		return $html;
@@ -3440,17 +3515,46 @@ class GF_Tops_Addon extends GFAddOn {
 
 	/**
 	 * @param string $contact_html Sanitized contact HTML.
+	 * @param int    $form_id      Form ID (for the request-log link).
 	 * @return string HTML fragment (wrapped).
 	 */
-	protected function build_default_tops_confirmation_unknown( $contact_html ) {
+	protected function build_default_tops_confirmation_unknown( $contact_html, $form_id = 0 ) {
 		$html = '<div class="gf-tops-confirmation gf-tops-confirmation--unknown">';
 		$html .= '<p>' . esc_html__( 'Your submission was received, but the dispatch reference could not be confirmed. Use the contact options below if you need help.', 'gravity-forms-tops' ) . '</p>';
 		if ( $contact_html !== '' ) {
 			$html .= '<div class="gf-tops-confirmation__contact">' . $contact_html . '</div>';
 		}
+		$html .= $this->get_staff_confirmation_note( '', $form_id );
 		$html .= '</div>';
 
 		return $html;
+	}
+
+	/**
+	 * Note for signed-in staff who can open the request log: the real error and a link to the log.
+	 * Visitors never see it.
+	 *
+	 * @param string $error   Error detail ('' when unknown).
+	 * @param int    $form_id Form ID.
+	 * @return string
+	 */
+	protected function get_staff_confirmation_note( $error, $form_id ) {
+		if ( ! function_exists( 'is_user_logged_in' ) || ! is_user_logged_in() || ! $this->user_can_view_tops_request_log() ) {
+			return '';
+		}
+		$html = '<div class="gf-tops-confirmation__staff" style="margin-top:1em;padding:8px 12px;border-left:4px solid #996800;background:#fcf9e8;">';
+		$html .= '<p style="margin:0;"><strong>' . esc_html__( 'Staff only (visitors do not see this):', 'gravity-forms-tops' ) . '</strong> ';
+		$html .= '' !== (string) $error
+			? sprintf(
+				/* translators: %s: TowX or transport error detail */
+				esc_html__( 'TowX reported: %s', 'gravity-forms-tops' ),
+				esc_html( $error )
+			)
+			: esc_html__( 'TowX did not return a Call ID.', 'gravity-forms-tops' );
+		if ( $form_id > 0 ) {
+			$html .= ' <a href="' . esc_url( admin_url( 'admin.php?page=gf_tops_request_log&id=' . (int) $form_id ) ) . '">' . esc_html__( 'Open the request log', 'gravity-forms-tops' ) . '</a>';
+		}
+		return $html . '</p></div>';
 	}
 
 	/**
@@ -3460,8 +3564,9 @@ class GF_Tops_Addon extends GFAddOn {
 	 * @param string $message Error text.
 	 * @param string $xml     Redacted request XML (GF_Tops_Xml::redact_for_log); never pass credentials.
 	 * @param string $raw     Raw response.
+	 * @param int    $form_id Form ID (links the email to its request log).
 	 */
-	protected function notify_error( $subject, $message, $xml, $raw ) {
+	protected function notify_error( $subject, $message, $xml, $raw, $form_id = 0 ) {
 		$this->log( $subject . ': ' . $message );
 
 		$plugin = $this->get_plugin_settings();
@@ -3472,7 +3577,10 @@ class GF_Tops_Addon extends GFAddOn {
 			return;
 		}
 
-		$body  = '<p>' . esc_html( $message ) . '</p>';
+		$body = '<p>' . esc_html( $message ) . '</p>';
+		if ( (int) $form_id > 0 ) {
+			$body .= '<p><a href="' . esc_url( admin_url( 'admin.php?page=gf_tops_request_log&id=' . (int) $form_id ) ) . '">' . esc_html__( 'Open the request log for this form', 'gravity-forms-tops' ) . '</a> ' . esc_html__( '(resend from there after fixing the cause).', 'gravity-forms-tops' ) . '</p>';
+		}
 		$body .= '<h4>' . esc_html__( 'Request XML (credentials redacted)', 'gravity-forms-tops' ) . '</h4><pre>' . esc_html( GF_Tops_Xml::redact_for_log( $xml ) ) . '</pre>';
 		if ( $raw !== '' ) {
 			$body .= '<h4>' . esc_html__( 'Response', 'gravity-forms-tops' ) . '</h4><pre>' . esc_html( $raw ) . '</pre>';

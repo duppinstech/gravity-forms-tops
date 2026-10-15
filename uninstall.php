@@ -24,6 +24,7 @@ if ( ! function_exists( 'gf_tops_uninstall_site' ) ) {
 		delete_option( 'gravityformsaddon_gravityformstops_settings' );
 		delete_option( 'gravityformsaddon_gravityformstops_version' );
 		delete_option( 'gf_tops_request_log_db_version' );
+		wp_clear_scheduled_hook( 'gf_tops_purge_request_log' );
 		delete_option( 'gf_tops_lookup_status' );
 		delete_option( 'gf_tops_auth_test_ok' );
 
