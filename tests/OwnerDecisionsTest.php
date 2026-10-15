@@ -41,8 +41,12 @@ class OwnerDecisionsTest extends TestCase {
 		$this->assertSame( 0, $this->addon->purge_request_log() );
 		$this->assertSame( array(), $GLOBALS['wpdb']->queries, 'Nothing is deleted when retention is 0.' );
 
-		$GLOBALS['gf_tops_test_plugin_settings'] = array( 'request_log_retention_days' => '-5' );
-		$this->assertSame( 5, $this->addon->get_request_log_retention_days(), 'absint() of the setting.' );
+		foreach ( array( '-1', '90 days', 'abc', '3.5' ) as $invalid ) {
+			$GLOBALS['gf_tops_test_plugin_settings'] = array( 'request_log_retention_days' => $invalid );
+			$this->assertSame( 90, $this->addon->get_request_log_retention_days(), "'$invalid' falls back to the default." );
+		}
+		$GLOBALS['gf_tops_test_plugin_settings'] = array( 'request_log_retention_days' => ' 45 ' );
+		$this->assertSame( 45, $this->addon->get_request_log_retention_days() );
 
 		$GLOBALS['gf_tops_test_filters']['gf_tops_request_log_retention_days'] = static function () {
 			return 7;
@@ -96,6 +100,31 @@ class OwnerDecisionsTest extends TestCase {
 
 		$GLOBALS['gf_tops_test_user_can'] = false;
 		$this->assertStringNotContainsString( 'Staff only', $this->call( 'build_default_tops_confirmation_error', 'x', '', 3 ), 'Logged in without log access: visitor view.' );
+	}
+
+	public function test_unknown_result_has_a_contact_fallback_for_visitors() {
+		$html = $this->call( 'build_default_tops_confirmation_unknown', '', 3 );
+		$this->assertStringContainsString( 'Please contact us directly', $html );
+		$this->assertStringNotContainsString( 'Staff only', $html );
+
+		$with_contact = $this->call( 'build_default_tops_confirmation_unknown', '<a href="tel:5550100">Call</a>', 3 );
+		$this->assertStringNotContainsString( 'Please contact us directly', $with_contact );
+	}
+
+	public function test_privacy_text_follows_the_retention_setting() {
+		$this->assertStringContainsString( 'after about 90 days', GF_Tops_Privacy::policy_text( 90 ) );
+		$this->assertStringContainsString( 'after about 30 days', GF_Tops_Privacy::policy_text( 30 ) );
+		$this->assertStringContainsString( 'after about 1 day,', GF_Tops_Privacy::policy_text( 1 ) );
+
+		$forever = GF_Tops_Privacy::policy_text( 0 );
+		$this->assertStringContainsString( 'kept until they are erased on request', $forever );
+		$this->assertStringNotContainsString( 'deleted automatically', $forever );
+	}
+
+	public function test_existing_cleanup_schedule_is_not_moved() {
+		$GLOBALS['gf_tops_test_cron'] = array( GF_Tops_Request_Log::PURGE_HOOK => 12345 );
+		$this->addon->init();
+		$this->assertSame( 12345, $GLOBALS['gf_tops_test_cron'][ GF_Tops_Request_Log::PURGE_HOOK ] );
 	}
 
 	public function test_support_link_on_the_plugins_screen() {

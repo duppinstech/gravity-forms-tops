@@ -194,7 +194,9 @@ class GF_Tops_Addon extends GFAddOn {
 	public function get_request_log_retention_days() {
 		$plugin = $this->get_plugin_settings();
 		$value  = is_array( $plugin ) && isset( $plugin['request_log_retention_days'] ) ? trim( (string) $plugin['request_log_retention_days'] ) : '';
-		$days   = '' === $value ? GF_Tops_Request_Log::DEFAULT_RETENTION_DAYS : absint( $value );
+		// Only a plain whole number counts; anything else ("90 days", "-1") uses the default rather than
+		// silently meaning "keep forever" (0) or "one day".
+		$days = preg_match( '/^\d+$/', $value ) ? (int) $value : GF_Tops_Request_Log::DEFAULT_RETENTION_DAYS;
 
 		/**
 		 * Days to keep TOPS request-log rows before the daily cleanup deletes them. 0 keeps them forever.
@@ -1251,7 +1253,7 @@ class GF_Tops_Addon extends GFAddOn {
 						'input_type'    => 'number',
 						'class'         => 'small',
 						'default_value' => (string) GF_Tops_Request_Log::DEFAULT_RETENTION_DAYS,
-						'tooltip'       => esc_html__( 'Request-log rows (with customer details) older than this are deleted daily. Gravity Forms entries are not affected. Default 90. Enter 0 to keep rows forever.', 'gravity-forms-tops' ),
+						'tooltip'       => esc_html__( 'Request-log rows (with customer details) older than this many days are deleted by a daily task. Gravity Forms entries are not affected. Enter a whole number; 0 keeps rows forever, and anything else uses the default of 90.', 'gravity-forms-tops' ),
 					),
 					array(
 						'name'    => 'enable_logging',
@@ -3520,9 +3522,11 @@ class GF_Tops_Addon extends GFAddOn {
 	 */
 	protected function build_default_tops_confirmation_unknown( $contact_html, $form_id = 0 ) {
 		$html = '<div class="gf-tops-confirmation gf-tops-confirmation--unknown">';
-		$html .= '<p>' . esc_html__( 'Your submission was received, but the dispatch reference could not be confirmed. Use the contact options below if you need help.', 'gravity-forms-tops' ) . '</p>';
+		$html .= '<p>' . esc_html__( 'Your submission was received, but the dispatch reference could not be confirmed.', 'gravity-forms-tops' ) . '</p>';
 		if ( $contact_html !== '' ) {
 			$html .= '<div class="gf-tops-confirmation__contact">' . $contact_html . '</div>';
+		} else {
+			$html .= '<p>' . esc_html__( 'Please contact us directly if you need help with this request.', 'gravity-forms-tops' ) . '</p>';
 		}
 		$html .= $this->get_staff_confirmation_note( '', $form_id );
 		$html .= '</div>';

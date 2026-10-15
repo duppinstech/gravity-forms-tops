@@ -33,16 +33,26 @@ class GF_Tops_Privacy {
 		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
 			return;
 		}
-		wp_add_privacy_policy_content( __( 'Gravity Forms TOPS / TowX Integration', 'gravity-forms-tops' ), wp_kses_post( wpautop( self::policy_text(), false ) ) );
+		$days = class_exists( 'GF_Tops_Addon' ) ? GF_Tops_Addon::get_instance()->get_request_log_retention_days() : GF_Tops_Request_Log::DEFAULT_RETENTION_DAYS;
+		wp_add_privacy_policy_content( __( 'Gravity Forms TOPS / TowX Integration', 'gravity-forms-tops' ), wp_kses_post( wpautop( self::policy_text( $days ), false ) ) );
 	}
 
 	/**
 	 * @return string
 	 */
-	public static function policy_text() {
+	public static function policy_text( $retention_days = GF_Tops_Request_Log::DEFAULT_RETENTION_DAYS ) {
+		$retention_days = max( 0, (int) $retention_days );
+		$retention      = 0 === $retention_days
+			? __( 'These records are kept until they are erased on request.', 'gravity-forms-tops' )
+			: sprintf(
+				/* translators: %d: number of days request-log records are kept */
+				_n( 'These records are deleted automatically after about %d day, or sooner on request.', 'These records are deleted automatically after about %d days, or sooner on request.', $retention_days, 'gravity-forms-tops' ),
+				$retention_days
+			);
+
 		$paragraphs = array(
 			'<strong>' . __( 'Suggested text:', 'gravity-forms-tops' ) . '</strong> ' . __( 'When you submit a tow or roadside request on this site, the details you enter (such as your name, phone number, pickup location, destination, vehicle year, make, model and color, license plate, and notes) are sent to our dispatch system provider, TowXchange (TowX / TOPS), to create the service call.', 'gravity-forms-tops' ),
-			__( 'A copy of each request sent to the dispatch system, and its response, is kept in this site\'s database so that we can confirm, troubleshoot, and resend requests. These records are deleted automatically after 90 days (or the period set by the site owner), or sooner on request. Dispatch login credentials are removed from these records.', 'gravity-forms-tops' ),
+			__( 'A copy of each request sent to the dispatch system, and its response, is kept in this site\'s database so that we can confirm, troubleshoot, and resend requests.', 'gravity-forms-tops' ) . ' ' . $retention . ' ' . __( 'Dispatch login credentials are removed from these records.', 'gravity-forms-tops' ),
 			__( 'If a request cannot be delivered to the dispatch system, the request details may be emailed to our staff so that we can follow up with you. Those emails are kept in our mailboxes and are not removed by an erasure request to this site.', 'gravity-forms-tops' ),
 			__( 'You can ask us for a copy of this information, or ask us to erase it, using the contact details on this site.', 'gravity-forms-tops' ),
 			'<em>' . __( 'For site owners: this plugin also checks GitHub (github.com) for plugin updates. That check does not include visitor data.', 'gravity-forms-tops' ) . '</em>',

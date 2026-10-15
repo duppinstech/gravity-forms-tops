@@ -71,7 +71,8 @@ All six departments reviewed the whole product. Everything that did not need the
 **Still open:**
 
 1. **Product name.** Legal rates a name that starts with "Gravity Forms" as the biggest trademark risk for a commercial product. Recommend a neutral name plus "for Gravity Forms" (the folder slug can stay). Counsel review.
-2. **Ownership and IP.** Confirm with counsel that the work account / OneDrive (WorldVia Travel Group) location creates no employer IP claim.
+2. **Ownership and IP (counsel).** Confirm that the work account / OneDrive (WorldVia Travel Group) location creates no employer IP claim. If Duppins Technology is a separate legal entity, it needs a written IP assignment from Odell Duppins to hold the copyright; if it is a trade name, Odell is the legal holder. Also get the beta client's written OK to be named in the public repository (removing it from the ZIP does not remove it from GitHub or git history).
+2a. **Terms of sale (counsel).** Payment buys delivery, setup and support, not the code (GPL lets buyers redistribute it, and public releases can be installed without paying). Put what payment covers, support scope, a warranty disclaimer consistent with GPL "AS IS", and refunds in the client agreement. Confirm TowX's API terms allow commercial third-party use (item 11).
 3. **Release approvals.** Add required reviewers to the `release` environment (GitHub creates it on the first release run). Optional for a solo maintainer now that tags are protected.
 4. **Failure emails.** Keep the full request details in the email, or send only the log link?
 5. **Other products named in public docs.** `docs/github-updater-standard.md` and this plan mention other products, including that LPM Pro's repository is private.
