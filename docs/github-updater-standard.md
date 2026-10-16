@@ -34,6 +34,7 @@ Every Duppins Technology WordPress plugin distributed through GitHub Releases us
 4. Add `Update URI: https://github.com/<owner>/<repo>` to the main plugin header. WordPress 5.8+ then does not take updates for this plugin from WordPress.org.
 5. Remove the plugin's previous updater completely: its class, hooks, its own `upgrader_source_selection` folder renames (the standard has one), "update source" settings, and manual "check for updates" links. Core's **Dashboard → Updates → Check again** resets this updater's cache.
 6. In `uninstall.php`, delete the `<prefix>_github_release` site option and any cache keys the old updater used.
+7. Copy `bin/release-notes.sh` verbatim and call it from the release workflow ("Write release notes" step, `body_path: release-notes.md`) and from CI ("Release notes for the current version" step), as this repository does. Keep a non-empty changelog section for the current version: `= x.y.z =` under `== Changelog ==` in `readme.txt`, or `## [x.y.z] - date` in `CHANGELOG.md`.
 
 ## Required behavior
 
@@ -74,6 +75,7 @@ Filters: `<prefix>_github_updater_config`, `<prefix>_github_release_http_args`.
 ## Verification for a port
 
 - The reference tests pass against the copy (rename the class in the test, point the fixture at a sample plugin).
+- `bash bin/release-notes.sh <version> <main file> /tmp/notes.md` prints the Requirements block followed by `## Changes in <version>`; after the first release, the GitHub release body shows the same.
 - `grep` finds no old updater hooks, settings or classes.
 - The main plugin header has `Update URI`.
 - The repository is **public** (or the plugin uses a separate public release channel); a private repository returns 404 to every site.

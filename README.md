@@ -68,9 +68,10 @@ composer phpcs       # WordPress security / i18n / PHP 7.4+ compatibility sniffs
 composer test        # PHPUnit unit tests (no WordPress or credentials needed)
 composer check       # all of the above
 bash bin/build-zip.sh  # build gravity-forms-tops.zip locally (needs zip)
+bash bin/release-notes.sh 1.5.0 gravity-forms-tops.php /tmp/notes.md  # preview the release notes
 ```
 
-CI (`.github/workflows/ci.yml`) runs these on PHP 7.4–8.4. Pushing a `v*` tag on a commit that is on `main` runs `.github/workflows/release.yml`: a read-only build job checks the tag against the plugin version, re-runs lint and tests, regenerates the translation template and builds the ZIP; a separate publish job (environment `release`) attests build provenance and attaches the ZIP to the GitHub release. Actions are pinned to commit SHAs.
+CI (`.github/workflows/ci.yml`) runs these on PHP 7.4–8.4. Pushing a `v*` tag on a commit that is on `main` runs `.github/workflows/release.yml`: a read-only build job checks the tag against the plugin version, re-runs lint and tests, regenerates the translation template and builds the ZIP; a separate publish job (environment `release`) attests build provenance and attaches the ZIP to the GitHub release, with release notes made of the requirements plus this version's `readme.txt` changelog section (`bin/release-notes.sh`; CI runs it on every PR, so a version bump without its changelog section fails early). Actions are pinned to commit SHAs.
 
 ## Support
 

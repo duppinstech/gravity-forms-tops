@@ -12,3 +12,4 @@ CLAUDE.local.md
 build/
 .phpunit.result.cache
 .phpcs-cache
+release-notes.md

@@ -42,7 +42,8 @@ jobs:
       - name: Unit tests
         run: composer test
 
-      # Same script the release workflow runs: fails if the current version has no dated changelog section.
+      # Same script the release workflow runs: fails if the current version has no changelog section
+      # (readme.txt "= x.y.z =" under == Changelog ==, or CHANGELOG.md "## [x.y.z]" not marked Unreleased).
       - name: Release notes for the current version
         if: matrix.php == '8.2'
         run: |

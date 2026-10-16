@@ -32,7 +32,7 @@ Gravity Forms TOPS / TowX Integration is a WordPress plugin maintained by Duppin
 - Keep user-facing strings translatable with the `gravity-forms-tops` text domain and escape output at the point of use.
 - Do not log credentials or add secrets, production customer data, or real API responses to fixtures or documentation.
 - Validation: `composer install`, then `composer lint`, `composer phpcs`, `composer test` (or `composer check`). Unit tests cover secrets, XML, HTTP host matching, entry mapping, the updater, privacy export / erase, and isolated add-on methods (via a `GFAddOn` stub and reflection) using stubs in `tests/bootstrap.php`; screens, hooks and the Create Call flow still need WordPress + Gravity Forms and are verified manually. Report exactly which checks ran.
-- For a release, bump the version in the plugin header, `GF_TOPS_VERSION` and `readme.txt` Stable tag (the release workflow fails on a mismatch), add a changelog entry, and inspect package contents; tagging `v*` causes GitHub Actions to create the plugin ZIP.
+- For a release, bump the version in the plugin header, `GF_TOPS_VERSION` and `readme.txt` Stable tag (the release workflow fails on a mismatch), add a changelog entry (a non-empty `= x.y.z =` section under `== Changelog ==` in readme.txt; CI and the release fail without it, and it becomes the GitHub release notes), and inspect package contents; tagging `v*` causes GitHub Actions to create the plugin ZIP.
 - Keep author and ownership metadata aligned with Duppins Technology. Client names describe intended use only, not ownership.
 
 ## Review board

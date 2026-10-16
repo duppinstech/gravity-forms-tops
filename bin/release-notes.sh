@@ -4,7 +4,8 @@
 #
 # The body starts with the "## Requirements" block the updater reads (R6), then the version's
 # changelog section (R7): CHANGELOG.md "## [x.y.z]" if that file exists, otherwise readme.txt
-# "= x.y.z =" under "== Changelog ==". Fails if the section is missing, empty, or marked Unreleased.
+# "= x.y.z =" under "== Changelog ==". Fails if a requirement is missing or not a version number,
+# or if the section is missing, empty, or marked Unreleased.
 set -euo pipefail
 
 version="${1:?version required}"
@@ -21,6 +22,13 @@ if [ -z "$requires" ] || [ -z "$requires_php" ] || [ -z "$tested" ]; then
     echo "::error::Missing requirement: 'Requires at least' and 'Requires PHP' in $main_file, 'Tested up to' in readme.txt (got '$requires' / '$requires_php' / '$tested')." >&2
     exit 1
 fi
+# The updater only reads plain version numbers; anything else would let a changelog line win instead.
+for value in "$requires" "$requires_php" "$tested"; do
+    if ! printf '%s' "$value" | grep -Eq '^[0-9]+(\.[0-9]+){0,2}$'; then
+        echo "::error::Requirement '$value' is not a plain version number (for example 6.2 or 7.4)." >&2
+        exit 1
+    fi
+done
 
 if [ -f CHANGELOG.md ]; then
     source_name="CHANGELOG.md"
@@ -31,10 +39,15 @@ if [ -f CHANGELOG.md ]; then
         found { print }')
 else
     source_name="readme.txt"
-    heading=$(tr -d '\r' < readme.txt | awk -v v="$version" '$0 == "= " v " =" { print; exit }')
+    # Only headings under "== Changelog ==" count (not "== Upgrade Notice ==" and the like).
+    # Accepts "= x.y.z =" and "= x.y.z (anything) =" so an Unreleased marker is reported as such.
+    heading=$(tr -d '\r' < readme.txt | awk -v v="$version" '
+        /^== / { in_log = ( $0 == "== Changelog ==" ); next }
+        in_log && ( $0 == "= " v " =" || ( index($0, "= " v " (") == 1 && / =$/ ) ) { print; exit }')
     notes=$(tr -d '\r' < readme.txt | awk -v v="$version" '
-        $0 == "= " v " =" { found = 1; next }
-        found && (/^= .* =$/ || /^== /) { exit }
+        /^== / { if ( found ) exit; in_log = ( $0 == "== Changelog ==" ); next }
+        in_log && !found && ( $0 == "= " v " =" || ( index($0, "= " v " (") == 1 && / =$/ ) ) { found = 1; next }
+        found && /^= .* =$/ { exit }
         found { print }')
 fi
 
@@ -43,7 +56,7 @@ if [ -z "$heading" ]; then
     exit 1
 fi
 if printf '%s' "$heading" | grep -qi 'unreleased'; then
-    echo "::error::The $version changelog section in $source_name is still marked Unreleased; date it before tagging." >&2
+    echo "::error::The $version changelog section in $source_name is still marked Unreleased; finalize it before tagging." >&2
     exit 1
 fi
 if [ -z "$(printf '%s' "$notes" | tr -d '[:space:]')" ]; then
@@ -56,4 +69,13 @@ fi
     printf '## Changes in %s\n' "$version"
     printf '%s\n' "$notes"
 } > "$out"
-cat "$out"
+
+# Show the result. In GitHub Actions, stop workflow-command parsing so changelog text is printed as plain text.
+if [ -n "${GITHUB_ACTIONS:-}" ]; then
+    token="release-notes-$(date +%s)-$$-${RANDOM}"
+    echo "::stop-commands::${token}"
+    cat "$out"
+    echo "::${token}::"
+else
+    cat "$out"
+fi
