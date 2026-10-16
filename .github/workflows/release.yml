@@ -70,16 +70,11 @@ jobs:
       - name: Create gravity-forms-tops.zip
         run: bash bin/build-zip.sh
 
-      # The updater reads these lines so WordPress checks this release's own requirements before updating.
-      - name: Write release requirements
-        run: |
-          set -euo pipefail
-          requires=$(sed -n 's/^ \* Requires at least:[[:space:]]*//p' gravity-forms-tops.php | tr -d '\r')
-          requires_php=$(sed -n 's/^ \* Requires PHP:[[:space:]]*//p' gravity-forms-tops.php | tr -d '\r')
-          tested=$(sed -n 's/^Tested up to:[[:space:]]*//p' readme.txt | tr -d '\r')
-          printf '## Requirements\n\n- Requires at least: %s\n- Requires PHP: %s\n- Tested up to: %s\n\n' \
-            "$requires" "$requires_php" "$tested" > release-requirements.md
-          cat release-requirements.md
+      # Requirements block (the updater reads it so WordPress checks this release's own requirements)
+      # followed by this version's changelog section, shown under "View details". Fails if the section
+      # is missing or still marked Unreleased.
+      - name: Write release notes
+        run: bash bin/release-notes.sh "${GITHUB_REF_NAME#v}" gravity-forms-tops.php release-notes.md
 
       - name: Upload build
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -87,7 +82,7 @@ jobs:
           name: release
           path: |
             gravity-forms-tops.zip
-            release-requirements.md
+            release-notes.md
           if-no-files-found: error
           retention-days: 7
 
@@ -114,5 +109,5 @@ jobs:
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           files: gravity-forms-tops.zip
-          body_path: release-requirements.md
+          body_path: release-notes.md
           generate_release_notes: true

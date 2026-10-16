@@ -22,7 +22,7 @@ class GF_Tops_GitHub_Updater {
 	/**
 	 * Version of the shared updater standard this file implements (compare across repos to detect drift).
 	 */
-	const STANDARD_VERSION = '1.0.0';
+	const STANDARD_VERSION = '1.1.0';
 
 	/**
 	 * Seconds that must pass after a check before a cache reset ("Check again", another plugin clearing
