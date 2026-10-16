@@ -25,6 +25,12 @@ function apply_filters( $hook, $value, ...$args ) {
 	return $value;
 }
 
+$GLOBALS['gf_tops_test_actions'] = array();
+
+function do_action( $hook, ...$args ) {
+	$GLOBALS['gf_tops_test_actions'][] = array( $hook, $args );
+}
+
 function __( $text, $domain = 'default' ) {
 	return $text;
 }

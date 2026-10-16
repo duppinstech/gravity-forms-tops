@@ -127,6 +127,21 @@ class OwnerDecisionsTest extends TestCase {
 		$this->assertSame( 12345, $GLOBALS['gf_tops_test_cron'][ GF_Tops_Request_Log::PURGE_HOOK ] );
 	}
 
+	public function test_pages_with_the_model_dropdown_cap_the_page_cache_ttl() {
+		$GLOBALS['gf_tops_test_actions'] = array();
+		$this->call( 'limit_page_cache_ttl', 6 );
+
+		$this->assertSame( array( 'litespeed_control_set_ttl', array( 36000 ) ), $GLOBALS['gf_tops_test_actions'][0] );
+		$this->assertSame( array( 'gf_tops_limit_page_cache_ttl', array( 36000, 6 ) ), $GLOBALS['gf_tops_test_actions'][1] );
+
+		$GLOBALS['gf_tops_test_actions']                                 = array();
+		$GLOBALS['gf_tops_test_filters']['gf_tops_models_require_nonce'] = static function () {
+			return false;
+		};
+		$this->call( 'limit_page_cache_ttl', 6 );
+		$this->assertSame( array(), $GLOBALS['gf_tops_test_actions'], 'No nonce, no limit needed.' );
+	}
+
 	public function test_support_link_on_the_plugins_screen() {
 		$links = $this->addon->add_plugin_row_meta( array( 'Version 1.5.0' ), plugin_basename( GF_TOPS_FILE ) );
 		$this->assertStringContainsString( 'mailto:support@duppinstech.com', end( $links ) );

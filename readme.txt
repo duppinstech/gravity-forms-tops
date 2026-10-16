@@ -45,7 +45,7 @@ This plugin is not affiliated with or endorsed by Rocketgenius (Gravity Forms) o
 
 = Page caching =
 
-The model drop-down uses a security token that expires after 12–24 hours. Exclude tow-request pages from full-page caching, or cache them for less than 12 hours. Developers who cannot do either can use the `gf_tops_models_require_nonce` filter.
+The model drop-down uses a security token that expires after 12–24 hours. With **LiteSpeed Cache**, the plugin automatically limits tow-request pages to a 10-hour cache. With other page caches, exclude tow-request pages or cache them for less than 12 hours (developers can use the `gf_tops_limit_page_cache_ttl` action or, as a last resort, the `gf_tops_models_require_nonce` filter).
 
 == Frequently Asked Questions ==
 
@@ -112,6 +112,7 @@ Request-log rows (including customer details from each request) are stored in yo
 * **Support:** support@duppinstech.com (also linked on the Plugins screen).
 * **Security:** The request log now requires permission to view Gravity Forms entries (resending requires permission to edit entries). A custom API address is always called over HTTPS, with a warning if it is not a TowX address. The API address is no longer printed in public page source.
 * **Reliability:** When TowX is unreachable, vehicle lookups pause for about 90 seconds instead of slowing every page view.
+* **Page caching:** With LiteSpeed Cache, pages with the model drop-down are cached for at most 10 hours so the drop-down's security token never goes stale (previously such pages could be cached for days and models stopped loading).
 * **Accessibility:** The ⚡ marker on TowX-filled fields has proper screen-reader text.
 * **Translations:** Translation template (`languages/gravity-forms-tops.pot`) included.
 * **Releases:** Signed build provenance and stricter release checks.

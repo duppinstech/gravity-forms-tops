@@ -1106,6 +1106,9 @@ class GF_Tops_Addon extends GFAddOn {
 		$colors_count   = $this->count_select_field_choices( $form, $color_field );
 
 		$cascade_on = $this->should_enable_model_cascade( $map );
+		if ( $cascade_on ) {
+			$this->limit_page_cache_ttl( (int) $form['id'] );
+		}
 
 		$fe_js  = GF_TOPS_PATH . 'assets/js/frontend.js';
 		$fe_css = GF_TOPS_PATH . 'assets/css/frontend.css';
@@ -1188,6 +1191,42 @@ class GF_Tops_Addon extends GFAddOn {
 			$inline,
 			'before'
 		);
+	}
+
+	/**
+	 * Keep full-page caches from serving the model drop-down's AJAX nonce after it expires (12–24 hours).
+	 * Applies to LiteSpeed Cache automatically; other caches can hook `gf_tops_limit_page_cache_ttl`.
+	 *
+	 * @param int $form_id Form ID on the page.
+	 */
+	protected function limit_page_cache_ttl( $form_id ) {
+		if ( ! apply_filters( 'gf_tops_models_require_nonce', true, $form_id ) ) {
+			return;
+		}
+
+		/**
+		 * Longest time (seconds) a full-page cache may keep a page with a TOPS model drop-down.
+		 * Default 10 hours, below the nonce lifetime. Return 0 to leave page caching alone.
+		 *
+		 * @param int $ttl     Seconds.
+		 * @param int $form_id Form ID.
+		 */
+		$ttl = (int) apply_filters( 'gf_tops_page_cache_max_ttl', 10 * HOUR_IN_SECONDS, $form_id );
+		if ( $ttl <= 0 ) {
+			return;
+		}
+
+		// LiteSpeed Cache public API.
+		do_action( 'litespeed_control_set_ttl', $ttl );
+
+		/**
+		 * Fires when a page with a TOPS model drop-down should be cached for at most $ttl seconds.
+		 * Use it to set the TTL for page caches other than LiteSpeed.
+		 *
+		 * @param int $ttl     Seconds.
+		 * @param int $form_id Form ID.
+		 */
+		do_action( 'gf_tops_limit_page_cache_ttl', $ttl, $form_id );
 	}
 
 	/**

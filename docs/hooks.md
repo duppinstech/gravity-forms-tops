@@ -1,6 +1,6 @@
 # Hooks reference
 
-Filters provided by Gravity Forms TOPS / TowX Integration. The plugin defines no actions of its own. Add filters from a site-specific plugin or the theme's `functions.php`, and test changes on a staging site with QA TowX credentials first.
+Filters provided by Gravity Forms TOPS / TowX Integration. The plugin defines one action, `gf_tops_limit_page_cache_ttl` (`$ttl, $form_id`), fired on pages with the model drop-down so you can cap other page caches' lifetime. Add filters from a site-specific plugin or the theme's `functions.php`, and test changes on a staging site with QA TowX credentials first.
 
 ## Confirmation
 
@@ -22,6 +22,7 @@ Filters provided by Gravity Forms TOPS / TowX Integration. The plugin defines no
 |---|---|---|---|
 | `gf_tops_vehicle_list_cache_ttl` | `$ttl, $verb` | `HOUR_IN_SECONDS` | Seconds to cache GetMakes / GetColors / GetModelsForMake results. `0` disables caching. |
 | `gf_tops_lookup_failure_backoff` | `$seconds, $verb` | `90` | Seconds to pause lookups for a set of credentials after an outage (no response, 429 or 5xx). Other TowX errors only cool down that make for 5 minutes. `0` disables the pause (failures are still shown on the settings checklist). |
+| `gf_tops_page_cache_max_ttl` | `$ttl, $form_id` | `36000` (10 hours) | Longest page-cache lifetime for pages with the model drop-down (sent to LiteSpeed Cache automatically). `0` leaves caching alone. |
 | `gf_tops_models_require_nonce` | `$require, $form_id` | `true` | Return `false` only if tow-form pages cannot be excluded from long-lived page caches. Make keys are still checked against TowX's make list. |
 
 ## Front-end discovery and diagnostics
