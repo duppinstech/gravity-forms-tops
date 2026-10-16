@@ -112,6 +112,7 @@ Request-log rows (including customer details from each request) are stored in yo
 * **Support:** support@duppinstech.com (also linked on the Plugins screen).
 * **Security:** The request log now requires permission to view Gravity Forms entries (resending requires permission to edit entries). A custom API address is always called over HTTPS, with a warning if it is not a TowX address. The API address is no longer printed in public page source.
 * **Reliability:** When TowX is unreachable, vehicle lookups pause for about 90 seconds instead of slowing every page view.
+* **Fix:** A malformed Make value in a submitted form no longer causes a PHP warning.
 * **Page caching:** With LiteSpeed Cache, pages with the model drop-down are cached for at most 10 hours so the drop-down's security token never goes stale (previously such pages could be cached for days and models stopped loading).
 * **Accessibility:** The ⚡ marker on TowX-filled fields has proper screen-reader text.
 * **Translations:** Translation template (`languages/gravity-forms-tops.pot`) included.

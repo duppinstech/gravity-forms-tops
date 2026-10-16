@@ -1734,7 +1734,8 @@ class GF_Tops_Addon extends GFAddOn {
 		// Only for a real submission of this form, so arbitrary POSTs cannot trigger TowX calls.
 		$is_this_form_posted = (int) rgpost( 'gform_submit' ) === (int) $form['id'];
 		if ( $is_this_form_posted && $make_field !== '' && $this->should_enable_model_cascade( $map ) ) {
-			$make_key = sanitize_text_field( (string) rgpost( 'input_' . str_replace( '.', '_', $make_field ) ) );
+			$posted   = rgpost( 'input_' . str_replace( '.', '_', $make_field ) );
+			$make_key = is_scalar( $posted ) ? sanitize_text_field( (string) $posted ) : '';
 		}
 
 		return $this->populate_vehicle_choices( $form, $settings, $make_key );
