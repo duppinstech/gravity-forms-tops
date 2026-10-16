@@ -26,7 +26,7 @@ These need WordPress, a licensed Gravity Forms install and authorized QA TowX cr
 - [x] **VehicleInfo:** in the request log row, VehicleInfo shows names (for example `2020 Toyota Camry Blue`), not numeric keys. Repeat with **Resend Create Call**; the resend must also show names, and resending a successful row must ask for confirmation. *Staging 2026-10-16: "2020 Toyota 2000 Beige" (names, not keys), also on resend.*
 - [x] **Error email:** set the API environment to an invalid custom URL, submit, and confirm the email contains no password, session ID or authentication key. Restore the environment. *Staging 2026-10-16: captured email links to the log and contains no credential.*
 - [ ] **Non-ASCII text:** submit with an accented name and a curly apostrophe (for example `José O’Brien`) and confirm how it appears in TowX. The plugin sends UTF-8 bytes but labels the request `charset=WINDOWS-1252`; if TowX shows garbled characters, open a fix to transcode to Windows-1252 (or change the declared charset) after confirming which one TowX expects. *Still open: needs a real Create Call to see how TowX displays it.*
-- [ ] **Page cache:** if the site uses a full-page cache, exclude tow-form pages or confirm their cache lifetime is under 12 hours (see README → Production notes). *Production uses LiteSpeed with a 7-day TTL; 1.5.0 caps pages with the model drop-down at 10 hours automatically.* *Fix built, not verified on LiteSpeed. Remaining: after updating production to 1.5.0, confirm `x-litespeed-cache-control` shows max-age=36000 on /request-a-tow/.*
+- [x] **Page cache:** Production uses LiteSpeed (7-day TTL). Since 1.5.0 on production (2026-10-16), `/request-a-tow/` is served with `x-litespeed-cache-control: public,max-age=36000`; other pages keep 7 days. *Verified on production 2026-10-16.*
 - [x] **Release:** `v1.4.0` tagged on `main` and the release ZIP published (2026-10-14).
 - [x] **Credential rotation:** not needed (confirmed by the owner, 2026-10-14).
 
@@ -39,6 +39,10 @@ These need WordPress, a licensed Gravity Forms install and authorized QA TowX cr
 - [ ] Port the standard to Landing Page Manager, Landing Page Manager Pro and Radius SEO with the porting prompt (Pro blocked until its release delivery is decided; its repository is private).
 
 ## Deployment checks for 1.5.0 (review-board fixes)
+
+> **Production (weilwrecker.com) upgraded 1.4.0 → 1.5.0 on 2026-10-16** with WP-CLI from the release ZIP (SHA-256 matched; build provenance attested), after a database + plugin backup in `/root/backups/gf-tops-1.4.0-to-1.5.0-20261016T043245Z/`. Verified: stored version 1.5.0, log cleanup scheduled 24 h out (90-day retention), form 6 enabled with 12 mappings and encrypted password / key, tow page renders with TowX makes, LiteSpeed 10-hour cap on the tow page, and the **new updater works from a background (cron) check**: plugin listed as current with release 1.5.0 and its ETag cached, so future releases arrive without anyone visiting wp-admin. Note: the first render right after installing can still run the old code for up to 60 s (opcache `revalidate_freq=60`); purge the page cache after an install, as was done here.
+>
+> Setup checklist on production form 6 still shows: run **Test authentication** once (records the tick), and **no contact line** is set for visitors when TowX fails (owner to add a phone number / link under Form → Settings → TOPS → TowX confirmation text).
 
 - [x] Request log: a user with only "edit forms" cannot open **Forms → TOPS log**; a user with "view entries" can view but sees no Resend button without "edit entries". *Staging 2026-10-16 (capability checks).*
 - [ ] Setup checklist appears on an enabled form's TOPS tab and updates after saving credentials, running **Test authentication**, mapping fields and adding a contact line. *Staging 2026-10-16 (checklist content; screen rendering not viewed).* *Remaining: view the checklist on the TOPS tab.*
