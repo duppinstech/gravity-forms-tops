@@ -4,7 +4,7 @@ Tags: gravity forms, tops, towx, towing, api
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,16 @@ In Gravity Forms form meta for that form. Current versions encrypt the password 
 Yes. Configure the field map separately on each site.
 
 == Changelog ==
+
+= 1.4.1 =
+* **Updates:** New shared Duppins Technology GitHub updater (standard v1.0.0, see `docs/github-updater-standard.md` in the repository).
+* **Fix:** Update checks run from WP-Cron and background auto-updates too; previously new releases were only noticed on wp-admin page loads.
+* **Fix:** The plugin is listed as up to date when current, so the core auto-update toggle works.
+* Adds the `Update URI` header so WordPress.org never offers a same-slug plugin over this one; same-slug entries from other sources are replaced.
+* GitHub checks are cached for 6 hours, use conditional requests (unchanged releases do not count against GitHub's rate limit), back off for 1 hour on errors, and wait for GitHub's rate-limit reset.
+* Only installs the `gravity-forms-tops.zip` asset from this repository's own GitHub releases. "View details" and the auto-update checks use the release's own WordPress / PHP requirements (written into the release notes by the release workflow).
+* Keeps the installed folder name when updating, so a site that installed the plugin under another folder name stays active.
+* Dashboard → Updates → **Check again** re-checks GitHub (at most once a minute, never during a rate-limit wait).
 
 = 1.4.0 =
 * **Security:** TowX failure emails and the short-lived confirmation transient now contain the *redacted* Create Call XML. Earlier versions emailed the TowX password, Session ID and authentication key in plain text.

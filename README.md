@@ -16,9 +16,10 @@ Ownership and licensing to clients are described in [OWNERSHIP.md](OWNERSHIP.md)
 | `includes/class-gf-tops-secrets.php` | Encryption of TowX password / authentication key at rest |
 | `includes/class-gf-tops-request-log.php` | Request-log database table |
 | `includes/class-gf-tops-http.php` | TLS / cURL adjustments for TowX hosts |
-| `includes/class-gf-tops-github-updater.php` | Update checks against GitHub Releases |
+| `includes/class-gf-tops-github-updater.php` | GitHub Releases updater (reference implementation of the shared standard) |
 | `assets/` | Front-end model cascade and admin connection-test scripts and styles |
 | `languages/` | Translation files |
+| `docs/` | Developer documentation, including the updater standard (not shipped) |
 | `tests/`, `bin/`, `composer.json`, `phpcs.xml.dist`, `phpunit.xml.dist` | Development tooling (not shipped in the release ZIP) |
 
 ## Requirements
@@ -34,7 +35,7 @@ Ownership and licensing to clients are described in [OWNERSHIP.md](OWNERSHIP.md)
 3. Configure **Forms → Settings → TOPS** (global: **API environment** for both JSON and Create Call XML, optional error email, logging).
 4. For each form: **Form → Settings → TOPS** — enable the integration, set credentials, map fields.
 
-Later releases are offered through the normal WordPress **Plugins → Updates** screen (GitHub Releases updater). Define `GF_TOPS_DISABLE_GITHUB_UPDATER` as `true` to turn this off.
+Later releases are offered through the normal WordPress **Plugins → Updates** screen, including background auto-updates. The updater follows the shared [Duppins Technology GitHub updater standard](docs/github-updater-standard.md); this repository holds its reference implementation. Define `GF_TOPS_DISABLE_GITHUB_UPDATER` as `true` to turn it off.
 
 ## Features
 

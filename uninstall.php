@@ -53,11 +53,11 @@ if ( is_multisite() ) {
 		gf_tops_uninstall_site();
 		restore_current_blog();
 	}
-	// GitHub release cache is a network-wide site transient.
-	delete_site_transient( 'gf_tops_gh_rel_' . md5( 'duppinstech/gravity-forms-tops' ) );
-	delete_site_transient( 'gf_tops_gh_rel_' . md5( 'oduppinsjr/gravity-forms-tops' ) );
 } else {
 	gf_tops_uninstall_site();
-	delete_site_transient( 'gf_tops_gh_rel_' . md5( 'duppinstech/gravity-forms-tops' ) );
-	delete_site_transient( 'gf_tops_gh_rel_' . md5( 'oduppinsjr/gravity-forms-tops' ) );
 }
+
+// GitHub updater cache (network-wide), plus the pre-1.4.1 release transients.
+delete_site_option( 'gf_tops_github_release' );
+delete_site_transient( 'gf_tops_gh_rel_' . md5( 'duppinstech/gravity-forms-tops' ) );
+delete_site_transient( 'gf_tops_gh_rel_' . md5( 'oduppinsjr/gravity-forms-tops' ) );
