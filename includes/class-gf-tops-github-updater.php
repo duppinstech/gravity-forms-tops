@@ -1,6 +1,6 @@
 <?php
 /**
- * Duppins Technology GitHub Releases updater (standard v1.0.0).
+ * Duppins Technology GitHub Releases updater (standard v1.1.0).
  *
  * Reference implementation of the shared updater standard described in docs/github-updater-standard.md.
  * To use it in another plugin, copy this file verbatim, rename the class (and file) to that plugin's

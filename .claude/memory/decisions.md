@@ -20,3 +20,4 @@
 - 2026-10-14: Support channel is support@duppinstech.com (also the security contact and the .pot bug-report address). No response-time promise.
 - 2026-10-14: OWNERSHIP.md (names the beta client) stays in the repo but is excluded from the release ZIP.
 - 2026-10-14: Tags matching v* are protected by a repository ruleset (only admins create; no update or delete).
+- 2026-10-16: Updater standard v1.1.0 (R7): release notes include the version's changelog section (CHANGELOG.md or readme.txt) via bin/release-notes.sh; CI runs it on every PR. Class behavior unchanged.

@@ -68,8 +68,8 @@ Filters: `<prefix>_github_updater_config`, `<prefix>_github_release_http_args`.
 | R3 | The workflow runs lint and tests before packaging. |
 | R4 | `bin/build-zip.sh` builds `<slug>.zip` from tracked files only, with a single top-level `<slug>/` folder, and excludes development files (`.github/`, `.claude/`, `tests/`, `bin/`, `docs/`, agent docs, Composer and PHPCS/PHPUnit config). |
 | R5 | The ZIP is attached to the GitHub release as an asset named `<repo>.zip`. |
-| R6 | The release notes start with a `## Requirements` block listing `Requires at least`, `Requires PHP` and `Tested up to` from the plugin header and `readme.txt` (written by `bin/release-notes.sh`). |
-| R7 | After the requirements, the release notes contain the version's changelog section: `CHANGELOG.md` `## [x.y.z]` when that file exists, otherwise `readme.txt` `= x.y.z =` under `== Changelog ==`. The workflow fails if the section is missing, empty, or marked Unreleased. (Added in v1.1.0.) |
+| R6 | The release notes start with a `## Requirements` block listing `Requires at least`, `Requires PHP` and `Tested up to` from the plugin header and `readme.txt` (written by `bin/release-notes.sh`, which fails if any of the three is missing). |
+| R7 | After the requirements, the release notes contain the version's changelog section: `CHANGELOG.md` `## [x.y.z]` when that file exists, otherwise `readme.txt` `= x.y.z =` under `== Changelog ==`. The workflow fails if the section is missing, empty, or marked Unreleased; CI runs the same script for the current version on every pull request, so a version bump without its changelog section fails before tagging. (Added in v1.1.0.) |
 
 ## Verification for a port
 

@@ -17,6 +17,11 @@ requires=$(sed -n 's/^ \* Requires at least:[[:space:]]*//p' "$main_file" | tr -
 requires_php=$(sed -n 's/^ \* Requires PHP:[[:space:]]*//p' "$main_file" | tr -d '\r')
 tested=$(sed -n 's/^Tested up to:[[:space:]]*//p' readme.txt | tr -d '\r')
 
+if [ -z "$requires" ] || [ -z "$requires_php" ] || [ -z "$tested" ]; then
+    echo "::error::Missing requirement: 'Requires at least' and 'Requires PHP' in $main_file, 'Tested up to' in readme.txt (got '$requires' / '$requires_php' / '$tested')." >&2
+    exit 1
+fi
+
 if [ -f CHANGELOG.md ]; then
     source_name="CHANGELOG.md"
     heading=$(tr -d '\r' < CHANGELOG.md | awk -v v="$version" 'index($0, "## [" v "]") == 1 { print; exit }')
