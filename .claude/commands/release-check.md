@@ -6,6 +6,6 @@ Review the current changes and release workflow without creating a tag or publis
 
 1. Confirm the working tree and target commit are understood.
 2. Check version consistency in the plugin header, constants, and `readme.txt` where applicable.
-3. Inspect `.github/workflows/release.yml` and `bin/build-zip.sh` and verify the package includes runtime plugin files while excluding development-only files.
+3. Inspect `.github/workflows/release.yml` and `bin/build-zip.sh` and verify the package includes runtime plugin files while excluding development-only files. Run `bash bin/release-notes.sh <version> gravity-forms-tops.php /tmp/notes.md` and check the release notes.
 4. Run `composer check` (lint, PHPCS, PHPUnit); do not invent credentials or contact production TowX endpoints.
 5. Report blockers and checks not performed. Never create or push a release tag unless explicitly asked.

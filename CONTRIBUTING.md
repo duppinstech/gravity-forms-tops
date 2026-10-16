@@ -28,6 +28,7 @@ Do **not** open a public issue for undisclosed vulnerabilities. Follow [SECURITY
 | Request-log table | `includes/class-gf-tops-request-log.php` |
 | GitHub Releases updater | `includes/class-gf-tops-github-updater.php` |
 | Release package contents | `bin/build-zip.sh` |
+| Release notes (requirements + changelog) | `bin/release-notes.sh` |
 | Unit tests and WordPress stubs | `tests/` |
 | Front-end model cascade | `assets/js/frontend.js` |
 | Form settings (test auth UI) | `assets/js/admin-form-settings.js`, `assets/css/admin-form-settings.css` |

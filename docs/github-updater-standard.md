@@ -1,4 +1,4 @@
-# Duppins Technology GitHub updater standard (v1.0.0)
+# Duppins Technology GitHub updater standard (v1.1.0)
 
 Every Duppins Technology WordPress plugin distributed through GitHub Releases uses the same updater code and the same release pipeline. This document is the contract. The reference implementation lives in the `duppinstech/gravity-forms-tops` repository:
 
@@ -8,6 +8,7 @@ Every Duppins Technology WordPress plugin distributed through GitHub Releases us
 | Boot call and `Update URI` header | `gravity-forms-tops.php` |
 | Unit tests | `tests/GitHubUpdaterTest.php`, fixture `tests/fixtures/sample-plugin/`, doubles in `tests/bootstrap.php` (section "Doubles used by the GitHub updater tests") |
 | Release workflow | `.github/workflows/release.yml` |
+| Release notes | `bin/release-notes.sh` |
 | ZIP build | `bin/build-zip.sh` |
 
 `STANDARD_VERSION` in the class says which version of this document a copy implements. Compare it across repos to spot drift.
@@ -33,6 +34,7 @@ Every Duppins Technology WordPress plugin distributed through GitHub Releases us
 4. Add `Update URI: https://github.com/<owner>/<repo>` to the main plugin header. WordPress 5.8+ then does not take updates for this plugin from WordPress.org.
 5. Remove the plugin's previous updater completely: its class, hooks, its own `upgrader_source_selection` folder renames (the standard has one), "update source" settings, and manual "check for updates" links. Core's **Dashboard → Updates → Check again** resets this updater's cache.
 6. In `uninstall.php`, delete the `<prefix>_github_release` site option and any cache keys the old updater used.
+7. Copy `bin/release-notes.sh` verbatim and call it from the release workflow ("Write release notes" step, `body_path: release-notes.md`) and from CI ("Release notes for the current version" step), as this repository does. Keep a non-empty changelog section for the current version: `= x.y.z =` under `== Changelog ==` in `readme.txt`, or `## [x.y.z] - date` in `CHANGELOG.md`.
 
 ## Required behavior
 
@@ -67,11 +69,13 @@ Filters: `<prefix>_github_updater_config`, `<prefix>_github_release_http_args`.
 | R3 | The workflow runs lint and tests before packaging. |
 | R4 | `bin/build-zip.sh` builds `<slug>.zip` from tracked files only, with a single top-level `<slug>/` folder, and excludes development files (`.github/`, `.claude/`, `tests/`, `bin/`, `docs/`, agent docs, Composer and PHPCS/PHPUnit config). |
 | R5 | The ZIP is attached to the GitHub release as an asset named `<repo>.zip`. |
-| R6 | The release notes start with a `## Requirements` block listing `Requires at least`, `Requires PHP` and `Tested up to` from the plugin header and `readme.txt` (see the "Write release requirements" step). |
+| R6 | The release notes start with a `## Requirements` block listing `Requires at least`, `Requires PHP` and `Tested up to` from the plugin header and `readme.txt` (written by `bin/release-notes.sh`, which fails if any of the three is missing). |
+| R7 | After the requirements, the release notes contain the version's changelog section: `CHANGELOG.md` `## [x.y.z]` when that file exists, otherwise `readme.txt` `= x.y.z =` under `== Changelog ==`. The workflow fails if the section is missing, empty, or marked Unreleased; CI runs the same script for the current version on every pull request, so a version bump without its changelog section fails before tagging. (Added in v1.1.0.) |
 
 ## Verification for a port
 
 - The reference tests pass against the copy (rename the class in the test, point the fixture at a sample plugin).
+- `bash bin/release-notes.sh <version> <main file> /tmp/notes.md` prints the Requirements block followed by `## Changes in <version>`; after the first release, the GitHub release body shows the same.
 - `grep` finds no old updater hooks, settings or classes.
 - The main plugin header has `Update URI`.
 - The repository is **public** (or the plugin uses a separate public release channel); a private repository returns 404 to every site.
