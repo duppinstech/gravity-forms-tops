@@ -203,7 +203,8 @@ class GF_Tops_Addon extends GFAddOn {
 		 *
 		 * @param int $days Default from Forms → Settings → TOPS (90 when not set).
 		 */
-		return max( 0, (int) apply_filters( 'gf_tops_request_log_retention_days', $days ) );
+		// Capped at 100 years so the cutoff date can always be calculated.
+		return min( 36500, max( 0, (int) apply_filters( 'gf_tops_request_log_retention_days', $days ) ) );
 	}
 
 	/**

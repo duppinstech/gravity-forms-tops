@@ -7,6 +7,22 @@
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Add-on that records the make key pre_render_populate passes on.
+ */
+class GF_Tops_Test_Populate_Addon extends GF_Tops_Test_Addon {
+	public $seen_make = null;
+
+	protected function is_form_enabled( $form_id ) {
+		return true;
+	}
+
+	protected function populate_vehicle_choices( $form, array $settings, $make_key = '' ) {
+		$this->seen_make = $make_key;
+		return $form;
+	}
+}
+
 class OwnerDecisionsTest extends TestCase {
 
 	/** @var GF_Tops_Test_Addon */
@@ -45,6 +61,9 @@ class OwnerDecisionsTest extends TestCase {
 			$GLOBALS['gf_tops_test_plugin_settings'] = array( 'request_log_retention_days' => $invalid );
 			$this->assertSame( 90, $this->addon->get_request_log_retention_days(), "'$invalid' falls back to the default." );
 		}
+		$GLOBALS['gf_tops_test_plugin_settings'] = array( 'request_log_retention_days' => '999999999999999999' );
+		$this->assertSame( 36500, $this->addon->get_request_log_retention_days(), 'Capped at 100 years.' );
+
 		$GLOBALS['gf_tops_test_plugin_settings'] = array( 'request_log_retention_days' => ' 45 ' );
 		$this->assertSame( 45, $this->addon->get_request_log_retention_days() );
 
@@ -140,6 +159,33 @@ class OwnerDecisionsTest extends TestCase {
 		};
 		$this->call( 'limit_page_cache_ttl', 6 );
 		$this->assertSame( array(), $GLOBALS['gf_tops_test_actions'], 'No nonce, no limit needed.' );
+	}
+
+	public function test_posted_make_must_be_a_single_value() {
+		$addon = new GF_Tops_Test_Populate_Addon();
+		$form  = array(
+			'id'               => 6,
+			'fields'           => array(),
+			'gravityformstops' => array(
+				'enabled'              => '1',
+				'tops_fields_make_key' => '5',
+				'tops_fields_model_key' => '6',
+			),
+		);
+
+		$_POST = array( 'gform_submit' => '6', 'input_5' => array( 'x', 'y' ) );
+		$addon->pre_render_populate( $form );
+		$this->assertSame( '', $addon->seen_make, 'An array is ignored (no warning, no lookup).' );
+
+		$_POST = array( 'gform_submit' => '6', 'input_5' => ' 14 ' );
+		$addon->pre_render_populate( $form );
+		$this->assertSame( '14', $addon->seen_make );
+
+		$_POST = array( 'gform_submit' => '7', 'input_5' => '14' );
+		$addon->pre_render_populate( $form );
+		$this->assertSame( '', $addon->seen_make, 'Only a submission of this form loads models.' );
+
+		$_POST = array();
 	}
 
 	public function test_support_link_on_the_plugins_screen() {

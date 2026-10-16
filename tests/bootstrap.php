@@ -316,6 +316,14 @@ function wp_schedule_event( $timestamp, $recurrence, $hook ) {
 	return true;
 }
 
+function sanitize_text_field( $text ) {
+	return trim( strip_tags( (string) $text ) ); // phpcs:ignore
+}
+
+function rgpost( $name ) {
+	return isset( $_POST[ $name ] ) ? $_POST[ $name ] : ''; // phpcs:ignore
+}
+
 function is_admin() {
 	return false;
 }
