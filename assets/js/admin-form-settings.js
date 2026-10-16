@@ -200,8 +200,7 @@
 							'\n\n' +
 							(text.length > 8000 ? text.substring(0, 8000) + '\n…' : text);
 					} else if (status === 0) {
-						err.details =
-							'No response body (HTTP 0). Often a network drop, timeout, or admin-ajax blocked. Check the browser Network tab for admin-ajax.php.';
+						err.details = gfTopsAdmin.i18n.noResponse;
 					}
 				}
 				renderTestResult($out, err, false);

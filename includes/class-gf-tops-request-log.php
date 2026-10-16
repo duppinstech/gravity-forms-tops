@@ -19,6 +19,16 @@ class GF_Tops_Request_Log {
 	const MAX_RESPONSE_BYTES = 262144;
 
 	/**
+	 * Default days to keep log rows (Forms → Settings → TOPS → Keep request log for).
+	 */
+	const DEFAULT_RETENTION_DAYS = 90;
+
+	/**
+	 * WP-Cron hook for the daily cleanup.
+	 */
+	const PURGE_HOOK = 'gf_tops_purge_request_log';
+
+	/**
 	 * @return string
 	 */
 	public static function table_name() {
@@ -195,6 +205,132 @@ class GF_Tops_Request_Log {
 			)
 		);
 		return $row ? $row : null;
+	}
+
+	const MAX_PERSON_CANDIDATES = 5000;
+
+	/**
+	 * Whether stored text contains this exact email address, not just as part of a longer one
+	 * (bob@x.com must not match jimbob@x.com or bob@x.com.au).
+	 *
+	 * @param string $text  Stored request or response.
+	 * @param string $email Email address.
+	 * @return bool
+	 */
+	public static function text_contains_email( $text, $email ) {
+		if ( '' === (string) $email ) {
+			return false;
+		}
+		$pattern = '/(?<![A-Za-z0-9._%+\-])' . preg_quote( (string) $email, '/' ) . '(?![A-Za-z0-9\-]|\.[A-Za-z0-9])/i';
+		return (bool) preg_match( $pattern, (string) $text );
+	}
+
+	/**
+	 * One person's rows: those for their Gravity Forms entry IDs, or whose stored request / response contains
+	 * their exact email address (covers entries already deleted). The database query is only a pre-filter;
+	 * every row is confirmed in PHP.
+	 *
+	 * @param int[]  $entry_ids Entry IDs (at most 1000 are used).
+	 * @param string $email     Email address.
+	 * @return array<int, object>
+	 */
+	protected static function rows_for_person( array $entry_ids, $email ) {
+		global $wpdb;
+		if ( ! is_email( $email ) ) {
+			return array();
+		}
+
+		$entry_ids = array_slice( array_values( array_unique( array_filter( array_map( 'absint', $entry_ids ) ) ) ), 0, 1000 );
+		$like      = '%' . $wpdb->esc_like( (string) $email ) . '%';
+		$where     = '(request_xml_redacted LIKE %s OR response_raw LIKE %s';
+		$values    = array( self::table_name(), $like, $like );
+		if ( ! empty( $entry_ids ) ) {
+			$where .= ' OR entry_id IN (' . implode( ',', array_fill( 0, count( $entry_ids ), '%d' ) ) . ')';
+			$values = array_merge( $values, $entry_ids );
+		}
+		$values[] = self::MAX_PERSON_CANDIDATES;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $where contains only %s/%d placeholders built above; every value is passed to prepare().
+		$candidates = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i WHERE ' . $where . ') ORDER BY id ASC LIMIT %d', $values ) );
+		if ( ! is_array( $candidates ) ) {
+			return array();
+		}
+
+		$rows = array();
+		foreach ( $candidates as $row ) {
+			if ( in_array( (int) $row->entry_id, $entry_ids, true )
+				|| self::text_contains_email( $row->request_xml_redacted, $email )
+				|| self::text_contains_email( $row->response_raw, $email ) ) {
+				$rows[] = $row;
+			}
+		}
+		return $rows;
+	}
+
+	/**
+	 * Log rows belonging to one person (privacy export).
+	 *
+	 * @param int[]  $entry_ids Entry IDs.
+	 * @param string $email     Email address.
+	 * @param int    $limit     Rows per page.
+	 * @param int    $offset    Offset.
+	 * @return array<int, object>
+	 */
+	public static function find_for_person( array $entry_ids, $email, $limit = 50, $offset = 0 ) {
+		return array_slice( self::rows_for_person( $entry_ids, $email ), max( 0, (int) $offset ), max( 1, (int) $limit ) );
+	}
+
+	/**
+	 * Delete one person's log rows (privacy erasure).
+	 *
+	 * @param int[]  $entry_ids Entry IDs.
+	 * @param string $email     Email address.
+	 * @return int Rows deleted.
+	 */
+	public static function delete_for_person( array $entry_ids, $email ) {
+		global $wpdb;
+
+		$ids = array();
+		foreach ( self::rows_for_person( $entry_ids, $email ) as $row ) {
+			$ids[] = (int) $row->id;
+		}
+
+		$deleted = 0;
+		foreach ( array_chunk( $ids, 500 ) as $chunk ) {
+			$values = array_merge( array( self::table_name() ), $chunk );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Only %d placeholders, one per row ID; every value is passed to prepare().
+			$result = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE id IN (' . implode( ',', array_fill( 0, count( $chunk ), '%d' ) ) . ')', $values ) );
+			$deleted += is_numeric( $result ) ? (int) $result : 0;
+		}
+		return $deleted;
+	}
+
+	/**
+	 * Delete rows older than a number of days, in batches.
+	 *
+	 * @param int $days        Rows created more than this many days ago are deleted (must be at least 1).
+	 * @param int $batch       Rows per DELETE.
+	 * @param int $max_batches Safety limit per run (the next daily run continues).
+	 * @return int Rows deleted.
+	 */
+	public static function purge_older_than( $days, $batch = 1000, $max_batches = 50 ) {
+		global $wpdb;
+		$days = (int) $days;
+		if ( $days < 1 ) {
+			return 0;
+		}
+		$cutoff  = gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS );
+		$deleted = 0;
+		for ( $i = 0; $i < (int) $max_batches; $i++ ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom log table retention cleanup.
+			$result = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE created_at < %s LIMIT %d', self::table_name(), $cutoff, max( 1, (int) $batch ) ) );
+			$count  = is_numeric( $result ) ? (int) $result : 0;
+			$deleted += $count;
+			if ( $count < (int) $batch ) {
+				break;
+			}
+		}
+		return $deleted;
 	}
 
 	/**

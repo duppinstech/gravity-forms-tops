@@ -49,6 +49,8 @@
 			<property name="custom_capabilities" type="array">
 				<element value="gform_full_access"/>
 				<element value="gravityforms_edit_forms"/>
+				<element value="gravityforms_view_entries"/>
+				<element value="gravityforms_edit_entries"/>
 			</property>
 		</properties>
 	</rule>
