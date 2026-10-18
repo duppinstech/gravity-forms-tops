@@ -13,3 +13,8 @@ build/
 .phpunit.result.cache
 .phpcs-cache
 release-notes.md
+.env*
+dist/
+__pycache__/
+.venv/
+.claude/worktrees/
