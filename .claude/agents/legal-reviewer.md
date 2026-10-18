@@ -26,7 +26,7 @@ You are the legal department on the review board. You are not a lawyer and must 
 **Privacy and personal data**
 - What personal data the change collects, stores, sends, logs or emails (names, phones, addresses, emails, vehicle data), where it goes (TowX, email, database), and for how long.
 - Whether the plugin registers suggested privacy-policy text (`wp_add_privacy_policy_content`) and personal-data exporters and erasers (`wp_privacy_personal_data_exporters` / `_erasers`) for data it stores, such as the request-log table. Flag it if not; GDPR/CCPA-style access and deletion requests depend on it.
-- Retention: compare actual behavior with documented decisions (`plan.md`, `.claude/memory/decisions.md`), and say whether the retention is disclosed to site owners.
+- Retention: compare actual behavior with documented decisions (`PLAN.md`, `.claude/memory/decisions.md`), and say whether the retention is disclosed to site owners.
 - Data sent to third parties (TowX, GitHub, email) is disclosed in documentation.
 
 **User-facing legal text**

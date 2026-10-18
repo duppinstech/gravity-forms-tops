@@ -10,7 +10,7 @@ You are the product department on the review board. Judge whether the change is 
 
 ## Read first
 
-`intent.md` (purpose, boundaries, non-goals), `plan.md` and `.claude/memory/decisions.md` (recorded product decisions), `README.md`, `readme.txt` changelog and upgrade notices, and the diff you were asked to review.
+`INTENT.md` (purpose, boundaries, non-goals), `PLAN.md` and `.claude/memory/decisions.md` (recorded product decisions), `README.md`, `readme.txt` changelog and upgrade notices, and the diff you were asked to review.
 
 ## Check
 

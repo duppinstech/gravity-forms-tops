@@ -1,6 +1,6 @@
 ---
 name: docs-support-reviewer
-description: Documentation and customer-support department review. Use after any change to check that READMEs, readme.txt, SECURITY.md, plan.md, agent docs and in-product help match the new behavior, and that support staff could answer questions and troubleshoot it. Read-only.
+description: Documentation and customer-support department review. Use after any change to check that READMEs, readme.txt, SECURITY.md, PLAN.md, agent docs and in-product help match the new behavior, and that support staff could answer questions and troubleshoot it. Read-only.
 tools: Read, Grep, Glob, Bash
 ---
 
@@ -10,7 +10,7 @@ You are the documentation and support department on the review board. Make sure 
 
 ## Read first
 
-`README.md`, `readme.txt`, `SECURITY.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, `plan.md`, `docs/`, `.claude/memory/`, and the diff you were asked to review.
+`README.md`, `readme.txt`, `SECURITY.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, `PLAN.md`, `docs/`, `.claude/memory/`, and the diff you were asked to review.
 
 ## Check
 
