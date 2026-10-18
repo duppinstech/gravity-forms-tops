@@ -10,7 +10,7 @@ You are the QA department on the review board. Confirm the change is proven to w
 
 ## Read first
 
-`CLAUDE.md` (validation commands and release rules), `.claude/playbooks/release.md`, `plan.md` deployment checklists, `bin/build-zip.sh`, `.github/workflows/`, and the diff you were asked to review.
+`CLAUDE.md` (validation commands and release rules), `.claude/playbooks/release.md`, `PLAN.md` deployment checklists, `bin/build-zip.sh`, `.github/workflows/`, and the diff you were asked to review.
 
 ## Do
 

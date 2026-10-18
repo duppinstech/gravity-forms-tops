@@ -4,8 +4,8 @@ This file applies to all work in this repository.
 
 ## Start here
 
-- Read [intent.md](intent.md) for the plugin's purpose and boundaries.
-- Read [plan.md](plan.md) for known SDLC follow-up work; do not treat it as authorization to expand a task.
+- Read [INTENT.md](INTENT.md) for the plugin's purpose and boundaries.
+- Read [PLAN.md](PLAN.md) for known SDLC follow-up work; do not treat it as authorization to expand a task.
 - Read [CLAUDE.md](CLAUDE.md) for repository-specific commands and conventions.
 - Follow [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
 - Read [OWNERSHIP.md](OWNERSHIP.md): authorship and copyright are Odell Duppins / Duppins Technology; the client is named only as who the work is for.
@@ -20,3 +20,13 @@ This file applies to all work in this repository.
 - Never pass credential-bearing XML or settings to logs, emails, transients or the request log; use `GF_Tops_Xml::redact_for_log()`.
 - Before completing a change, inspect the diff and report validation performed and any environment-dependent checks not run.
 - After development is done, run the department review board (`.claude/commands/review-board.md`: security, legal, finance, product, QA, docs/support reviewers in `.claude/agents/`) before merging or releasing. Agents without subagent support should work through each reviewer's checklist in turn.
+
+## Commands
+
+- Install dev tools: `composer install`
+- Build the plugin ZIP: `bash bin/build-zip.sh`
+
+## Do not touch
+
+- `.env*`, `CLAUDE.local.md`, and `.claude/settings.local.json`.
+- `vendor/` (Composer installs it; it is gitignored).

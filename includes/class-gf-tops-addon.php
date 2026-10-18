@@ -1685,7 +1685,7 @@ class GF_Tops_Addon extends GFAddOn {
 			$custom = (string) rgar( $plugin, 'custom_api_base' );
 			if ( $custom !== '' ) {
 				// Credentials travel in the query string and XML body, so always start over HTTPS. (Redirects are still
-				// followed, as for the built-in hosts; see plan.md before disabling them.)
+				// followed, as for the built-in hosts; see PLAN.md before disabling them.)
 				return trailingslashit( set_url_scheme( esc_url_raw( $custom ), 'https' ) );
 			}
 		}

@@ -10,7 +10,7 @@ You are the finance department on the review board. Decide whether the change af
 
 ## Read first
 
-`OWNERSHIP.md` (owner and licensed clients), `intent.md`, `README.md`, `readme.txt` changelog, `plan.md`, `.claude/memory/decisions.md`, any pricing, licensing or billing files if present, and the diff you were asked to review.
+`OWNERSHIP.md` (owner and licensed clients), `INTENT.md`, `README.md`, `readme.txt` changelog, `PLAN.md`, `.claude/memory/decisions.md`, any pricing, licensing or billing files if present, and the diff you were asked to review.
 
 ## Check
 
