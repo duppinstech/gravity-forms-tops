@@ -1,6 +1,6 @@
 ---
 name: plugin-change
-description: Use when implementing or changing behavior in the Gravity Forms TOPS WordPress plugin.
+description: Use when implementing or changing behavior in the GF TowX Integration WordPress plugin.
 ---
 
 # Plugin Change Workflow

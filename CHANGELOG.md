@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 GitHub release notes are generated from the matching `= x.y.z =` section in [readme.txt](readme.txt). Update that section and this file together.
 
-## [Unreleased]
+## [1.6.0] - 2026-10-19
+
+### Changed
+
+- The plugin's name is GF TowX Integration. It is a Gravity Forms add-on for TOPS by TowXchange, and Duppins Technology is not affiliated with either. The folder, text domain, and saved settings stay the same. The Forms menu labels now say GF TowX Integration.
+
+### Fixed
+
+- Contact and custom confirmation textareas accept a phone link. Gravity Forms was rejecting that HTML on save.
+
+### Added
+
+- Plugins → View details shows the readme description, installation (including the setup guide), FAQ, and screenshots, plus the banner and icon. When the GitHub updater has release notes, the Changelog tab stays those notes. Settings opens Forms → Settings → GF TowX Integration. There is no Help link. Support stays support@duppinstech.com. Sponsor is an optional link to the author's GitHub Sponsors page and is not required to use the plugin.
+- Forms → Settings → GF TowX Integration → **API product**. The default is TOPSLink. A custom product is used only after it is saved. An upgrade does not write this setting, so existing sites keep sending TOPSLink until an administrator chooses otherwise.
 
 ## [1.5.0] - 2026-10-16
 

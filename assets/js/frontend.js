@@ -1,5 +1,5 @@
 /**
- * TowX model cascade + optional hidden sync + field labels (Gravity Forms TOPS).
+ * TowX model cascade + optional hidden sync + field labels (GF TowX Integration).
  * Diagnostics go to the browser console only when enabled in form settings.
  */
 (function ($) {
@@ -19,7 +19,7 @@
 		return typeof gf_tops_i18n !== 'undefined' && gf_tops_i18n[key] ? gf_tops_i18n[key] : key;
 	}
 
-	/** gfTopsStatus.debugConsole: Forms → Settings → TOPS (browser console) and/or per-form console toggle. */
+	/** gfTopsStatus.debugConsole: Forms → Settings → GF TowX Integration (browser console) and/or per-form console toggle. */
 	function topsConsole(formId, message, detail) {
 		var st = window.gfTopsStatus && window.gfTopsStatus[formId];
 		if (!st || !st.debugConsole) {
@@ -87,7 +87,7 @@
 		bindSel('Make', st.makeFieldId);
 		bindSel('Model', st.modelFieldId);
 		bindSel('Color', st.colorFieldId);
-		topsConsole(formId, 'Verbose console logging enabled (Forms → Settings → TOPS or Form Settings → TOPS).', {
+		topsConsole(formId, 'Verbose console logging enabled (Forms → Settings → GF TowX Integration or Form Settings → GF TowX Integration).', {
 			makeFieldId: st.makeFieldId,
 			modelFieldId: st.modelFieldId,
 			colorFieldId: st.colorFieldId,

@@ -1,47 +1,49 @@
-=== Gravity Forms TOPS / TowX Integration ===
+=== GF TowX Integration ===
 Contributors: duppinstechnology
 Tags: gravity forms, tops, towx, towing, api
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Send Gravity Forms tow and roadside requests straight into TowX / TOPS dispatch, with live vehicle make, model and color lists.
+Connect a Gravity Forms form to TOPS by TowXchange, with live vehicle make, model and color lists.
 
 == Description ==
 
-This plugin connects a Gravity Forms request form on your WordPress site to your TowX / TOPS (TOPSLink) dispatch system:
+GF TowX Integration connects a Gravity Forms request form on your WordPress site to TOPS by TowXchange (TOPSLink):
 
 * **Creates the call in dispatch.** Each submitted request is sent to TowX as a **Create Call**, and the visitor's confirmation shows the TowX Call ID.
 * **Live vehicle lists.** Make and Color drop-downs are filled from TowX, and choosing a make loads that make's models.
-* **Your form, your fields.** You map your own form fields to TowX fields; nothing is hard-coded.
-* **Request log.** Every attempt is recorded under **Forms → TOPS log** with the response from TowX (kept 90 days by default), and failed requests can be resent after you fix the cause.
+* **Your form, your fields.** You map your own form fields to TowX fields; nothing is hard-coded. TowX credentials are saved on each form, because different forms can use different TowX accounts.
+* **Request log.** Every attempt is recorded under **Forms → GF TowX Integration log** with the response from TowX (kept 90 days by default), and failed requests can be resent after you fix the cause.
 * **Safe credentials.** The TowX password and authentication key are encrypted in the database and never shown again after saving.
-* **Setup checklist and connection test** on each form's TOPS settings.
+* **Setup checklist and connection test** on each form's GF TowX Integration settings.
 * **Privacy tools.** Suggested privacy-policy text, and request-log rows that can be matched to a person's email address are included in WordPress's personal-data export and erase tools.
 
-**Requirements:** WordPress 6.2+, PHP 7.4+, Gravity Forms 2.5+ (licensed), and TowX / TOPS API credentials from TowXchange.
+**Requirements:** WordPress 6.2+, PHP 7.4+, Gravity Forms 2.5+ (licensed), and API credentials issued by TowXchange under your existing TowXchange agreement.
 
-This plugin is not affiliated with or endorsed by Rocketgenius (Gravity Forms) or TowXchange (TowX / TOPS). Product names are used only to describe compatibility.
+GF TowX Integration is not affiliated with or endorsed by Rocketgenius (Gravity Forms) or TowXchange. Gravity Forms, TowX, TowXchange, TOPS and TOPSLink are used only to describe compatibility.
+
+The plugin is provided **AS IS**, without warranty, as the GPL states. When Duppins Technology charges for GF TowX Integration, that payment is for delivery, setup and support. It does not sell the code, and it does not grant access to the TowX API.
 
 == Installation ==
 
 1. Install `gravity-forms-tops.zip` from **Plugins → Add New → Upload Plugin**, or upload the `gravity-forms-tops` folder to `/wp-content/plugins/`.
-2. Activate **Gravity Forms TOPS / TowX Integration**.
+2. Activate **GF TowX Integration**.
 3. Follow the setup guide below.
 
 = Setup guide =
 
-1. **Get TowX API credentials.** Ask TowXchange (or your TOPS administrator) for API access. You need four values: **User ID**, **Password**, **Session ID** and **Authentication key**. Ask for **QA (test) access** as well, so you can test without creating real tow calls.
-2. **Choose the environment.** Go to **Forms → Settings → TOPS** and set **API environment** to **QA** while you test. Optionally enter an **Error notification email** and a **contact line** shown to visitors if TowX cannot take a request (for example your dispatch phone number).
+1. **Get TowX API credentials.** Ask TowXchange (or your TOPS administrator) for API access. You need four values: **User ID**, **Password**, **Session ID** and **Authentication key**. QA is for tests that must not create a real tow call. As of 2026-10-18, QA (`apiqa.towxchange.net`) does not answer; only Production does.
+2. **Choose the environment.** Go to **Forms → Settings → GF TowX Integration**. Use **QA** when it is answering. While QA is down, **Production** is the only working environment, and every submission creates a real tow call. **API product** stays **TOPSLink** unless TowX gave you a different Product name: choose **Custom product** and enter that name. An update does not fill this in for you, and it does not replace a custom product you already saved. Optionally enter an **Error notification email** and a **contact line** shown to visitors if TowX cannot take a request (for example your dispatch phone number).
 3. **Build the form.** Your request form needs fields for: pickup location and destination (Address, Single Line Text or Paragraph), caller name (Name or Text), caller phone (Phone or Text), tag number and tag state, vehicle year, and **Make, Model and Color as Drop Down fields** (the plugin fills their choices from TowX). Optional: dispatch notes, bill-to account, customer email, owner name, key location and call reason are added to the dispatch notes.
-4. **Enable and connect.** Open the form → **Settings → TOPS**. Tick **Enable integration**, enter the four credentials, click **Save settings**, then **Test authentication**. It should report the number of vehicle makes found.
+4. **Enable and connect.** Open the form → **Settings → GF TowX Integration**. Tick **Enable integration**, enter the four credentials, click **Save settings**, then **Test authentication**. It should report the number of vehicle makes found.
 5. **Map the fields.** Under **Field map**, choose the form field for each TowX field and save. Once the integration is enabled and saved, the **Setup checklist** at the top of the tab shows what is still missing.
 6. **Use a message confirmation.** The TowX result (Call ID, or the error and your contact line) is added to Gravity Forms **Text** confirmations. Redirect confirmations do not show it.
-7. **Test on QA.** Submit the form. You should see a Call ID in the confirmation and a **Success** row under **Forms → TOPS log**.
-8. **Go live.** Switch **API environment** to **Production**. From then on, every submission creates a real tow call.
+7. **Test.** When QA is answering, submit there. You should see a Call ID in the confirmation and a **Success** row under **Forms → GF TowX Integration log**. While QA is down, a test has to use Production and creates a real tow call.
+8. **Go live.** With **API environment** set to **Production**, every submission creates a real tow call.
 
 = Page caching =
 
@@ -51,11 +53,11 @@ The model drop-down uses a security token that expires after 12–24 hours. With
 
 = The Make and Color drop-downs are empty or show my own placeholder choices =
 
-Run **Test authentication** on the form's TOPS settings. Check that Make and Color are **Drop Down** fields mapped in the **Field map**, and that the **API environment** matches your credentials (QA credentials do not work in Production). If TowX is unreachable, the **Setup checklist** shows the last failed lookup, and the form keeps its saved choices until TowX answers again.
+Run **Test authentication** on the form's GF TowX Integration settings. Check that Make and Color are **Drop Down** fields mapped in the **Field map**, and that the **API environment** matches your credentials (QA credentials do not work in Production). If TowX is unreachable, the **Setup checklist** shows the last failed lookup, and the form keeps its saved choices until TowX answers again.
 
 = Models never load, or visitors see "Vehicle models could not be loaded" =
 
-Usually a page cache is serving an expired token (see **Page caching**; visitors are told to reload) or TowX was briefly unreachable. After TowX does not answer, the plugin waits about 90 seconds before asking again; if TowX rejects one make, that make is retried after 5 minutes. Turn on **Browser console** under **Forms → Settings → TOPS** to see details in the browser's developer console (F12).
+Usually a page cache is serving an expired token (see **Page caching**; visitors are told to reload) or TowX was briefly unreachable. After TowX does not answer, the plugin waits about 90 seconds before asking again; if TowX rejects one make, that make is retried after 5 minutes. Turn on **Browser console** under **Forms → Settings → GF TowX Integration** to see details in the browser's developer console (F12).
 
 = What do the request log statuses mean? =
 
@@ -75,7 +77,7 @@ The result is only added to **Text** (message) confirmations, not redirects, and
 
 = I do not receive error emails =
 
-Check **Error notification email** under **Forms → Settings → TOPS** and that your site can send email. With **Logging** turned on, the PHP error log records lines starting with `[GF TOPS]`, including when an email was skipped.
+Check **Error notification email** under **Forms → Settings → GF TowX Integration** and that your site can send email. With **Logging** turned on, the PHP error log records lines starting with `[GF TOPS]`, including when an email was skipped.
 
 = Where are my TowX password and key stored? =
 
@@ -84,6 +86,14 @@ In Gravity Forms form meta for that form, encrypted with Gravity Forms' built-in
 = Who can see the request log? =
 
 Users who can view Gravity Forms entries. Resending requires permission to edit entries. Log rows contain customer details from the request, with the TowX User ID, password, Session ID and authentication key removed.
+
+= Which services does this plugin contact? =
+
+TowXchange (TowX / TOPS) at `api.towxchange.net` (Production), `apiqa.towxchange.net` (QA), or the custom address you enter. Each submitted request (name, phone, locations, vehicle, tag, notes) and your TowX credentials are sent to create the call, and vehicle lists are requested to fill the drop-downs. GitHub (`api.github.com` and `github.com`) is checked for plugin updates; no visitor data is sent there.
+
+= How long is the request log kept? =
+
+Request-log rows, including customer details from each request, are deleted after **90 days** by default (**Forms → Settings → GF TowX Integration → Keep request log for**; 0 keeps them forever). Rows that include the person's email can be erased sooner with **Tools → Erase Personal Data**. Requests submitted without that email must be found in **Forms → GF TowX Integration log** by name or phone. Gravity Forms entries are not deleted by this plugin.
 
 = How do I get support? =
 
@@ -98,9 +108,20 @@ This plugin connects to:
 
 == Privacy ==
 
-Request-log rows (including customer details from each request) are stored in your site's database and deleted automatically after **90 days** (change it under **Forms → Settings → TOPS → Keep request log for**; 0 keeps them forever). Gravity Forms entries are kept as Gravity Forms keeps them. Rows can be erased sooner with **Tools → Erase Personal Data**, and all rows are removed when the plugin is deleted. Rows are matched to a person by their email address (in the Gravity Forms entry or the stored request); requests submitted without that email address must be found in **Forms → TOPS log** by name or phone. Failure notification emails include the request details and stay in the recipient's mailbox. Suggested privacy-policy text is added under **Settings → Privacy → Policy Guide**.
+Request-log rows (including customer details from each request) are stored in your site's database and deleted automatically after **90 days** (change it under **Forms → Settings → GF TowX Integration → Keep request log for**; 0 keeps them forever). Gravity Forms entries are kept as Gravity Forms keeps them. Rows can be erased sooner with **Tools → Erase Personal Data**, and all rows are removed when the plugin is deleted. Rows are matched to a person by their email address (in the Gravity Forms entry or the stored request); requests submitted without that email address must be found in **Forms → GF TowX Integration log** by name or phone. Failure notification emails include the request details and stay in the recipient's mailbox. Suggested privacy-policy text is added under **Settings → Privacy → Policy Guide**.
+
+== Screenshots ==
+
+1. Forms → Settings → GF TowX Integration: choose the TowX environment (this picture shows Production, which is the environment that answers while QA is down), set the error email and the contact line visitors see, and choose how long request-log rows are kept.
+2. A form's Settings → GF TowX Integration tab: enter the TowX credentials, save them, and test the connection. The field map starts underneath.
 
 == Changelog ==
+
+= 1.6.0 =
+* The plugin is now called **GF TowX Integration**. It connects a Gravity Forms form to TOPS by TowXchange, and Duppins Technology is not affiliated with Rocketgenius or TowXchange. The folder and saved settings stay the same. Forms menu labels now say GF TowX Integration.
+* **API product** under **Forms → Settings → GF TowX Integration**. The default is TOPSLink. A custom product is used only after it is saved. An update does not write this setting.
+* **Plugins → View details** shows the description, setup guide, FAQ, and screenshots, plus the banner and icon. Settings opens **Forms → Settings → GF TowX Integration**. Support stays support@duppinstech.com.
+* Contact and custom confirmation textareas accept a phone link. Gravity Forms was rejecting that HTML on save.
 
 = 1.5.0 =
 * **Visitors:** The Model drop-down shows "Loading models…" and a clear message if models cannot be loaded or none exist, instead of going blank. The message is announced to screen readers.

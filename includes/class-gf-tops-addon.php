@@ -52,17 +52,12 @@ class GF_Tops_Addon extends GFAddOn {
 	/**
 	 * @var string
 	 */
-	protected $_title = 'Gravity Forms TOPS';
+	protected $_title = 'GF TowX Integration';
 
 	/**
 	 * @var string
 	 */
-	protected $_short_title = 'TOPS';
-
-	/**
-	 * Support contact shown on the Plugins screen and in documentation.
-	 */
-	const SUPPORT_EMAIL = 'support@duppinstech.com';
+	protected $_short_title = 'GF TowX Integration';
 
 	/**
 	 * Singleton.
@@ -153,36 +148,23 @@ class GF_Tops_Addon extends GFAddOn {
 		GF_Tops_Privacy::register_hooks();
 
 		if ( is_admin() ) {
-			add_filter( 'plugin_action_links_' . plugin_basename( GF_TOPS_FILE ), array( $this, 'add_plugin_action_links' ) );
-			add_filter( 'plugin_row_meta', array( $this, 'add_plugin_row_meta' ), 10, 2 );
 			add_action( 'admin_menu', array( $this, 'register_request_log_menu' ), 60 );
 			add_action( 'admin_post_gf_tops_resend_create_call', array( $this, 'handle_resend_create_call_post' ) );
 		}
 	}
 
 	/**
-	 * "Settings" link on the Plugins screen.
+	 * Suppress Gravity Forms' Settings link so GF_Tops_Plugin_Info is the only one
+	 * (Forms → Settings → GF TowX Integration, capability manage_options).
 	 *
-	 * @param array $links Action links.
-	 * @return array
-	 */
-	public function add_plugin_action_links( $links ) {
-		$url = admin_url( 'admin.php?page=gf_settings&subview=' . $this->get_slug() );
-		array_unshift( $links, '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'gravity-forms-tops' ) . '</a>' );
-		return $links;
-	}
-
-	/**
-	 * "Support" link under the plugin description on the Plugins screen.
+	 * The signature matches GFAddOn::plugin_settings_link( $links, $file ).
 	 *
-	 * @param array  $links Row meta links.
-	 * @param string $file  Plugin basename.
-	 * @return array
+	 * @param string[] $links An array of plugin action links.
+	 * @param string   $file  Path to the plugin file relative to the plugins directory.
+	 * @return string[]
 	 */
-	public function add_plugin_row_meta( $links, $file ) {
-		if ( plugin_basename( GF_TOPS_FILE ) === $file ) {
-			$links[] = '<a href="' . esc_url( 'mailto:' . self::SUPPORT_EMAIL ) . '">' . esc_html__( 'Support', 'gravity-forms-tops' ) . '</a>';
-		}
+	public function plugin_settings_link( $links, $file ) {
+		unset( $file );
 		return $links;
 	}
 
@@ -201,7 +183,7 @@ class GF_Tops_Addon extends GFAddOn {
 		/**
 		 * Days to keep TOPS request-log rows before the daily cleanup deletes them. 0 keeps them forever.
 		 *
-		 * @param int $days Default from Forms → Settings → TOPS (90 when not set).
+		 * @param int $days Default from Forms → Settings → GF TowX Integration (90 when not set).
 		 */
 		// Capped at 100 years so the cutoff date can always be calculated.
 		return min( 36500, max( 0, (int) apply_filters( 'gf_tops_request_log_retention_days', $days ) ) );
@@ -565,7 +547,7 @@ class GF_Tops_Addon extends GFAddOn {
 	}
 
 	/**
-	 * Front-end browser console logging: Forms → Settings → TOPS (global), and/or Form Settings → TOPS cascade diagnostics.
+	 * Front-end browser console logging: Forms → Settings → GF TowX Integration (global), and/or Form Settings → GF TowX Integration cascade diagnostics.
 	 *
 	 * @param array|null $form_settings Optional Gravity Forms add-on settings for the current form.
 	 * @return bool
@@ -727,7 +709,7 @@ class GF_Tops_Addon extends GFAddOn {
 			'warn' => ! $has_contact,
 			'text' => $has_contact
 				? __( 'A contact line is set for visitors when TowX cannot take the request.', 'gravity-forms-tops' )
-				: __( 'No contact line is set. If TowX fails, visitors are asked to contact you but are not shown a phone number or link. Add one under "TowX confirmation text" below or in Forms → Settings → TOPS.', 'gravity-forms-tops' ),
+				: __( 'No contact line is set. If TowX fails, visitors are asked to contact you but are not shown a phone number or link. Add one under "TowX confirmation text" below or in Forms → Settings → GF TowX Integration.', 'gravity-forms-tops' ),
 		);
 
 		$plugin = $this->get_plugin_settings();
@@ -739,6 +721,15 @@ class GF_Tops_Addon extends GFAddOn {
 				/* translators: %s: API environment label, e.g. "Production (api.towxchange.net)" */
 				__( 'API environment: %s. In Production, every test submission creates a real tow call.', 'gravity-forms-tops' ),
 				wp_strip_all_tags( $this->get_api_environment_label() )
+			),
+		);
+		$items[] = array(
+			'ok'   => true,
+			'warn' => false,
+			'text' => sprintf(
+				/* translators: %s: TowX Product value, for example TOPSLink */
+				__( 'API product: %s.', 'gravity-forms-tops' ),
+				$this->get_api_product()
 			),
 		);
 
@@ -1132,7 +1123,7 @@ class GF_Tops_Addon extends GFAddOn {
 			'gf_tops_i18n',
 			array(
 				'selectModel'           => esc_html__( 'Select a model', 'gravity-forms-tops' ),
-				'statusTitle'           => esc_html__( 'TOPS / TowX API', 'gravity-forms-tops' ),
+				'statusTitle'           => esc_html__( 'GF TowX Integration', 'gravity-forms-tops' ),
 				'statusEnabled'         => esc_html__( 'Integration active on this form.', 'gravity-forms-tops' ),
 				'statusApi'             => esc_html__( 'JSON / XML endpoint', 'gravity-forms-tops' ),
 				'statusMakes'           => esc_html__( 'Makes loaded into dropdown', 'gravity-forms-tops' ),
@@ -1273,6 +1264,29 @@ class GF_Tops_Addon extends GFAddOn {
 						'html' => $this->get_custom_api_base_notice_html(),
 					),
 					array(
+						'name'    => 'api_product_mode',
+						'label'   => esc_html__( 'API product', 'gravity-forms-tops' ),
+						'type'    => 'select',
+						'choices' => array(
+							array(
+								'label' => esc_html__( 'TOPSLink (default)', 'gravity-forms-tops' ),
+								'value' => 'topslink',
+							),
+							array(
+								'label' => esc_html__( 'Custom product', 'gravity-forms-tops' ),
+								'value' => 'custom',
+							),
+						),
+						'tooltip' => esc_html__( 'TOPSLink is sent when this stays on the default. Choose Custom only when TowX gave you a different Product value. Credentials are sent either way. Saving other settings does not change a custom product you already saved.', 'gravity-forms-tops' ),
+					),
+					array(
+						'name'    => 'api_product_custom',
+						'label'   => esc_html__( 'Custom product', 'gravity-forms-tops' ),
+						'type'    => 'text',
+						'class'   => 'medium',
+						'tooltip' => esc_html__( 'Sent as the TowX Product on Create Call and on vehicle lookups. Letters, numbers, spaces, hyphens and underscores. A blank or invalid value keeps TOPSLink.', 'gravity-forms-tops' ),
+					),
+					array(
 						'name'  => 'notification_email',
 						'label' => esc_html__( 'Error notification email', 'gravity-forms-tops' ),
 						'type'  => 'text',
@@ -1280,11 +1294,12 @@ class GF_Tops_Addon extends GFAddOn {
 						'tooltip' => esc_html__( 'Optional. Must be a valid email address. Receives diagnostic emails when TowX Create Call fails (transport error, API error, or unexpected response). Leave blank to skip email.', 'gravity-forms-tops' ),
 					),
 					array(
-						'name'  => 'confirmation_error_contact_html',
-						'label' => esc_html__( 'Confirmation: contact line when TowX fails', 'gravity-forms-tops' ),
-						'type'  => 'textarea',
-						'class' => 'large',
-						'tooltip' => esc_html__( 'Optional HTML shown after an API error when this form does not override it under Form Settings → TOPS → TowX confirmation text. Message confirmations only, not redirects.', 'gravity-forms-tops' ),
+						'name'       => 'confirmation_error_contact_html',
+						'label'      => esc_html__( 'Confirmation: contact line when TowX fails', 'gravity-forms-tops' ),
+						'type'       => 'textarea',
+						'class'      => 'large',
+						'allow_html' => true,
+						'tooltip'    => esc_html__( 'Optional HTML shown after an API error when this form does not override it under Form Settings → GF TowX Integration → TowX confirmation text. Message confirmations only, not redirects.', 'gravity-forms-tops' ),
 					),
 					array(
 						'name'          => 'request_log_retention_days',
@@ -1312,7 +1327,7 @@ class GF_Tops_Addon extends GFAddOn {
 						'type'    => 'checkbox',
 						'choices' => array(
 							array(
-								'label' => esc_html__( 'Write TowX diagnostics to the browser console on forms with TOPS enabled', 'gravity-forms-tops' ),
+								'label' => esc_html__( 'Write TowX diagnostics to the browser console on forms with GF TowX Integration enabled', 'gravity-forms-tops' ),
 								'name'  => 'browser_console_logging',
 							),
 						),
@@ -1362,7 +1377,7 @@ class GF_Tops_Addon extends GFAddOn {
 
 		return array(
 			array(
-				'title'       => esc_html__( 'TOPS / TowX', 'gravity-forms-tops' ),
+				'title'       => esc_html__( 'GF TowX Integration', 'gravity-forms-tops' ),
 				'description' => '',
 				'fields'      => array(
 					array(
@@ -1392,7 +1407,7 @@ class GF_Tops_Addon extends GFAddOn {
 						'type'    => 'checkbox',
 						'choices' => array(
 							array(
-								'label' => esc_html__( 'Enable TowX browser console diagnostics for this form only (optional if already enabled under Forms → Settings → TOPS)', 'gravity-forms-tops' ),
+								'label' => esc_html__( 'Enable TowX browser console diagnostics for this form only (optional if already enabled under Forms → Settings → GF TowX Integration)', 'gravity-forms-tops' ),
 								'name'  => 'gf_tops_cascade_debug',
 							),
 						),
@@ -1523,32 +1538,36 @@ class GF_Tops_Addon extends GFAddOn {
 						'tooltip' => esc_html__( 'Leave blank to use the WordPress Site Title (Settings → General). Set only if this form should show a different name in default confirmation text and in the {organization} placeholder.', 'gravity-forms-tops' ),
 					),
 					array(
-						'name'    => 'tops_confirmation_contact_html',
-						'label'   => esc_html__( 'Contact HTML when TowX fails (optional)', 'gravity-forms-tops' ),
-						'type'    => 'textarea',
-						'class'   => 'large',
-						'tooltip' => esc_html__( 'Overrides the global Forms → Settings → TOPS contact line for this form only (e.g. phone link). Allowed HTML is sanitized.', 'gravity-forms-tops' ),
+						'name'       => 'tops_confirmation_contact_html',
+						'label'      => esc_html__( 'Contact HTML when TowX fails (optional)', 'gravity-forms-tops' ),
+						'type'       => 'textarea',
+						'class'      => 'large',
+						'allow_html' => true,
+						'tooltip'    => esc_html__( 'Overrides the global Forms → Settings → GF TowX Integration contact line for this form only (e.g. phone link). Allowed HTML is sanitized.', 'gravity-forms-tops' ),
 					),
 					array(
-						'name'    => 'tops_confirmation_success_custom',
-						'label'   => esc_html__( 'Custom message — TowX success (optional)', 'gravity-forms-tops' ),
-						'type'    => 'textarea',
-						'class'   => 'large',
-						'tooltip' => esc_html__( 'If set, replaces the default success block. Placeholders: {call_id}, {organization}, {site_name}, {contact_html}', 'gravity-forms-tops' ),
+						'name'       => 'tops_confirmation_success_custom',
+						'label'      => esc_html__( 'Custom message — TowX success (optional)', 'gravity-forms-tops' ),
+						'type'       => 'textarea',
+						'class'      => 'large',
+						'allow_html' => true,
+						'tooltip'    => esc_html__( 'If set, replaces the default success block. Placeholders: {call_id}, {organization}, {site_name}, {contact_html}', 'gravity-forms-tops' ),
 					),
 					array(
-						'name'    => 'tops_confirmation_error_custom',
-						'label'   => esc_html__( 'Custom message — TowX error (optional)', 'gravity-forms-tops' ),
-						'type'    => 'textarea',
-						'class'   => 'large',
-						'tooltip' => esc_html__( 'If set, replaces the default error block. Placeholders: {error} (the raw TowX / transport error, shown to visitors), {organization}, {site_name}, {contact_html}. The default block shows visitors a generic message instead.', 'gravity-forms-tops' ),
+						'name'       => 'tops_confirmation_error_custom',
+						'label'      => esc_html__( 'Custom message — TowX error (optional)', 'gravity-forms-tops' ),
+						'type'       => 'textarea',
+						'class'      => 'large',
+						'allow_html' => true,
+						'tooltip'    => esc_html__( 'If set, replaces the default error block. Placeholders: {error} (the raw TowX / transport error, shown to visitors), {organization}, {site_name}, {contact_html}. The default block shows visitors a generic message instead.', 'gravity-forms-tops' ),
 					),
 					array(
-						'name'    => 'tops_confirmation_unknown_custom',
-						'label'   => esc_html__( 'Custom message — unclear result (optional)', 'gravity-forms-tops' ),
-						'type'    => 'textarea',
-						'class'   => 'large',
-						'tooltip' => esc_html__( 'If set, replaces the default message when the response had no Call ID and no clear error. Placeholders: {organization}, {site_name}, {contact_html}', 'gravity-forms-tops' ),
+						'name'       => 'tops_confirmation_unknown_custom',
+						'label'      => esc_html__( 'Custom message — unclear result (optional)', 'gravity-forms-tops' ),
+						'type'       => 'textarea',
+						'class'      => 'large',
+						'allow_html' => true,
+						'tooltip'    => esc_html__( 'If set, replaces the default message when the response had no Call ID and no clear error. Placeholders: {organization}, {site_name}, {contact_html}', 'gravity-forms-tops' ),
 					),
 				),
 			),
@@ -1698,6 +1717,33 @@ class GF_Tops_Addon extends GFAddOn {
 	}
 
 	/**
+	 * TowX Product for Create Call and vehicle lookups.
+	 *
+	 * Missing or invalid settings use TOPSLink. This does not write the option: an upgrade leaves a saved
+	 * custom product alone, and a site that has never saved one keeps sending TOPSLink.
+	 *
+	 * @return string
+	 */
+	public function get_api_product() {
+		$plugin  = $this->get_plugin_settings();
+		$product = 'TOPSLink';
+		if ( is_array( $plugin ) && 'custom' === (string) rgar( $plugin, 'api_product_mode' ) ) {
+			$product = GF_Tops_Xml::normalize_product( rgar( $plugin, 'api_product_custom' ) );
+		}
+
+		/**
+		 * TowX Product sent on Create Call and vehicle lookups.
+		 *
+		 * @param string $product Resolved product. TOPSLink when no valid custom product is saved.
+		 */
+		$filtered = apply_filters( 'gf_tops_api_product', $product );
+		if ( ! is_string( $filtered ) ) {
+			$filtered = $product;
+		}
+		return GF_Tops_Xml::normalize_product( $filtered );
+	}
+
+	/**
 	 * Create Call XML endpoint: same TowX base as JSON (plugin → TOPS → API environment).
 	 *
 	 * @return string
@@ -1705,7 +1751,7 @@ class GF_Tops_Addon extends GFAddOn {
 	protected function get_create_call_url() {
 		return esc_url_raw(
 			add_query_arg(
-				array( 'Product' => 'TOPSLink' ),
+				array( 'Product' => $this->get_api_product() ),
 				$this->get_json_api_base()
 			)
 		);
@@ -1794,6 +1840,7 @@ class GF_Tops_Addon extends GFAddOn {
 	protected function get_vehicle_list_cache_key( array $settings, $verb, $make_key = '' ) {
 		$parts = array(
 			$this->get_json_api_base(),
+			$this->get_api_product(),
 			(string) rgar( $settings, 'tops_session_id' ),
 			(string) rgar( $settings, 'tops_auth_key' ),
 			(string) $verb,
@@ -2092,7 +2139,7 @@ class GF_Tops_Addon extends GFAddOn {
 	protected function get_models_url( array $settings, $make_key ) {
 		return add_query_arg(
 			array(
-				'Product'           => 'TOPSLink',
+				'Product'           => $this->get_api_product(),
 				'Noun'              => 'Call',
 				'Verb'              => 'GetModelsForMake',
 				'SessionID'         => rawurlencode( (string) rgar( $settings, 'tops_session_id' ) ),
@@ -2139,7 +2186,7 @@ class GF_Tops_Addon extends GFAddOn {
 		$base = $this->get_json_api_base();
 		$url  = add_query_arg(
 			array(
-				'Product'            => 'TOPSLink',
+				'Product'            => $this->get_api_product(),
 				'Noun'               => 'Call',
 				'Verb'               => $verb,
 				'SessionID'          => rawurlencode( (string) rgar( $form_settings, 'tops_session_id' ) ),
@@ -2566,7 +2613,7 @@ class GF_Tops_Addon extends GFAddOn {
 		$base = $this->get_json_api_base();
 		$url  = add_query_arg(
 			array(
-				'Product'           => 'TOPSLink',
+				'Product'           => $this->get_api_product(),
 				'Noun'              => 'Call',
 				'Verb'              => 'GetMakes',
 				'SessionID'         => rawurlencode( $session ),
@@ -2785,7 +2832,7 @@ class GF_Tops_Addon extends GFAddOn {
 			'color_key'      => GF_Tops_Entry::get_value( $form, $entry, rgar( $map, 'color_key' ) ),
 		);
 
-		$xml       = GF_Tops_Xml::build_create_call_xml( $auth, $data );
+		$xml       = GF_Tops_Xml::build_create_call_xml( $auth, $data, $this->get_api_product() );
 		$url       = $this->get_create_call_url();
 		$redacted  = GF_Tops_Xml::redact_for_log( $xml );
 		$post_out  = GF_Tops_Xml::post( $url, $xml );
@@ -2975,7 +3022,7 @@ class GF_Tops_Addon extends GFAddOn {
 		add_submenu_page(
 			'gf_edit_forms',
 			__( 'TOPS request log', 'gravity-forms-tops' ),
-			__( 'TOPS log', 'gravity-forms-tops' ),
+			__( 'GF TowX Integration log', 'gravity-forms-tops' ),
 			$this->get_request_log_menu_capability(),
 			'gf_tops_request_log',
 			array( $this, 'render_request_log_page' )
@@ -2999,7 +3046,7 @@ class GF_Tops_Addon extends GFAddOn {
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		echo '<div class="wrap gf-tops-request-log-wrap">';
-		echo '<h1 class="wp-heading-inline">' . esc_html__( 'TOPS / TowX request log', 'gravity-forms-tops' ) . '</h1>';
+		echo '<h1 class="wp-heading-inline">' . esc_html__( 'GF TowX Integration request log', 'gravity-forms-tops' ) . '</h1>';
 		echo '<hr class="wp-header-end" />';
 
 		if ( 'resent_ok' === $notice ) {
@@ -3007,7 +3054,7 @@ class GF_Tops_Addon extends GFAddOn {
 		} elseif ( 'resent_fail' === $notice ) {
 			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Resend could not be completed.', 'gravity-forms-tops' ) . '</p></div>';
 		} elseif ( 'resent_result' === $notice && 'no_map' === $outcome ) {
-			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Nothing was sent: this form has no TOPS field map. Map the fields under Form Settings → TOPS, then resend.', 'gravity-forms-tops' ) . '</p></div>';
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Nothing was sent: this form has no GF TowX Integration field map. Map the fields under Form Settings → GF TowX Integration, then resend.', 'gravity-forms-tops' ) . '</p></div>';
 		} elseif ( 'resent_result' === $notice ) {
 			echo '<div class="notice notice-warning is-dismissible"><p>' . sprintf(
 				/* translators: %s: request log status label, e.g. "API error" */
@@ -3398,7 +3445,7 @@ class GF_Tops_Addon extends GFAddOn {
 	/**
 	 * HTML block for confirmation: success (Call ID), API/transport error, or ambiguous state.
 	 *
-	 * Per-form text lives under Form Settings → TOPS → TowX confirmation text. The default “contacting …”
+	 * Per-form text lives under Form Settings → GF TowX Integration → TowX confirmation text. The default “contacting …”
 	 * name is the WordPress Site Title unless you set a per-form override or custom templates.
 	 *
 	 * @param array $form Form.
@@ -3618,7 +3665,7 @@ class GF_Tops_Addon extends GFAddOn {
 		$raw_to = rgar( $plugin, 'notification_email' );
 		$to     = is_string( $raw_to ) ? sanitize_email( trim( $raw_to ) ) : '';
 		if ( ! is_email( $to ) ) {
-			$this->log( 'TowX error email skipped: invalid or empty Error notification email (Forms → Settings → TOPS).' );
+			$this->log( 'TowX error email skipped: invalid or empty Error notification email (Forms → Settings → GF TowX Integration).' );
 			return;
 		}
 

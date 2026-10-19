@@ -189,10 +189,81 @@ class OwnerDecisionsTest extends TestCase {
 	}
 
 	public function test_support_link_on_the_plugins_screen() {
-		$links = $this->addon->add_plugin_row_meta( array( 'Version 1.5.0' ), plugin_basename( GF_TOPS_FILE ) );
-		$this->assertStringContainsString( 'mailto:support@duppinstech.com', end( $links ) );
+		$info = new GF_Tops_Plugin_Info(
+			array(
+				'file'         => GF_TOPS_FILE,
+				'settings_url' => 'admin.php?page=gf_settings&subview=gravityformstops',
+				'help_url'     => '',
+				'support_url'  => 'mailto:support@duppinstech.com',
+			)
+		);
+		$GLOBALS['gf_tops_test_user_can'] = true;
+		$meta                             = $info->row_meta(
+			array( 'Version 1.5.0', '<a href="https://duppinstech.com">Duppins Technology</a>' ),
+			plugin_basename( GF_TOPS_FILE )
+		);
+		$sponsor = $meta[2];
+		$this->assertStringContainsString( 'https://github.com/sponsors/oduppinsjr', $sponsor );
+		$this->assertStringContainsString( 'Sponsor', $sponsor );
+		$this->assertStringContainsString( 'target="_blank"', $sponsor );
+		$this->assertStringContainsString( 'mailto:support@duppinstech.com', end( $meta ) );
+		$this->assertStringContainsString( 'plugin-information', implode( '', $meta ) );
 
-		$this->assertSame( array( 'x' ), $this->addon->add_plugin_row_meta( array( 'x' ), 'other/other.php' ) );
+		$already = $info->row_meta(
+			array( '<a href="https://duppinstech.com">Duppins Technology</a>', '<a class="thickbox" href="plugin-install.php?tab=plugin-information">View details</a>' ),
+			plugin_basename( GF_TOPS_FILE )
+		);
+		$this->assertSame( 1, substr_count( implode( '', $already ), 'plugin-information' ) );
+
+		$this->assertSame( array( 'x' ), $info->row_meta( array( 'x' ), 'other/other.php' ) );
+
+		$links = $info->action_links( array( 'Deactivate' ) );
+		$this->assertSame( 'Settings', wp_strip_all_tags( $links[0] ) );
+		$this->assertStringContainsString( 'page=gf_settings&subview=gravityformstops', $links[0] );
+		$this->assertStringNotContainsString( 'Help', implode( '', $links ) );
+		$this->assertSame( 'Deactivate', $links[1] );
+
+		$GLOBALS['gf_tops_test_user_can'] = false;
+		$this->assertSame( array( 'Deactivate' ), $info->action_links( array( 'Deactivate' ) ) );
+		$hidden = $info->row_meta( array( '<a href="https://duppinstech.com">Author</a>' ), plugin_basename( GF_TOPS_FILE ) );
+		$this->assertStringNotContainsString( 'mailto:', implode( '', $hidden ) );
+	}
+
+	public function test_view_details_reads_readme_and_wporg_images() {
+		$info   = new GF_Tops_Plugin_Info( array( 'file' => GF_TOPS_FILE ) );
+		$readme = $info->readme();
+		$this->assertSame( '1.6.0', $readme['headers']['stable tag'] );
+		$this->assertArrayHasKey( 'description', $readme['sections'] );
+		$this->assertArrayHasKey( 'installation', $readme['sections'] );
+		$this->assertArrayHasKey( 'frequently asked questions', $readme['sections'] );
+		$this->assertArrayHasKey( 'changelog', $readme['sections'] );
+
+		$info_obj = $info->filter_plugins_api( false, 'plugin_information', (object) array( 'slug' => 'gravity-forms-tops' ) );
+		$this->assertIsObject( $info_obj );
+		$this->assertArrayHasKey( 'description', $info_obj->sections );
+		$this->assertArrayHasKey( 'installation', $info_obj->sections );
+		$this->assertArrayHasKey( 'faq', $info_obj->sections );
+		$this->assertArrayHasKey( 'changelog', $info_obj->sections );
+		$this->assertStringContainsString( 'Setup checklist', $info_obj->sections['changelog'] );
+		$this->assertStringContainsString( 'TowXchange', $info_obj->sections['faq'] );
+		$this->assertStringContainsString( '90 days', $info_obj->sections['faq'] );
+		$this->assertSame( false, $info->filter_plugins_api( false, 'plugin_information', (object) array( 'slug' => 'other-plugin' ) ) );
+
+		$kept = $info->filter_plugins_api(
+			(object) array( 'sections' => array( 'changelog' => '<p>Release notes</p>' ) ),
+			'plugin_information',
+			(object) array( 'slug' => 'gravity-forms-tops' )
+		);
+		$this->assertSame( '<p>Release notes</p>', $kept->sections['changelog'] );
+
+		$this->assertStringContainsString( 'banner-772x250.jpg', $info_obj->banners['low'] );
+		$this->assertStringContainsString( 'banner-1544x500.jpg', $info_obj->banners['high'] );
+		$this->assertStringContainsString( 'icon-128x128.png', $info_obj->icons['1x'] );
+		$this->assertStringContainsString( 'icon-256x256.png', $info_obj->icons['2x'] );
+		$this->assertArrayHasKey( 'screenshots', $info_obj->sections );
+		$this->assertStringContainsString( 'screenshot-1.jpg', $info_obj->sections['screenshots'] );
+		$this->assertStringContainsString( 'screenshot-2.jpg', $info_obj->sections['screenshots'] );
+		$this->assertStringContainsString( 'while QA is down', $info_obj->sections['screenshots'] );
 	}
 
 	public function test_failure_email_links_to_the_request_log_and_never_contains_credentials() {
@@ -223,5 +294,24 @@ class OwnerDecisionsTest extends TestCase {
 
 		$this->assertArrayHasKey( GF_Tops_Request_Log::PURGE_HOOK, $GLOBALS['gf_tops_test_cron'] );
 		$this->assertGreaterThanOrEqual( time() + DAY_IN_SECONDS - 5, $GLOBALS['gf_tops_test_cron'][ GF_Tops_Request_Log::PURGE_HOOK ] );
+	}
+
+	public function test_public_name_is_callpost_and_contributions_use_the_dco() {
+		$root     = dirname( __DIR__ );
+		$header   = file_get_contents( $root . '/gravity-forms-tops.php' );
+		$readme   = file_get_contents( $root . '/readme.txt' );
+		$contrib  = file_get_contents( $root . '/CONTRIBUTING.md' );
+		$dco      = file_get_contents( $root . '/DCO' );
+		$plan     = file_get_contents( $root . '/PLAN.md' );
+		$standard = file_get_contents( $root . '/docs/github-updater-standard.md' );
+
+		$this->assertStringContainsString( 'Plugin Name:       GF TowX Integration', $header );
+		$this->assertStringContainsString( '=== GF TowX Integration ===', $readme );
+		$this->assertStringContainsString( 'not affiliated with or endorsed by Rocketgenius', $readme );
+		$this->assertStringContainsString( 'AS IS', $readme );
+		$this->assertStringContainsString( 'Signed-off-by:', $contrib );
+		$this->assertStringContainsString( "Developer's Certificate of Origin 1.1", $dco );
+		$this->assertStringNotContainsString( 'Landing Page Manager', $plan );
+		$this->assertStringNotContainsString( 'LPM_GitHub_Updater', $standard );
 	}
 }

@@ -6,6 +6,8 @@
 	<exclude-pattern>/vendor/*</exclude-pattern>
 	<exclude-pattern>/build/*</exclude-pattern>
 	<exclude-pattern>/node_modules/*</exclude-pattern>
+	<!-- Copied plugin-info standard. Keep it verbatim; do not reformat it for these sniffs. -->
+	<exclude-pattern>/includes/class-gf-tops-plugin-info.php</exclude-pattern>
 	<!-- Test doubles intentionally stub WordPress / Gravity Forms globals. -->
 	<exclude-pattern>/tests/*</exclude-pattern>
 	<exclude-pattern>/bin/*</exclude-pattern>

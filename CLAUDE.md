@@ -2,7 +2,7 @@
 
 # Claude Code Project Guide
 
-Gravity Forms TOPS / TowX Integration is a WordPress plugin maintained by Duppins Technology. It maps Gravity Forms submissions to TowX / TOPS API requests.
+GF TowX Integration is a WordPress plugin maintained by Duppins Technology. It maps Gravity Forms submissions to TOPS by TowXchange.
 
 ## Read before changing code
 
@@ -19,6 +19,7 @@ Gravity Forms TOPS / TowX Integration is a WordPress plugin maintained by Duppin
 - Hooks reference: `docs/hooks.md` (update it when adding or changing a filter)
 - Release ZIP: `.github/workflows/release.yml`, triggered by `v*` tags; package contents come from `bin/build-zip.sh`.
 - Updater: `includes/class-gf-tops-github-updater.php` is the **reference implementation** of `docs/github-updater-standard.md`, copied into other Duppins Technology plugins. Behavior changes go through the standard: update the doc and tests, bump `STANDARD_VERSION`.
+- Plugins screen: `includes/class-gf-tops-plugin-info.php` (plugin-info standard v1.0.0). Keep that class verbatim except the class name; behavior changes belong in the scaffold copy.
 - CI: `.github/workflows/ci.yml` (lint, PHPCS, PHPUnit on PHP 7.4–8.4). Actions are pinned to commit SHAs in both workflows.
 - Step-by-step playbooks: `.claude/playbooks/` (bug fix, feature change, release).
 - Requirements: WordPress 6.2+, PHP 7.4+, and active Gravity Forms.

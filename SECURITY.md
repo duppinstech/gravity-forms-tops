@@ -29,8 +29,17 @@ We aim to acknowledge reports within a few business days.
 - Secrets are decrypted only in memory when calling TowX. The settings screen receives the stored (encrypted) value, never the plaintext.
 - Gravity Forms may embed the full form object (including add-on settings) in **admin JavaScript** on the form settings screen. Password and key appear there only as ciphertext; User ID and Session ID appear as stored. Mitigate with strict admin access and auditing.
 - **Request log** rows (`{prefix}gf_tops_request_log`) store the Create Call XML with User ID, Password, Session ID and Authentication key replaced by `***` (User ID since 1.5.0), plus TowX’s raw response. They still contain customer details from the submission (name, phone, addresses, vehicle, notes) and are deleted after 90 days by default (configurable; 0 keeps them forever), when erased with **Tools → Erase Personal Data**, or when the plugin is deleted. Viewing the log requires the Gravity Forms view-entries permission; resending requires edit-entries.
-- **Failure emails** (optional, Forms → Settings → TOPS) contain the redacted request XML and TowX’s response. Before **1.4.0** these emails included the TowX password, Session ID and authentication key in plain text; rotate those credentials if error emails were enabled on an older version.
+- **Failure emails** (optional, Forms → Settings → GF TowX Integration) contain the redacted request XML, TowX’s response, and a link to the request log. Before **1.4.0** these emails included the TowX password, Session ID and authentication key in plain text; rotate those credentials if error emails were enabled on an older version.
+- TowX credentials are stored **per form**. They are sent on the request the way TowX’s API documents. A custom API address is always requested over HTTPS, and the settings screen warns when that address is not a TowXchange host.
 - Cached TowX vehicle lists are stored as transients keyed by a salted hash of the credentials; the credentials themselves are not stored in the cache.
+
+## Verifying a release package
+
+GitHub attests the release ZIP when the release workflow publishes it. The plugin's updater does not check that attestation. Before installing a ZIP outside **Plugins → Updates**, verify it:
+
+```bash
+gh attestation verify gravity-forms-tops.zip -R duppinstech/gravity-forms-tops
+```
 
 ## Out of scope
 

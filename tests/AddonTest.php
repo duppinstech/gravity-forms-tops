@@ -204,6 +204,43 @@ class AddonTest extends TestCase {
 		$this->assertSame( array(), $GLOBALS['gf_tops_test_get_requests'] );
 	}
 
+	public function test_api_product_defaults_to_topslink_without_writing_settings() {
+		$GLOBALS['gf_tops_test_plugin_settings'] = array( 'api_environment' => 'production' );
+		$before                                  = $GLOBALS['gf_tops_test_plugin_settings'];
+
+		$this->assertSame( 'TOPSLink', $this->addon->get_api_product() );
+		$this->assertSame( $before, $GLOBALS['gf_tops_test_plugin_settings'], 'Resolving the default does not save a product.' );
+		$this->assertStringContainsString( 'Product=TOPSLink', $this->call( 'get_create_call_url' ) );
+		$this->assertStringContainsString( 'Product=TOPSLink', $this->call( 'get_models_url', $this->settings(), '10' ) );
+
+		$GLOBALS['gf_tops_test_plugin_settings'] = array(
+			'api_product_mode'   => 'custom',
+			'api_product_custom' => 'CustomProduct',
+		);
+		$this->assertSame( 'CustomProduct', $this->addon->get_api_product() );
+		$this->assertSame( 'CustomProduct', $GLOBALS['gf_tops_test_plugin_settings']['api_product_custom'] );
+		$this->assertStringContainsString( 'Product=CustomProduct', $this->call( 'get_create_call_url' ) );
+
+		$custom_key = $this->call( 'get_vehicle_list_cache_key', $this->settings(), 'GetMakes' );
+		$GLOBALS['gf_tops_test_plugin_settings']['api_product_mode'] = 'topslink';
+		$this->assertSame( 'TOPSLink', $this->addon->get_api_product() );
+		$this->assertSame( 'CustomProduct', $GLOBALS['gf_tops_test_plugin_settings']['api_product_custom'], 'Switching back to TOPSLink keeps the saved custom name.' );
+		$this->assertNotSame( $custom_key, $this->call( 'get_vehicle_list_cache_key', $this->settings(), 'GetMakes' ) );
+
+		$GLOBALS['gf_tops_test_plugin_settings'] = array(
+			'api_product_mode'   => 'custom',
+			'api_product_custom' => 'A</Product><Injected>',
+		);
+		$this->assertSame( 'TOPSLink', $this->addon->get_api_product() );
+		$this->assertSame( 'A</Product><Injected>', $GLOBALS['gf_tops_test_plugin_settings']['api_product_custom'], 'An invalid saved value is not rewritten.' );
+
+		$GLOBALS['gf_tops_test_filters']['gf_tops_api_product'] = static function () {
+			return 'FilteredProduct';
+		};
+		$GLOBALS['gf_tops_test_plugin_settings'] = array();
+		$this->assertSame( 'FilteredProduct', $this->addon->get_api_product() );
+	}
+
 	public function test_custom_api_base_is_always_https() {
 		$GLOBALS['gf_tops_test_plugin_settings'] = array(
 			'api_environment' => 'custom',
@@ -270,6 +307,30 @@ class AddonTest extends TestCase {
 		}
 		$this->assertNotContains( 'dispatch_notes', $required );
 		$this->assertNotContains( 'customer_email', $required );
+	}
+
+	public function test_confirmation_textareas_allow_html() {
+		$html_fields = array(
+			'confirmation_error_contact_html',
+			'tops_confirmation_contact_html',
+			'tops_confirmation_success_custom',
+			'tops_confirmation_error_custom',
+			'tops_confirmation_unknown_custom',
+		);
+		$found = array();
+		foreach ( array( $this->addon->plugin_settings_fields(), $this->addon->form_settings_fields( array( 'id' => 1 ) ) ) as $sections ) {
+			foreach ( $sections as $section ) {
+				foreach ( $section['fields'] as $field ) {
+					if ( in_array( $field['name'], $html_fields, true ) ) {
+						$found[ $field['name'] ] = ! empty( $field['allow_html'] );
+					}
+				}
+			}
+		}
+		foreach ( $html_fields as $name ) {
+			$this->assertArrayHasKey( $name, $found );
+			$this->assertTrue( $found[ $name ], $name );
+		}
 	}
 
 	public function test_log_labels_are_translated_and_unknown_values_pass_through() {

@@ -44,13 +44,29 @@ class GF_Tops_Xml {
 	}
 
 	/**
-	 * Build the Create Call XML body.
+	 * TowX Product value. Anything other than letters, numbers, spaces, hyphens or underscores becomes TOPSLink.
 	 *
-	 * @param array $auth Keys: user_id, password, session_id, authentication_key.
-	 * @param array $data Keys matching TowX Data element names.
+	 * @param string $product Raw product.
 	 * @return string
 	 */
-	public static function build_create_call_xml( array $auth, array $data ) {
+	public static function normalize_product( $product ) {
+		$product = trim( (string) $product );
+		if ( ! preg_match( '/^[A-Za-z0-9][A-Za-z0-9 _-]{0,63}$/', $product ) ) {
+			return 'TOPSLink';
+		}
+		return $product;
+	}
+
+	/**
+	 * Build the Create Call XML body.
+	 *
+	 * @param array  $auth    Keys: user_id, password, session_id, authentication_key.
+	 * @param array  $data    Keys matching TowX Data element names.
+	 * @param string $product TowX Product. Invalid values use TOPSLink.
+	 * @return string
+	 */
+	public static function build_create_call_xml( array $auth, array $data, $product = 'TOPSLink' ) {
+		$product = self::escape( self::normalize_product( $product ) );
 		$uid     = self::escape( $auth['user_id'] );
 		$pass    = self::escape( $auth['password'] );
 		$sess    = self::escape( $auth['session_id'] );
@@ -73,7 +89,7 @@ class GF_Tops_Xml {
 <!DOCTYPE towXRequest>
 <towXRequest>
   <Operation>
-    <Product>TOPSLink</Product>
+    <Product>' . $product . '</Product>
     <Noun>Call</Noun>
     <Verb>Create</Verb>
     <Mode>[Blank]</Mode>

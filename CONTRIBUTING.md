@@ -1,6 +1,16 @@
 # Contributing
 
-Thank you for helping improve this plugin. It is owned by Duppins Technology; see [OWNERSHIP.md](OWNERSHIP.md). Contributions are accepted under the plugin's GPL-2.0-or-later license.
+Thank you for helping improve GF TowX Integration. It is owned by Duppins Technology; see [OWNERSHIP.md](OWNERSHIP.md). Contributions are accepted under the plugin's GPL-2.0-or-later license.
+
+## Developer Certificate of Origin
+
+Every contribution must include a `Signed-off-by` line. That line certifies the [Developer Certificate of Origin 1.1](DCO). Add it with `git commit -s`:
+
+```text
+Signed-off-by: Your Name <you@example.com>
+```
+
+Use the name and email on the commit. A Developer Certificate of Origin is a statement that you have the right to submit the contribution under this project's license. It is not a separate copyright assignment. There is no contributor license agreement in this repository.
 
 ## Security
 
@@ -27,6 +37,7 @@ Do **not** open a public issue for undisclosed vulnerabilities. Follow [SECURITY
 | Filters reference (update when adding or changing a filter) | `docs/hooks.md` |
 | Request-log table | `includes/class-gf-tops-request-log.php` |
 | GitHub Releases updater | `includes/class-gf-tops-github-updater.php` |
+| Plugins screen links and View details | `includes/class-gf-tops-plugin-info.php` (copied standard; do not reformat), images in `assets/wporg/`, captions in `readme.txt` |
 | Release package contents | `bin/build-zip.sh` |
 | Release notes (requirements + changelog) | `bin/release-notes.sh` |
 | Unit tests and WordPress stubs | `tests/` |
