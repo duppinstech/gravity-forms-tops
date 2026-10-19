@@ -336,6 +336,37 @@ function admin_url( $path = '' ) {
 	return 'https://example.test/wp-admin/' . ltrim( (string) $path, '/' );
 }
 
+/**
+ * Enough of WordPress add_query_arg() for array arguments on a URL.
+ *
+ * @param array|string $args Query args, or a single key when used the other way.
+ * @param string       $url  Base URL when $args is an array.
+ * @return string
+ */
+function add_query_arg( $args, $url = '' ) {
+	if ( ! is_array( $args ) ) {
+		return (string) $url;
+	}
+	$pairs = array();
+	foreach ( $args as $key => $value ) {
+		$pairs[] = rawurlencode( (string) $key ) . '=' . rawurlencode( (string) $value );
+	}
+	$sep = ( false === strpos( (string) $url, '?' ) ) ? '?' : '&';
+	return (string) $url . $sep . implode( '&', $pairs );
+}
+
+function self_admin_url( $path = '' ) {
+	return admin_url( $path );
+}
+
+function plugins_url( $path = '', $plugin = '' ) {
+	return 'https://example.test/wp-content/plugins/gravity-forms-tops/' . ltrim( (string) $path, '/' );
+}
+
+function esc_attr( $text ) {
+	return esc_html( $text );
+}
+
 function sanitize_email( $email ) {
 	return (string) $email;
 }
@@ -494,6 +525,7 @@ class GF_Tops_Test_Wpdb {
 $GLOBALS['wpdb'] = new GF_Tops_Test_Wpdb();
 
 require_once dirname( __DIR__ ) . '/includes/class-gf-tops-github-updater.php';
+require_once dirname( __DIR__ ) . '/includes/class-gf-tops-plugin-info.php';
 require_once dirname( __DIR__ ) . '/includes/class-gf-tops-secrets.php';
 require_once dirname( __DIR__ ) . '/includes/class-gf-tops-xml.php';
 require_once dirname( __DIR__ ) . '/includes/class-gf-tops-entry.php';

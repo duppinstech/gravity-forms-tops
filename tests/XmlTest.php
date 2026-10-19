@@ -55,6 +55,18 @@ class XmlTest extends TestCase {
 		$this->assertSame( '20', (string) $doc->Data->ModelKey );
 	}
 
+	public function test_custom_product_is_used_and_an_invalid_product_stays_topslink() {
+		$xml = GF_Tops_Xml::build_create_call_xml( $this->auth(), $this->data(), 'CustomProduct' );
+		$doc = simplexml_load_string( $xml );
+		$this->assertSame( 'CustomProduct', (string) $doc->Operation->Product );
+
+		$bad = GF_Tops_Xml::build_create_call_xml( $this->auth(), $this->data(), 'A</Product><Injected>' );
+		$doc = simplexml_load_string( $bad );
+		$this->assertNotFalse( $doc );
+		$this->assertSame( 'TOPSLink', (string) $doc->Operation->Product );
+		$this->assertFalse( isset( $doc->Injected ) );
+	}
+
 	public function test_markup_and_control_characters_in_input_cannot_break_the_document() {
 		$xml = GF_Tops_Xml::build_create_call_xml(
 			$this->auth(),

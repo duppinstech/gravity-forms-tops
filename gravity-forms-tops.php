@@ -40,6 +40,18 @@ GF_Tops_GitHub_Updater::boot(
 	)
 );
 
+require_once GF_TOPS_PATH . 'includes/class-gf-tops-plugin-info.php';
+
+// Plugins screen links and the View details modal. Help is omitted: the setup guide lives in readme.txt.
+GF_Tops_Plugin_Info::boot(
+	array(
+		'file'         => GF_TOPS_FILE,
+		'settings_url' => 'admin.php?page=gf_settings&subview=gravityformstops',
+		'help_url'     => '',
+		'support_url'  => 'mailto:support@duppinstech.com',
+	)
+);
+
 register_deactivation_hook(
 	__FILE__,
 	static function () {

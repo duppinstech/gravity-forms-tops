@@ -34,14 +34,14 @@ This plugin is not affiliated with or endorsed by Rocketgenius (Gravity Forms) o
 
 = Setup guide =
 
-1. **Get TowX API credentials.** Ask TowXchange (or your TOPS administrator) for API access. You need four values: **User ID**, **Password**, **Session ID** and **Authentication key**. Ask for **QA (test) access** as well, so you can test without creating real tow calls.
-2. **Choose the environment.** Go to **Forms → Settings → TOPS** and set **API environment** to **QA** while you test. Optionally enter an **Error notification email** and a **contact line** shown to visitors if TowX cannot take a request (for example your dispatch phone number).
+1. **Get TowX API credentials.** Ask TowXchange (or your TOPS administrator) for API access. You need four values: **User ID**, **Password**, **Session ID** and **Authentication key**. QA is for tests that must not create a real tow call. As of 2026-10-18, QA (`apiqa.towxchange.net`) does not answer; only Production does.
+2. **Choose the environment.** Go to **Forms → Settings → TOPS**. Use **QA** when it is answering. While QA is down, **Production** is the only working environment, and every submission creates a real tow call. **API product** stays **TOPSLink** unless TowX gave you a different Product name: choose **Custom product** and enter that name. An update does not fill this in for you, and it does not replace a custom product you already saved. Optionally enter an **Error notification email** and a **contact line** shown to visitors if TowX cannot take a request (for example your dispatch phone number).
 3. **Build the form.** Your request form needs fields for: pickup location and destination (Address, Single Line Text or Paragraph), caller name (Name or Text), caller phone (Phone or Text), tag number and tag state, vehicle year, and **Make, Model and Color as Drop Down fields** (the plugin fills their choices from TowX). Optional: dispatch notes, bill-to account, customer email, owner name, key location and call reason are added to the dispatch notes.
 4. **Enable and connect.** Open the form → **Settings → TOPS**. Tick **Enable integration**, enter the four credentials, click **Save settings**, then **Test authentication**. It should report the number of vehicle makes found.
 5. **Map the fields.** Under **Field map**, choose the form field for each TowX field and save. Once the integration is enabled and saved, the **Setup checklist** at the top of the tab shows what is still missing.
 6. **Use a message confirmation.** The TowX result (Call ID, or the error and your contact line) is added to Gravity Forms **Text** confirmations. Redirect confirmations do not show it.
-7. **Test on QA.** Submit the form. You should see a Call ID in the confirmation and a **Success** row under **Forms → TOPS log**.
-8. **Go live.** Switch **API environment** to **Production**. From then on, every submission creates a real tow call.
+7. **Test.** When QA is answering, submit there. You should see a Call ID in the confirmation and a **Success** row under **Forms → TOPS log**. While QA is down, a test has to use Production and creates a real tow call.
+8. **Go live.** With **API environment** set to **Production**, every submission creates a real tow call.
 
 = Page caching =
 
@@ -85,6 +85,14 @@ In Gravity Forms form meta for that form, encrypted with Gravity Forms' built-in
 
 Users who can view Gravity Forms entries. Resending requires permission to edit entries. Log rows contain customer details from the request, with the TowX User ID, password, Session ID and authentication key removed.
 
+= Which services does this plugin contact? =
+
+TowXchange (TowX / TOPS) at `api.towxchange.net` (Production), `apiqa.towxchange.net` (QA), or the custom address you enter. Each submitted request (name, phone, locations, vehicle, tag, notes) and your TowX credentials are sent to create the call, and vehicle lists are requested to fill the drop-downs. GitHub (`api.github.com` and `github.com`) is checked for plugin updates; no visitor data is sent there.
+
+= How long is the request log kept? =
+
+Request-log rows, including customer details from each request, are deleted after **90 days** by default (**Forms → Settings → TOPS → Keep request log for**; 0 keeps them forever). Rows that include the person's email can be erased sooner with **Tools → Erase Personal Data**. Requests submitted without that email must be found in **Forms → TOPS log** by name or phone. Gravity Forms entries are not deleted by this plugin.
+
 = How do I get support? =
 
 Email **support@duppinstech.com**. Please include: plugin, WordPress, PHP and Gravity Forms versions; the API environment; the form ID, entry ID and request-log row; the status and error text; and the **Test authentication** result. **Never send** your TowX password, Session ID or authentication key.
@@ -99,6 +107,11 @@ This plugin connects to:
 == Privacy ==
 
 Request-log rows (including customer details from each request) are stored in your site's database and deleted automatically after **90 days** (change it under **Forms → Settings → TOPS → Keep request log for**; 0 keeps them forever). Gravity Forms entries are kept as Gravity Forms keeps them. Rows can be erased sooner with **Tools → Erase Personal Data**, and all rows are removed when the plugin is deleted. Rows are matched to a person by their email address (in the Gravity Forms entry or the stored request); requests submitted without that email address must be found in **Forms → TOPS log** by name or phone. Failure notification emails include the request details and stay in the recipient's mailbox. Suggested privacy-policy text is added under **Settings → Privacy → Policy Guide**.
+
+== Screenshots ==
+
+1. Forms → Settings → TOPS: choose the TowX environment (this picture shows Production, which is the environment that answers while QA is down), set the error email and the contact line visitors see, and choose how long request-log rows are kept.
+2. A form's Settings → TOPS tab: enter the TowX credentials, save them, and test the connection. The field map starts underneath.
 
 == Changelog ==
 

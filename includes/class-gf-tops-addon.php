@@ -60,11 +60,6 @@ class GF_Tops_Addon extends GFAddOn {
 	protected $_short_title = 'TOPS';
 
 	/**
-	 * Support contact shown on the Plugins screen and in documentation.
-	 */
-	const SUPPORT_EMAIL = 'support@duppinstech.com';
-
-	/**
 	 * Singleton.
 	 *
 	 * @var GF_Tops_Addon|null
@@ -153,36 +148,23 @@ class GF_Tops_Addon extends GFAddOn {
 		GF_Tops_Privacy::register_hooks();
 
 		if ( is_admin() ) {
-			add_filter( 'plugin_action_links_' . plugin_basename( GF_TOPS_FILE ), array( $this, 'add_plugin_action_links' ) );
-			add_filter( 'plugin_row_meta', array( $this, 'add_plugin_row_meta' ), 10, 2 );
 			add_action( 'admin_menu', array( $this, 'register_request_log_menu' ), 60 );
 			add_action( 'admin_post_gf_tops_resend_create_call', array( $this, 'handle_resend_create_call_post' ) );
 		}
 	}
 
 	/**
-	 * "Settings" link on the Plugins screen.
+	 * Suppress Gravity Forms' Settings link so GF_Tops_Plugin_Info is the only one
+	 * (Forms → Settings → TOPS, capability manage_options).
 	 *
-	 * @param array $links Action links.
-	 * @return array
-	 */
-	public function add_plugin_action_links( $links ) {
-		$url = admin_url( 'admin.php?page=gf_settings&subview=' . $this->get_slug() );
-		array_unshift( $links, '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'gravity-forms-tops' ) . '</a>' );
-		return $links;
-	}
-
-	/**
-	 * "Support" link under the plugin description on the Plugins screen.
+	 * The signature matches GFAddOn::plugin_settings_link( $links, $file ).
 	 *
-	 * @param array  $links Row meta links.
-	 * @param string $file  Plugin basename.
-	 * @return array
+	 * @param string[] $links An array of plugin action links.
+	 * @param string   $file  Path to the plugin file relative to the plugins directory.
+	 * @return string[]
 	 */
-	public function add_plugin_row_meta( $links, $file ) {
-		if ( plugin_basename( GF_TOPS_FILE ) === $file ) {
-			$links[] = '<a href="' . esc_url( 'mailto:' . self::SUPPORT_EMAIL ) . '">' . esc_html__( 'Support', 'gravity-forms-tops' ) . '</a>';
-		}
+	public function plugin_settings_link( $links, $file ) {
+		unset( $file );
 		return $links;
 	}
 
@@ -741,6 +723,15 @@ class GF_Tops_Addon extends GFAddOn {
 				wp_strip_all_tags( $this->get_api_environment_label() )
 			),
 		);
+		$items[] = array(
+			'ok'   => true,
+			'warn' => false,
+			'text' => sprintf(
+				/* translators: %s: TowX Product value, for example TOPSLink */
+				__( 'API product: %s.', 'gravity-forms-tops' ),
+				$this->get_api_product()
+			),
+		);
 
 		$failure = $has_credentials ? $this->get_last_lookup_failure( $this->get_runtime_form_settings( $form ) ) : null;
 		if ( is_array( $failure ) ) {
@@ -1273,6 +1264,29 @@ class GF_Tops_Addon extends GFAddOn {
 						'html' => $this->get_custom_api_base_notice_html(),
 					),
 					array(
+						'name'    => 'api_product_mode',
+						'label'   => esc_html__( 'API product', 'gravity-forms-tops' ),
+						'type'    => 'select',
+						'choices' => array(
+							array(
+								'label' => esc_html__( 'TOPSLink (default)', 'gravity-forms-tops' ),
+								'value' => 'topslink',
+							),
+							array(
+								'label' => esc_html__( 'Custom product', 'gravity-forms-tops' ),
+								'value' => 'custom',
+							),
+						),
+						'tooltip' => esc_html__( 'TOPSLink is sent when this stays on the default. Choose Custom only when TowX gave you a different Product value. Credentials are sent either way. Saving other settings does not change a custom product you already saved.', 'gravity-forms-tops' ),
+					),
+					array(
+						'name'    => 'api_product_custom',
+						'label'   => esc_html__( 'Custom product', 'gravity-forms-tops' ),
+						'type'    => 'text',
+						'class'   => 'medium',
+						'tooltip' => esc_html__( 'Sent as the TowX Product on Create Call and on vehicle lookups. Letters, numbers, spaces, hyphens and underscores. A blank or invalid value keeps TOPSLink.', 'gravity-forms-tops' ),
+					),
+					array(
 						'name'  => 'notification_email',
 						'label' => esc_html__( 'Error notification email', 'gravity-forms-tops' ),
 						'type'  => 'text',
@@ -1698,6 +1712,33 @@ class GF_Tops_Addon extends GFAddOn {
 	}
 
 	/**
+	 * TowX Product for Create Call and vehicle lookups.
+	 *
+	 * Missing or invalid settings use TOPSLink. This does not write the option: an upgrade leaves a saved
+	 * custom product alone, and a site that has never saved one keeps sending TOPSLink.
+	 *
+	 * @return string
+	 */
+	public function get_api_product() {
+		$plugin  = $this->get_plugin_settings();
+		$product = 'TOPSLink';
+		if ( is_array( $plugin ) && 'custom' === (string) rgar( $plugin, 'api_product_mode' ) ) {
+			$product = GF_Tops_Xml::normalize_product( rgar( $plugin, 'api_product_custom' ) );
+		}
+
+		/**
+		 * TowX Product sent on Create Call and vehicle lookups.
+		 *
+		 * @param string $product Resolved product. TOPSLink when no valid custom product is saved.
+		 */
+		$filtered = apply_filters( 'gf_tops_api_product', $product );
+		if ( ! is_string( $filtered ) ) {
+			$filtered = $product;
+		}
+		return GF_Tops_Xml::normalize_product( $filtered );
+	}
+
+	/**
 	 * Create Call XML endpoint: same TowX base as JSON (plugin → TOPS → API environment).
 	 *
 	 * @return string
@@ -1705,7 +1746,7 @@ class GF_Tops_Addon extends GFAddOn {
 	protected function get_create_call_url() {
 		return esc_url_raw(
 			add_query_arg(
-				array( 'Product' => 'TOPSLink' ),
+				array( 'Product' => $this->get_api_product() ),
 				$this->get_json_api_base()
 			)
 		);
@@ -1794,6 +1835,7 @@ class GF_Tops_Addon extends GFAddOn {
 	protected function get_vehicle_list_cache_key( array $settings, $verb, $make_key = '' ) {
 		$parts = array(
 			$this->get_json_api_base(),
+			$this->get_api_product(),
 			(string) rgar( $settings, 'tops_session_id' ),
 			(string) rgar( $settings, 'tops_auth_key' ),
 			(string) $verb,
@@ -2092,7 +2134,7 @@ class GF_Tops_Addon extends GFAddOn {
 	protected function get_models_url( array $settings, $make_key ) {
 		return add_query_arg(
 			array(
-				'Product'           => 'TOPSLink',
+				'Product'           => $this->get_api_product(),
 				'Noun'              => 'Call',
 				'Verb'              => 'GetModelsForMake',
 				'SessionID'         => rawurlencode( (string) rgar( $settings, 'tops_session_id' ) ),
@@ -2139,7 +2181,7 @@ class GF_Tops_Addon extends GFAddOn {
 		$base = $this->get_json_api_base();
 		$url  = add_query_arg(
 			array(
-				'Product'            => 'TOPSLink',
+				'Product'            => $this->get_api_product(),
 				'Noun'               => 'Call',
 				'Verb'               => $verb,
 				'SessionID'          => rawurlencode( (string) rgar( $form_settings, 'tops_session_id' ) ),
@@ -2566,7 +2608,7 @@ class GF_Tops_Addon extends GFAddOn {
 		$base = $this->get_json_api_base();
 		$url  = add_query_arg(
 			array(
-				'Product'           => 'TOPSLink',
+				'Product'           => $this->get_api_product(),
 				'Noun'              => 'Call',
 				'Verb'              => 'GetMakes',
 				'SessionID'         => rawurlencode( $session ),
@@ -2785,7 +2827,7 @@ class GF_Tops_Addon extends GFAddOn {
 			'color_key'      => GF_Tops_Entry::get_value( $form, $entry, rgar( $map, 'color_key' ) ),
 		);
 
-		$xml       = GF_Tops_Xml::build_create_call_xml( $auth, $data );
+		$xml       = GF_Tops_Xml::build_create_call_xml( $auth, $data, $this->get_api_product() );
 		$url       = $this->get_create_call_url();
 		$redacted  = GF_Tops_Xml::redact_for_log( $xml );
 		$post_out  = GF_Tops_Xml::post( $url, $xml );

@@ -32,6 +32,14 @@ We aim to acknowledge reports within a few business days.
 - **Failure emails** (optional, Forms → Settings → TOPS) contain the redacted request XML and TowX’s response. Before **1.4.0** these emails included the TowX password, Session ID and authentication key in plain text; rotate those credentials if error emails were enabled on an older version.
 - Cached TowX vehicle lists are stored as transients keyed by a salted hash of the credentials; the credentials themselves are not stored in the cache.
 
+## Verifying a release package
+
+GitHub attests the release ZIP when the release workflow publishes it. The plugin's updater does not check that attestation. Before installing a ZIP outside **Plugins → Updates**, verify it:
+
+```bash
+gh attestation verify gravity-forms-tops.zip -R duppinstech/gravity-forms-tops
+```
+
 ## Out of scope
 
 - Issues in **Gravity Forms** core or other third-party plugins (report to the respective vendor)

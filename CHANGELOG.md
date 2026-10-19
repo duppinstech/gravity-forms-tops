@@ -9,6 +9,11 @@ GitHub release notes are generated from the matching `= x.y.z =` section in [rea
 
 ## [Unreleased]
 
+### Added
+
+- Plugins → View details shows the readme description, installation (including the setup guide), FAQ, and screenshots, plus the banner and icon. When the GitHub updater has release notes, the Changelog tab stays those notes. Settings still opens Forms → Settings → TOPS. There is no Help link. Support stays support@duppinstech.com. Sponsor is an optional link to the author's GitHub Sponsors page and is not required to use the plugin.
+- Forms → Settings → TOPS → **API product**. The default is TOPSLink. A custom product is used only after it is saved. An upgrade does not write this setting, so existing sites keep sending TOPSLink until an administrator chooses otherwise.
+
 ## [1.5.0] - 2026-10-16
 
 ### Security

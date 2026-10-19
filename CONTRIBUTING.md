@@ -27,6 +27,7 @@ Do **not** open a public issue for undisclosed vulnerabilities. Follow [SECURITY
 | Filters reference (update when adding or changing a filter) | `docs/hooks.md` |
 | Request-log table | `includes/class-gf-tops-request-log.php` |
 | GitHub Releases updater | `includes/class-gf-tops-github-updater.php` |
+| Plugins screen links and View details | `includes/class-gf-tops-plugin-info.php` (copied standard; do not reformat), images in `assets/wporg/`, captions in `readme.txt` |
 | Release package contents | `bin/build-zip.sh` |
 | Release notes (requirements + changelog) | `bin/release-notes.sh` |
 | Unit tests and WordPress stubs | `tests/` |

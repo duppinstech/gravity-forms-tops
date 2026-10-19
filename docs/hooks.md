@@ -40,6 +40,12 @@ Filters provided by Gravity Forms TOPS / TowX Integration. The plugin defines on
 | `gf_tops_http_force_http11` | `$use_11` | `true` | Force HTTP/1.1. |
 | `gf_tops_http_force_tls12` | `$set_tls12` | `true` | Require TLS 1.2 or newer. |
 
+## API product
+
+| Filter | Arguments | Default | Use |
+|---|---|---|---|
+| `gf_tops_api_product` | `$product` | **API product** setting, or `TOPSLink` when that is the default or the custom value is blank or invalid | Product sent on Create Call and on vehicle lookups. Return only letters, numbers, spaces, hyphens or underscores; anything else is sent as `TOPSLink`. |
+
 ## Credentials
 
 | Filter | Arguments | Default | Use |

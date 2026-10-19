@@ -204,6 +204,43 @@ class AddonTest extends TestCase {
 		$this->assertSame( array(), $GLOBALS['gf_tops_test_get_requests'] );
 	}
 
+	public function test_api_product_defaults_to_topslink_without_writing_settings() {
+		$GLOBALS['gf_tops_test_plugin_settings'] = array( 'api_environment' => 'production' );
+		$before                                  = $GLOBALS['gf_tops_test_plugin_settings'];
+
+		$this->assertSame( 'TOPSLink', $this->addon->get_api_product() );
+		$this->assertSame( $before, $GLOBALS['gf_tops_test_plugin_settings'], 'Resolving the default does not save a product.' );
+		$this->assertStringContainsString( 'Product=TOPSLink', $this->call( 'get_create_call_url' ) );
+		$this->assertStringContainsString( 'Product=TOPSLink', $this->call( 'get_models_url', $this->settings(), '10' ) );
+
+		$GLOBALS['gf_tops_test_plugin_settings'] = array(
+			'api_product_mode'   => 'custom',
+			'api_product_custom' => 'CustomProduct',
+		);
+		$this->assertSame( 'CustomProduct', $this->addon->get_api_product() );
+		$this->assertSame( 'CustomProduct', $GLOBALS['gf_tops_test_plugin_settings']['api_product_custom'] );
+		$this->assertStringContainsString( 'Product=CustomProduct', $this->call( 'get_create_call_url' ) );
+
+		$custom_key = $this->call( 'get_vehicle_list_cache_key', $this->settings(), 'GetMakes' );
+		$GLOBALS['gf_tops_test_plugin_settings']['api_product_mode'] = 'topslink';
+		$this->assertSame( 'TOPSLink', $this->addon->get_api_product() );
+		$this->assertSame( 'CustomProduct', $GLOBALS['gf_tops_test_plugin_settings']['api_product_custom'], 'Switching back to TOPSLink keeps the saved custom name.' );
+		$this->assertNotSame( $custom_key, $this->call( 'get_vehicle_list_cache_key', $this->settings(), 'GetMakes' ) );
+
+		$GLOBALS['gf_tops_test_plugin_settings'] = array(
+			'api_product_mode'   => 'custom',
+			'api_product_custom' => 'A</Product><Injected>',
+		);
+		$this->assertSame( 'TOPSLink', $this->addon->get_api_product() );
+		$this->assertSame( 'A</Product><Injected>', $GLOBALS['gf_tops_test_plugin_settings']['api_product_custom'], 'An invalid saved value is not rewritten.' );
+
+		$GLOBALS['gf_tops_test_filters']['gf_tops_api_product'] = static function () {
+			return 'FilteredProduct';
+		};
+		$GLOBALS['gf_tops_test_plugin_settings'] = array();
+		$this->assertSame( 'FilteredProduct', $this->addon->get_api_product() );
+	}
+
 	public function test_custom_api_base_is_always_https() {
 		$GLOBALS['gf_tops_test_plugin_settings'] = array(
 			'api_environment' => 'custom',
