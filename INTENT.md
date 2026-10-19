@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Provide a maintainable WordPress integration that sends selected Gravity Forms submission data to the TowX / TOPS (TOPSLink) API for tow dispatch, and can populate vehicle choices from TowX data.
+GF TowX Integration is a WordPress plugin that sends selected Gravity Forms submission data to TOPS by TowXchange (TOPSLink) for tow dispatch, and can populate vehicle choices from TowX data. Duppins Technology is not affiliated with Rocketgenius or TowXchange.
 
 ## Intended users
 

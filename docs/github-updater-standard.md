@@ -15,7 +15,7 @@ Every Duppins Technology WordPress plugin distributed through GitHub Releases us
 
 ## Porting rules
 
-1. Copy the class file **verbatim**. Change only the class name, the file name, and the `@package` tag to the plugin's own prefix (for example `LPM_GitHub_Updater` in `includes/class-lpm-github-updater.php`, or a namespaced class if the plugin uses namespaces). Each plugin needs its own copy: two plugins on one site must never share one class name.
+1. Copy the class file **verbatim**. Change only the class name, the file name, and the `@package` tag to the plugin's own prefix (for example `Example_GitHub_Updater` in `includes/class-example-github-updater.php`, or a namespaced class if the plugin uses namespaces). Each plugin needs its own copy: two plugins on one site must never share one class name.
 2. Do not change behavior in a copy. To change behavior, change the reference, bump `STANDARD_VERSION`, and re-port.
 3. Boot it from the main plugin file at load time, not on `admin_init`, `is_admin()`, or a settings check:
 

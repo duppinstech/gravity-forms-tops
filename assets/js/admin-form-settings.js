@@ -1,5 +1,5 @@
 /**
- * Gravity Forms TOPS — form settings (test auth).
+ * GF TowX Integration — form settings (test auth).
  *
  * Uses dataType "text" + manual JSON parse so TowX errors still show when WordPress
  * returns HTTP 400/500 (jQuery would otherwise skip responseJSON on .fail()).

@@ -232,7 +232,7 @@ class OwnerDecisionsTest extends TestCase {
 	public function test_view_details_reads_readme_and_wporg_images() {
 		$info   = new GF_Tops_Plugin_Info( array( 'file' => GF_TOPS_FILE ) );
 		$readme = $info->readme();
-		$this->assertSame( '1.5.0', $readme['headers']['stable tag'] );
+		$this->assertSame( '1.6.0', $readme['headers']['stable tag'] );
 		$this->assertArrayHasKey( 'description', $readme['sections'] );
 		$this->assertArrayHasKey( 'installation', $readme['sections'] );
 		$this->assertArrayHasKey( 'frequently asked questions', $readme['sections'] );
@@ -294,5 +294,24 @@ class OwnerDecisionsTest extends TestCase {
 
 		$this->assertArrayHasKey( GF_Tops_Request_Log::PURGE_HOOK, $GLOBALS['gf_tops_test_cron'] );
 		$this->assertGreaterThanOrEqual( time() + DAY_IN_SECONDS - 5, $GLOBALS['gf_tops_test_cron'][ GF_Tops_Request_Log::PURGE_HOOK ] );
+	}
+
+	public function test_public_name_is_callpost_and_contributions_use_the_dco() {
+		$root     = dirname( __DIR__ );
+		$header   = file_get_contents( $root . '/gravity-forms-tops.php' );
+		$readme   = file_get_contents( $root . '/readme.txt' );
+		$contrib  = file_get_contents( $root . '/CONTRIBUTING.md' );
+		$dco      = file_get_contents( $root . '/DCO' );
+		$plan     = file_get_contents( $root . '/PLAN.md' );
+		$standard = file_get_contents( $root . '/docs/github-updater-standard.md' );
+
+		$this->assertStringContainsString( 'Plugin Name:       GF TowX Integration', $header );
+		$this->assertStringContainsString( '=== GF TowX Integration ===', $readme );
+		$this->assertStringContainsString( 'not affiliated with or endorsed by Rocketgenius', $readme );
+		$this->assertStringContainsString( 'AS IS', $readme );
+		$this->assertStringContainsString( 'Signed-off-by:', $contrib );
+		$this->assertStringContainsString( "Developer's Certificate of Origin 1.1", $dco );
+		$this->assertStringNotContainsString( 'Landing Page Manager', $plan );
+		$this->assertStringNotContainsString( 'LPM_GitHub_Updater', $standard );
 	}
 }

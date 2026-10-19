@@ -4,7 +4,7 @@ Ownership notice for this repository. Portable notice. The same file goes in eve
 
 ## Author and owner
 
-- **Product:** Gravity Forms TOPS / TowX Integration (WordPress plugin, slug `gravity-forms-tops`)
+- **Product:** GF TowX Integration (WordPress plugin, slug `gravity-forms-tops`)
 - **Person:** Odell Duppins Jr, owner of Duppins Technology
 - **Author:** Duppins Technology (https://duppinstech.com)
 - **Business:** Duppins Technology (https://duppinstech.com)
@@ -12,7 +12,7 @@ Ownership notice for this repository. Portable notice. The same file goes in eve
 - **Support:** support@duppinstech.com
 - **Repository:** https://github.com/duppinstech/gravity-forms-tops
 
-Gravity Forms TOPS / TowX Integration is a Duppins Technology product. Odell Duppins Jr is the author and holds the copyright; Duppins Technology is his trade name, not a separate entity. `LICENSE` and the copyright line in `README.md` name **Duppins Technology**. The plugin `Author` header names **Duppins Technology**. `composer.json` has no `authors` field. They do not name a client.
+GF TowX Integration is a Duppins Technology product. It is a Gravity Forms add-on for TOPS by TowXchange. Duppins Technology is not affiliated with Rocketgenius or TowXchange. Odell Duppins Jr is the author and holds the copyright; Duppins Technology is his trade name, not a separate entity. `LICENSE` and the copyright line in `README.md` name **Duppins Technology**. The plugin `Author` header names **Duppins Technology**. `composer.json` has no `authors` field. They do not name a client.
 
 This file stays in the repository and is not included in the release ZIP.
 

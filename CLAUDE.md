@@ -2,7 +2,7 @@
 
 # Claude Code Project Guide
 
-Gravity Forms TOPS / TowX Integration is a WordPress plugin maintained by Duppins Technology. It maps Gravity Forms submissions to TowX / TOPS API requests.
+GF TowX Integration is a WordPress plugin maintained by Duppins Technology. It maps Gravity Forms submissions to TOPS by TowXchange.
 
 ## Read before changing code
 

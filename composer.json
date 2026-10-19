@@ -1,6 +1,6 @@
 {
 	"name": "duppinstech/gravity-forms-tops",
-	"description": "Gravity Forms TOPS / TowX Integration (WordPress plugin). Composer is used for development tooling only; the plugin has no runtime Composer dependencies.",
+	"description": "GF TowX Integration, a Gravity Forms add-on for TOPS by TowXchange. Composer is used for development tooling only; the plugin has no runtime Composer dependencies.",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
 	"authors": [

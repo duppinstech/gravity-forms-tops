@@ -1,6 +1,6 @@
-# Gravity Forms TOPS / TowX Integration
+# GF TowX Integration
 
-WordPress plugin by **Duppins Technology** that connects [Gravity Forms](https://www.gravityforms.com/) to the **TowX / TOPS (TOPSLink)** API for tow dispatch (Create Call XML), with per-form field mapping and dynamic vehicle dropdowns.
+WordPress plugin by **Duppins Technology** that connects a [Gravity Forms](https://www.gravityforms.com/) form to **TOPS by TowXchange** (TOPSLink) for tow dispatch (Create Call XML), with per-form credentials, field mapping and dynamic vehicle dropdowns. GF TowX Integration is not affiliated with Rocketgenius or TowXchange.
 
 Ownership and licensing to clients are described in [OWNERSHIP.md](OWNERSHIP.md).
 
@@ -33,7 +33,7 @@ Ownership and licensing to clients are described in [OWNERSHIP.md](OWNERSHIP.md)
 ## Install
 
 1. Install the `gravity-forms-tops.zip` from the latest [GitHub release](https://github.com/duppinstech/gravity-forms-tops/releases) (or copy this repository into `wp-content/plugins/gravity-forms-tops/`).
-2. Activate **Gravity Forms TOPS / TowX Integration** in **Plugins**.
+2. Activate **GF TowX Integration** in **Plugins**.
 3. Follow the step-by-step **Setup guide**, troubleshooting FAQ and request-log status glossary in [readme.txt](readme.txt) (shown in WordPress under **View details**).
 
 Later releases are offered through the normal WordPress **Plugins → Updates** screen, including background auto-updates. The updater follows the shared [Duppins Technology GitHub updater standard](docs/github-updater-standard.md); this repository holds its reference implementation. Define `GF_TOPS_DISABLE_GITHUB_UPDATER` as `true` to turn it off.
@@ -44,8 +44,8 @@ Later releases are offered through the normal WordPress **Plugins → Updates** 
 - **Live vehicle lists:** Make and Color selects are filled from TowX GetMakes / GetColors; Model is loaded with GetModelsForMake when a make is chosen. Lists are cached for one hour (filter `gf_tops_vehicle_list_cache_ttl`).
 - **Credentials:** password and authentication key are encrypted at rest and never re-displayed; leave blank to keep the stored value.
 - **Test authentication** runs GetMakes and shows a summary plus detailed response on failure.
-- **API product** under Forms → Settings → TOPS. TOPSLink is used until an administrator saves a custom product. An upgrade does not write or replace that value.
-- **Request log** (Forms → TOPS log, kept 90 days by default) with redacted request XML, TowX responses, and **Resend Create Call** (view requires Gravity Forms' view-entries permission; resend requires edit-entries).
+- **API product** under Forms → Settings → GF TowX Integration. TOPSLink is used until an administrator saves a custom product. An upgrade does not write or replace that value.
+- **Request log** (Forms → GF TowX Integration log, kept 90 days by default) with redacted request XML, TowX responses, and **Resend Create Call** (view requires Gravity Forms' view-entries permission; resend requires edit-entries). Failure emails keep that redacted request and a link to the log.
 - **Setup checklist** on each form's TOPS tab, including the last failed TowX lookup.
 - **Privacy:** suggested privacy-policy text and personal-data export / erase for request-log rows.
 - **TLS helpers** for `towxchange.net` hosts (filters `gf_tops_http_*`).
@@ -54,7 +54,7 @@ Later releases are offered through the normal WordPress **Plugins → Updates** 
 
 - **Page caching:** the model dropdown uses an AJAX nonce. If a full-page cache serves tow-form pages for longer than 12 hours, exclude those pages from the cache (preferred), or return `false` from `gf_tops_models_require_nonce`.
 - **Diagnostics:** the `<!-- GF TOPS … -->` footer comment appears only when browser console logging or `WP_DEBUG` is on (filter `gf_tops_show_footer_diagnostic_comment`).
-- **Request log retention:** log rows include customer details from the submission and are deleted after **90 days** by a daily WP-Cron task (**Forms → Settings → TOPS → Keep request log for**, 0 keeps them forever; filter `gf_tops_request_log_retention_days`). Gravity Forms entries are not affected. Rows can also be erased per person through WordPress's privacy tools.
+- **Request log retention:** log rows include customer details from the submission and are deleted after **90 days** by a daily WP-Cron task (**Forms → Settings → GF TowX Integration → Keep request log for**, 0 keeps them forever; filter `gf_tops_request_log_retention_days`). Gravity Forms entries are not affected. Rows can also be erased per person through WordPress's privacy tools.
 - **Outages:** after a failed TowX lookup, lookups pause for 90 seconds per credential set (`gf_tops_lookup_failure_backoff`).
 - **Logging:** with **Logging** on, messages go to the PHP error log with the prefix `[GF TOPS]` (the host must have PHP error logging enabled).
 - **Hooks:** see [docs/hooks.md](docs/hooks.md).
@@ -87,6 +87,10 @@ See [SECURITY.md](SECURITY.md). TowX password and authentication key are encrypt
 
 GPL-2.0-or-later. See [LICENSE](LICENSE). Copyright Duppins Technology.
 
+The plugin is provided **AS IS**, without warranty of any kind, including any warranty of merchantability or fitness for a particular purpose. When Duppins Technology charges for GF TowX Integration, that payment is for delivery, setup and support. It is not a sale of the code. The GPL lets anyone who has a copy redistribute it. Payment does not include access to the TowX API.
+
 ## Legal
 
-Gravity Forms is a trademark of Rocketgenius, Inc. This project is not affiliated with or endorsed by Rocketgenius or TowXchange. TowX / TOPS are used here to describe API compatibility only.
+Gravity Forms is a trademark of Rocketgenius, Inc. TowX, TowXchange, TOPS and TOPSLink belong to their owners. GF TowX Integration is not affiliated with or endorsed by Rocketgenius or TowXchange. Those names are used only to describe compatibility.
+
+Using the TowX API requires an existing TowXchange customer agreement and API credentials that TowXchange issued to that customer. GF TowX Integration does not provide those credentials. TowX documents sending them on the request, and GF TowX Integration follows that method. A custom API address is called over HTTPS and shown with a warning when it is not a TowXchange host.

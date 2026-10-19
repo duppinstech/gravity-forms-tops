@@ -309,6 +309,30 @@ class AddonTest extends TestCase {
 		$this->assertNotContains( 'customer_email', $required );
 	}
 
+	public function test_confirmation_textareas_allow_html() {
+		$html_fields = array(
+			'confirmation_error_contact_html',
+			'tops_confirmation_contact_html',
+			'tops_confirmation_success_custom',
+			'tops_confirmation_error_custom',
+			'tops_confirmation_unknown_custom',
+		);
+		$found = array();
+		foreach ( array( $this->addon->plugin_settings_fields(), $this->addon->form_settings_fields( array( 'id' => 1 ) ) ) as $sections ) {
+			foreach ( $sections as $section ) {
+				foreach ( $section['fields'] as $field ) {
+					if ( in_array( $field['name'], $html_fields, true ) ) {
+						$found[ $field['name'] ] = ! empty( $field['allow_html'] );
+					}
+				}
+			}
+		}
+		foreach ( $html_fields as $name ) {
+			$this->assertArrayHasKey( $name, $found );
+			$this->assertTrue( $found[ $name ], $name );
+		}
+	}
+
 	public function test_log_labels_are_translated_and_unknown_values_pass_through() {
 		$this->assertSame( 'Form submission', $this->call( 'format_log_source_label', 'submission' ) );
 		$this->assertSame( 'Resend', $this->call( 'format_log_source_label', 'resend' ) );

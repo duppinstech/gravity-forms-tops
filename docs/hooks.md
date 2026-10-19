@@ -1,6 +1,6 @@
 # Hooks reference
 
-Filters provided by Gravity Forms TOPS / TowX Integration. The plugin defines one action, `gf_tops_limit_page_cache_ttl` (`$ttl, $form_id`), fired on pages with the model drop-down so you can cap other page caches' lifetime. Add filters from a site-specific plugin or the theme's `functions.php`, and test changes on a staging site with QA TowX credentials first.
+Filters provided by GF TowX Integration. The plugin defines one action, `gf_tops_limit_page_cache_ttl` (`$ttl, $form_id`), fired on pages with the model drop-down so you can cap other page caches' lifetime. Add filters from a site-specific plugin or the theme's `functions.php`, and test changes on a staging site with QA TowX credentials first.
 
 ## Confirmation
 

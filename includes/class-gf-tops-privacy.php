@@ -34,7 +34,7 @@ class GF_Tops_Privacy {
 			return;
 		}
 		$days = class_exists( 'GF_Tops_Addon' ) ? GF_Tops_Addon::get_instance()->get_request_log_retention_days() : GF_Tops_Request_Log::DEFAULT_RETENTION_DAYS;
-		wp_add_privacy_policy_content( __( 'Gravity Forms TOPS / TowX Integration', 'gravity-forms-tops' ), wp_kses_post( wpautop( self::policy_text( $days ), false ) ) );
+		wp_add_privacy_policy_content( __( 'GF TowX Integration', 'gravity-forms-tops' ), wp_kses_post( wpautop( self::policy_text( $days ), false ) ) );
 	}
 
 	/**
@@ -66,7 +66,7 @@ class GF_Tops_Privacy {
 	 */
 	public static function register_exporter( $exporters ) {
 		$exporters['gravity-forms-tops'] = array(
-			'exporter_friendly_name' => __( 'TOPS / TowX request log', 'gravity-forms-tops' ),
+			'exporter_friendly_name' => __( 'GF TowX Integration request log', 'gravity-forms-tops' ),
 			'callback'               => array( __CLASS__, 'export_personal_data' ),
 		);
 		return $exporters;
@@ -78,7 +78,7 @@ class GF_Tops_Privacy {
 	 */
 	public static function register_eraser( $erasers ) {
 		$erasers['gravity-forms-tops'] = array(
-			'eraser_friendly_name' => __( 'TOPS / TowX request log', 'gravity-forms-tops' ),
+			'eraser_friendly_name' => __( 'GF TowX Integration request log', 'gravity-forms-tops' ),
 			'callback'             => array( __CLASS__, 'erase_personal_data' ),
 		);
 		return $erasers;
@@ -192,7 +192,7 @@ class GF_Tops_Privacy {
 			'items_removed'  => $removed > 0,
 			'items_retained' => false,
 			'messages'       => array(
-				__( 'TOPS / TowX request log: rows are found by this email address in Gravity Forms entries or in the stored request. Requests submitted without this email address cannot be matched automatically; search Forms → TOPS log by name or phone and remove them if needed. Failure notification emails already sent are not affected.', 'gravity-forms-tops' ),
+				__( 'GF TowX Integration request log: rows are found by this email address in Gravity Forms entries or in the stored request. Requests submitted without this email address cannot be matched automatically; search Forms → GF TowX Integration log by name or phone and remove them if needed. Failure notification emails already sent are not affected.', 'gravity-forms-tops' ),
 			),
 			'done'           => true,
 		);
